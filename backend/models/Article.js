@@ -260,7 +260,7 @@ class Article {
   static async getStats() {
     const [totalRows] = await db.query('SELECT COUNT(*) as total FROM articles');
     const [todayRows] = await db.query(
-      'SELECT COUNT(*) as today FROM articles WHERE DATE(fetched_at) = CURDATE()'
+      'SELECT COUNT(*) as today FROM articles WHERE DATE(created_at) = CURDATE()'
     );
     const [sourceRows] = await db.query(
       'SELECT source, COUNT(*) as count FROM articles GROUP BY source ORDER BY count DESC LIMIT 10'
