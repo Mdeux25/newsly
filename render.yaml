@@ -1,0 +1,78 @@
+services:
+  # MySQL Database
+  - type: pserv
+    name: newsly-mysql
+    env: docker
+    dockerfilePath: ./Dockerfile.mysql
+    disk:
+      name: newsly-mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+      - key: MYSQL_DATABASE
+        value: news_aggregator
+      - key: MYSQL_USER
+        value: news_user
+      - key: MYSQL_PASSWORD
+        generateValue: true
+
+  # Newsly Application
+  - type: web
+    name: newsly
+    env: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/status
+    envVars:
+      # Database (connected to MySQL service)
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: newsly-mysql
+          property: host
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: news_user
+      - key: DB_PASSWORD
+        fromService:
+          type: pserv
+          name: newsly-mysql
+          envVarKey: MYSQL_PASSWORD
+      - key: DB_NAME
+        value: news_aggregator
+
+      # API Keys (set these in Render Dashboard)
+      - key: NEWSAPI_KEY
+        sync: false
+      - key: NEWSDATA_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GNEWS_KEY
+        value: optional
+      - key: TWITTER_BEARER_TOKEN
+        value: optional
+
+      # OpenAI Configuration
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: LLM_CACHE_ENABLED
+        value: true
+      - key: LLM_DAILY_BUDGET
+        value: 1.00
+
+      # Server Configuration
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+
+      # Worker Configuration
+      - key: FETCH_INTERVAL_MINUTES
+        value: 15
+      - key: ARTICLE_RETENTION_DAYS
+        value: 7
+      - key: MAX_ARTICLES_PER_FETCH
+        value: 50
