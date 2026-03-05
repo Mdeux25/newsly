@@ -86,18 +86,15 @@ async function fetchFromSingleAPI(apiName, topic, country, language = 'en') {
 
   try {
     // Check if we have quota available
-    const canFetch = await ApiQuota.canMakeRequest(apiName);
+    let canFetch = true;
+    try {
+      canFetch = await ApiQuota.canMakeRequest(apiName);
+    } catch (err) {
+      console.warn(`⚠️  Quota check failed (${err.message}), allowing fetch`);
+    }
+
     if (!canFetch) {
       console.log(`⚠️  ${apiName} quota exhausted, skipping`);
-      await FetchLog.create({
-        api_name: apiName,
-        endpoint: apiName === 'NewsData' ? '/api/1/news' : '/v2/top-headlines',
-        country,
-        topic,
-        language,
-        status: 'rate_limit',
-        error_message: 'Daily quota exhausted'
-      });
       return { fetched: 0, stored: 0, articles: [] };
     }
 
@@ -112,7 +109,11 @@ async function fetchFromSingleAPI(apiName, topic, country, language = 'en') {
     }
 
     // Increment quota usage
-    await ApiQuota.incrementUsage(apiName, 1);
+    try {
+      await ApiQuota.incrementUsage(apiName, 1);
+    } catch (err) {
+      console.warn(`⚠️  Quota increment failed (${err.message}), continuing`);
+    }
 
     const responseTime = Date.now() - startTime;
 
@@ -189,11 +190,15 @@ async function fetchAllNews() {
   let totalStored = 0;
 
   // Check quota status before starting
-  const quotas = await ApiQuota.getAllQuotas();
-  console.log('\n📊 API Quota Status:');
-  quotas.forEach(quota => {
-    console.log(`  ${quota.apiName}: ${quota.remaining}/${quota.dailyLimit} remaining (${quota.percentUsed.toFixed(1)}% used)`);
-  });
+  try {
+    const quotas = await ApiQuota.getAllQuotas();
+    console.log('\n📊 API Quota Status:');
+    quotas.forEach(quota => {
+      console.log(`  ${quota.apiName}: ${quota.remaining}/${quota.dailyLimit} remaining (${quota.percentUsed.toFixed(1)}% used)`);
+    });
+  } catch (err) {
+    console.warn(`⚠️  Quota status unavailable (${err.message})`);
+  }
 
   // Fetch for each country and topic combination
   // Priority-based: High priority topics first
@@ -221,11 +226,15 @@ async function fetchAllNews() {
   console.log(`Duration: ${totalTime}s`);
 
   // Get updated quota status
-  const updatedQuotas = await ApiQuota.getAllQuotas();
-  console.log('\n📊 Updated Quota Status:');
-  updatedQuotas.forEach(quota => {
+  try {
+    const updatedQuotas = await ApiQuota.getAllQuotas();
+    console.log('\n📊 Updated Quota Status:');
+    updatedQuotas.forEach(quota => {
     console.log(`  ${quota.apiName}: ${quota.remaining}/${quota.dailyLimit} remaining`);
   });
+  } catch (err) {
+    console.warn(`⚠️  Updated quota status unavailable (${err.message})`);
+  }
 
   console.log('=====================================\n');
 
@@ -264,8 +273,18 @@ async function cleanupOldLogs() {
  */
 async function getWorkerStatus() {
   const stats = await Article.getStats();
-  const quotas = await ApiQuota.getAllQuotas();
-  const recentLogs = await FetchLog.getRecentLogs(1);
+  let quotas = [];
+  try {
+    quotas = await ApiQuota.getAllQuotas();
+  } catch (err) {
+    console.warn(`⚠️  Quota status unavailable (${err.message})`);
+  }
+  let recentLogs = [];
+  try {
+    recentLogs = await FetchLog.getRecentLogs(1);
+  } catch (err) {
+    console.warn(`⚠️  Recent logs unavailable (${err.message})`);
+  }
   const errorRate = await FetchLog.getErrorRate('NewsAPI', 24);
 
   return {

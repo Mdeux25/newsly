@@ -119,7 +119,12 @@ function startScheduler() {
     try {
       const Article = require('../models/Article');
       const stats = await Article.getStats();
-      const quotas = await ApiQuota.getAllQuotas();
+      let quotas = [];
+      try {
+        quotas = await ApiQuota.getAllQuotas();
+      } catch (err) {
+        console.warn(`⚠️  Quota status unavailable (${err.message})`);
+      }
 
       console.log('\n📊 Hourly Status Report:');
       console.log(`  Total articles: ${stats.total}`);
