@@ -29,16 +29,20 @@ CREATE TABLE IF NOT EXISTS articles (
 
 CREATE TABLE IF NOT EXISTS fetch_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  source VARCHAR(50) NOT NULL,
+  api_name VARCHAR(50) NOT NULL,
+  endpoint VARCHAR(200),
+  country VARCHAR(2),
+  topic VARCHAR(200),
+  language VARCHAR(10),
   articles_fetched INT DEFAULT 0,
-  articles_saved INT DEFAULT 0,
-  duplicates_skipped INT DEFAULT 0,
-  success BOOLEAN DEFAULT TRUE,
+  articles_stored INT DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'success',
   error_message TEXT,
-  fetch_duration_ms INT,
+  response_time_ms INT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_source (source),
-  INDEX idx_created (created_at DESC)
+  INDEX idx_api_name (api_name),
+  INDEX idx_created (created_at DESC),
+  INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS api_quotas (

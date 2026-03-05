@@ -46,7 +46,7 @@ class FetchLog {
   static async getRecentLogs(hours = 24, apiName = null) {
     const minDate = new Date(Date.now() - hours * 60 * 60 * 1000);
 
-    let query = 'SELECT * FROM fetch_logs WHERE fetched_at >= ?';
+    let query = 'SELECT * FROM fetch_logs WHERE created_at >= ?';
     const params = [minDate];
 
     if (apiName) {
@@ -54,7 +54,7 @@ class FetchLog {
       params.push(apiName);
     }
 
-    query += ' ORDER BY fetched_at DESC LIMIT 100';
+    query += ' ORDER BY created_at DESC LIMIT 100';
 
     const [rows] = await db.query(query, params);
     return rows;
@@ -79,7 +79,7 @@ class FetchLog {
         SUM(articles_fetched) as total_articles_fetched,
         SUM(articles_stored) as total_articles_stored
        FROM fetch_logs
-       WHERE api_name = ? AND fetched_at >= ?`,
+       WHERE api_name = ? AND created_at >= ?`,
       [apiName, minDate]
     );
 
@@ -116,7 +116,7 @@ class FetchLog {
         SUM(articles_fetched) as total_articles_fetched,
         SUM(articles_stored) as total_articles_stored
        FROM fetch_logs
-       WHERE fetched_at >= ?
+       WHERE created_at >= ?
        GROUP BY api_name
        ORDER BY total_requests DESC`,
       [minDate]
@@ -144,7 +144,7 @@ class FetchLog {
     const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
 
     const [result] = await db.query(
-      'DELETE FROM fetch_logs WHERE fetched_at < ?',
+      'DELETE FROM fetch_logs WHERE created_at < ?',
       [cutoffDate]
     );
 
