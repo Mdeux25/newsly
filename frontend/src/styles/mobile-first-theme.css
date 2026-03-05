@@ -1,0 +1,312 @@
+/* ============================================
+   MOBILE-FIRST THEME CSS
+   Base styles: Mobile (375px)
+   Enhancement: Tablet (768px+), Desktop (1024px+)
+   ============================================ */
+
+/* ============================================
+   CSS VARIABLES - Mobile Base (375px)
+   ============================================ */
+:root {
+  /* Dark Theme Colors - Professional Blue/Slate */
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f2e;
+  --bg-card: rgba(255, 255, 255, 0.05);
+
+  /* Professional Gradients - Blue/Cyan/Slate */
+  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  --gradient-teal: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+  --gradient-slate: linear-gradient(135deg, #475569 0%, #64748b 100%);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Accent Colors - Professional but Modern */
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-teal: #14b8a6;
+  --accent-orange: #f59e0b;
+
+  /* Typography - Mobile Base */
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, 'Poppins', sans-serif;
+
+  /* Font Sizes - Mobile */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 2rem;        /* 32px */
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+
+  /* Spacing Scale - Mobile */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Safe Area Insets (notch, rounded corners) */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+
+  /* Touch-Optimized Sizes */
+  --tap-target-min: 44px;
+  --input-height: 48px;
+  --button-height: 48px;
+
+  /* Border Radius - Mobile */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows - Mobile (simplified) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+  /* Transitions - Touch-optimized */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* ============================================
+   TABLET ENHANCEMENT (min-width: 768px)
+   ============================================ */
+@media (min-width: 768px) {
+  :root {
+    /* Enhanced Typography */
+    --text-base: 1.125rem;   /* 18px */
+    --text-lg: 1.25rem;      /* 20px */
+    --text-xl: 1.5rem;       /* 24px */
+    --text-2xl: 2rem;        /* 32px */
+    --text-3xl: 3rem;        /* 48px */
+
+    /* Enhanced Spacing */
+    --space-8: 40px;
+    --space-10: 48px;
+
+    /* Enhanced Border Radius */
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+  }
+}
+
+/* ============================================
+   DESKTOP ENHANCEMENT (min-width: 1024px)
+   ============================================ */
+@media (min-width: 1024px) {
+  :root {
+    /* Enhanced Spacing */
+    --space-8: 48px;
+    --space-10: 56px;
+
+    /* Enhanced Shadows (desktop glow effects) */
+    --shadow-lg: 0 20px 40px rgba(102, 126, 234, 0.3),
+                 0 0 60px rgba(240, 147, 251, 0.2);
+  }
+}
+
+/* ============================================
+   GLOBAL RESETS - Mobile-First
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Prevent text size adjustment on mobile */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior: none;
+}
+
+/* ============================================
+   UTILITY CLASSES - Mobile-First
+   ============================================ */
+
+/* Touch-Optimized Elements */
+.tap-target {
+  min-height: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+}
+
+.touchable {
+  cursor: pointer;
+  transition: transform var(--transition-base), opacity var(--transition-base);
+}
+
+.touchable:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+}
+
+/* Glassmorphism - Mobile (lightweight) */
+.glass-card {
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(8px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+/* Desktop: Enhanced glassmorphism */
+@media (min-width: 1024px) {
+  .glass-card {
+    backdrop-filter: blur(12px) saturate(180%);
+  }
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Container - Mobile-First */
+.container-mobile {
+  width: 100%;
+  padding-left: max(var(--space-4), var(--safe-left));
+  padding-right: max(var(--space-4), var(--safe-right));
+}
+
+@media (min-width: 768px) {
+  .container-mobile {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-accent);
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus Visible (keyboard navigation) */
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Desktop: Gradient animation */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}

@@ -1,0 +1,472 @@
+const express = require('express');
+const router = express.Router();
+const newsapi = require('../services/newsapi');
+const gnews = require('../services/gnews');
+const translator = require('../services/translator');
+const twitter = require('../services/twitter');
+const Article = require('../models/Article');
+const ApiQuota = require('../models/ApiQuota');
+
+// Get news articles
+router.get('/news', async (req, res) => {
+  try {
+    const {
+      topic = 'breaking news',
+      region = 'all',
+      limit = 20,
+      offset = 0,
+      language = 'en',
+      countries = null,
+      smartSearch = 'false' // NEW: Enable smart cross-language search
+    } = req.query;
+
+    // Parse countries parameter
+    const countryArray = countries ? countries.split(',') : null;
+    const useSmartSearch = smartSearch === 'true' && topic && topic !== 'breaking news';
+
+    // Log request with logic explanation
+    if (countryArray && countryArray.length > 0) {
+      console.log(`Fetching news: topic="${topic}", countries="${countries}", language="${language}", offset=${offset}, limit=${limit}, smartSearch=${useSmartSearch} (region="${region}" ignored because countries are selected)`);
+    } else {
+      console.log(`Fetching news: topic="${topic}", region="${region}", language="${language}", offset=${offset}, limit=${limit}, smartSearch=${useSmartSearch}, countries="all"`);
+    }
+
+    let articles = [];
+    let totalCount = 0;
+    let source = 'database'; // Track where articles came from
+
+    // TRY DATABASE FIRST (fast, no rate limits!)
+    try {
+      const filters = {
+        language: language === 'both' ? null : language,
+        // IMPORTANT: Ignore region when specific countries are selected (user's point #1)
+        region: (countryArray && countryArray.length > 0) ? null : (region !== 'all' ? region : null),
+        country: countryArray,
+        minDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days (matches retention)
+      };
+
+      let dbArticles;
+
+      // Use smart search if enabled and topic provided
+      if (useSmartSearch) {
+        console.log(`🔍 Smart search: "${topic}" (cross-language + weighted ranking)`);
+        try {
+          dbArticles = await Article.smartSearch(topic, filters, parseInt(limit), parseInt(offset));
+          totalCount = await Article.countSmartSearch(topic, filters);
+          source = 'smart-search';
+        } catch (smartError) {
+          console.warn('⚠️  Smart search failed, falling back to simple search:', smartError.message);
+          // Fallback to simple search
+          filters.topic = topic;
+          dbArticles = await Article.findRecent(filters, parseInt(limit), parseInt(offset));
+          totalCount = await Article.countArticles(filters);
+        }
+      } else {
+        // Simple search (original behavior)
+        filters.topic = topic !== 'breaking news' ? topic : null;
+        dbArticles = await Article.findRecent(filters, parseInt(limit), parseInt(offset));
+        totalCount = await Article.countArticles(filters);
+      }
+
+      if (dbArticles && dbArticles.length > 0) {
+        // Convert database format to API format
+        articles = dbArticles.map(article => ({
+          title: article.title,
+          description: article.description,
+          url: article.url,
+          image: article.image_url,
+          source: article.source,
+          author: article.author,
+          content: article.content,
+          publishedAt: article.published_at,
+          region: article.region,
+          language: article.language,
+          country: article.country,
+          category: article.category
+        }));
+
+        console.log(`✅ Returned ${articles.length} articles from database (fast!)`);
+      }
+    } catch (dbError) {
+      console.warn('⚠️  Database query failed, falling back to API:', dbError.message);
+    }
+
+    // FALLBACK TO API if database is empty or has insufficient articles
+    if (articles.length < limit / 2) {
+      console.log(`📡 Database has ${articles.length} articles, fetching from API to supplement...`);
+
+      // If Arabic is selected, fetch both Arabic and English news, then translate English
+      if (language === 'ar' || language === 'both') {
+        // Fetch Arabic news
+        const arabicArticles = await newsapi.fetchNews(topic, region, Math.floor(limit / 2), 'ar', countries);
+
+        // Fetch English news
+        const englishArticles = await newsapi.fetchNews(topic, region, Math.floor(limit / 2), 'en', countries);
+
+        // Auto-translate English articles to Arabic
+        console.log(`Auto-translating ${englishArticles.length} English articles to Arabic...`);
+        const translatedArticles = await Promise.all(
+          englishArticles.map(article => translator.translateArticle(article, 'ar'))
+        );
+
+        // Combine both
+        articles = [...articles, ...arabicArticles, ...translatedArticles];
+      } else {
+        // English only - fetch English news
+        let apiArticles = await newsapi.fetchNews(topic, region, limit, language, countries);
+
+        // IMPORTANT: When countries are selected, filter results by language (user's requirement #2)
+        // This is needed because top-headlines endpoint doesn't support language filter
+        if (countries && language !== 'both') {
+          console.log(`Filtering ${apiArticles.length} articles by language: ${language}`);
+          apiArticles = apiArticles.filter(article => {
+            const articleLang = article.language || 'en';
+            return articleLang === language;
+          });
+          console.log(`After language filter: ${apiArticles.length} articles`);
+        }
+
+        // If no results with country filter, try without country filter
+        if (apiArticles.length === 0 && countries) {
+          console.log('No results with country filter, trying without country filter...');
+          const fallbackArticles = await newsapi.fetchNews(topic, region, limit, language, null);
+          articles = [...articles, ...fallbackArticles];
+        } else {
+          articles = [...articles, ...apiArticles];
+        }
+
+        // If still no results, try GNews as backup
+        if (articles.length === 0 && process.env.GNEWS_KEY) {
+          console.log('Falling back to GNews API');
+          const gnewsArticles = await gnews.fetchNews(topic, region, Math.min(limit, 10), language);
+          articles = [...articles, ...gnewsArticles];
+        }
+      }
+
+      source = 'api+database';
+    }
+
+    // Deduplicate by title (simple similarity check)
+    const uniqueArticles = deduplicateArticles(articles);
+
+    // Sort by publication date
+    uniqueArticles.sort((a, b) => new Date(b.publishedAt || b.published_at) - new Date(a.publishedAt || a.published_at));
+
+    res.json({
+      success: true,
+      count: uniqueArticles.length,
+      totalCount: totalCount, // Total number of articles matching filters (for pagination)
+      articles: uniqueArticles.slice(0, limit),
+      source: source, // Let frontend know where data came from
+      smartSearchUsed: useSmartSearch, // NEW: Indicate if smart search was used
+      note: uniqueArticles.length === 0 ? 'No articles found. This may be due to API rate limits or no news available for the selected filters.' : null
+    });
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch news articles'
+    });
+  }
+});
+
+// Get trending topics (simple keyword extraction)
+router.get('/trending', async (req, res) => {
+  try {
+    let articles = [];
+
+    // TRY DATABASE FIRST (get articles from last 24 hours)
+    try {
+      const dbArticles = await Article.findRecent({
+        minDate: new Date(Date.now() - 24 * 60 * 60 * 1000)
+      }, 100);
+
+      if (dbArticles && dbArticles.length > 0) {
+        articles = dbArticles.map(article => ({
+          title: article.title,
+          category: article.category
+        }));
+        console.log(`✅ Using ${articles.length} articles from database for trending analysis`);
+      }
+    } catch (dbError) {
+      console.warn('⚠️  Database query failed:', dbError.message);
+    }
+
+    // FALLBACK TO API if database is empty
+    if (articles.length === 0) {
+      console.log('📡 Fetching from API for trending analysis...');
+      articles = await newsapi.fetchNews('world news', 'all', 30);
+    }
+
+    // Get trending categories from database
+    const trendingCategories = await Article.getTrendingTopics(24, 10);
+
+    // Extract common words from titles (simple trending detection)
+    const keywords = extractKeywords(articles);
+
+    res.json({
+      success: true,
+      trending: keywords.slice(0, 10),
+      categories: trendingCategories,
+      source: articles.length > 30 ? 'database' : 'api'
+    });
+  } catch (error) {
+    console.error('Error fetching trending:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch trending topics'
+    });
+  }
+});
+
+// Translate article to Arabic
+router.post('/translate', async (req, res) => {
+  try {
+    const { article, targetLang = 'ar' } = req.body;
+
+    if (!article) {
+      return res.status(400).json({
+        success: false,
+        error: 'Article data required'
+      });
+    }
+
+    const translatedArticle = await translator.translateArticle(article, targetLang);
+
+    res.json({
+      success: true,
+      article: translatedArticle
+    });
+  } catch (error) {
+    console.error('Error translating article:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Translation failed'
+    });
+  }
+});
+
+// Helper: Deduplicate articles by title similarity
+function deduplicateArticles(articles) {
+  const unique = [];
+  const seen = new Set();
+
+  for (const article of articles) {
+    const normalizedTitle = article.title?.toLowerCase().trim();
+    if (!normalizedTitle || seen.has(normalizedTitle)) continue;
+
+    // Check if very similar title exists
+    const isDuplicate = Array.from(seen).some(title => {
+      return similarity(title, normalizedTitle) > 0.8;
+    });
+
+    if (!isDuplicate) {
+      seen.add(normalizedTitle);
+      unique.push(article);
+    }
+  }
+
+  return unique;
+}
+
+// Simple string similarity (Dice coefficient)
+function similarity(str1, str2) {
+  const words1 = new Set(str1.split(' '));
+  const words2 = new Set(str2.split(' '));
+  const intersection = new Set([...words1].filter(w => words2.has(w)));
+  return (2 * intersection.size) / (words1.size + words2.size);
+}
+
+// Get tweets by topic/keyword
+router.get('/tweets/search', async (req, res) => {
+  try {
+    const { query, limit = 10 } = req.query;
+
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: 'Query parameter required'
+      });
+    }
+
+    console.log(`Searching tweets: query="${query}"`);
+    const tweets = await twitter.searchTweets(query, limit);
+
+    res.json({
+      success: true,
+      count: tweets.length,
+      tweets: tweets
+    });
+  } catch (error) {
+    console.error('Error fetching tweets:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch tweets'
+    });
+  }
+});
+
+// Get tweets from specific user
+router.get('/tweets/user/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { limit = 10 } = req.query;
+
+    console.log(`Fetching tweets from @${username}`);
+    const tweets = await twitter.getUserTweets(username, limit);
+
+    res.json({
+      success: true,
+      count: tweets.length,
+      tweets: tweets
+    });
+  } catch (error) {
+    console.error('Error fetching user tweets:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user tweets'
+    });
+  }
+});
+
+// Extract keywords from articles
+function extractKeywords(articles) {
+  const wordCount = {};
+  const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'as', 'by', 'is', 'are', 'was', 'were']);
+
+  articles.forEach(article => {
+    if (!article.title) return;
+    const words = article.title.toLowerCase().match(/\b\w+\b/g) || [];
+    words.forEach(word => {
+      if (word.length > 3 && !stopWords.has(word)) {
+        wordCount[word] = (wordCount[word] || 0) + 1;
+      }
+    });
+  });
+
+  return Object.entries(wordCount)
+    .sort(([, a], [, b]) => b - a)
+    .map(([word]) => word);
+}
+
+// Get system status (database stats, API quotas, worker status)
+router.get('/status', async (req, res) => {
+  try {
+    const stats = await Article.getStats();
+    const quotas = await ApiQuota.getAllQuotas();
+    const FetchLog = require('../models/FetchLog');
+    const recentLogs = await FetchLog.getSummary(24);
+
+    // Get LLM service stats
+    let llmStats = null;
+    try {
+      const llm = require('../services/llm');
+      llmStats = llm.getStats();
+    } catch (err) {
+      console.warn('LLM stats unavailable:', err.message);
+    }
+
+    res.json({
+      success: true,
+      database: {
+        totalArticles: stats.total,
+        articlesToday: stats.today,
+        topSources: stats.topSources,
+        articlesByCountry: stats.byCountry
+      },
+      apiQuotas: quotas,
+      fetchActivity: recentLogs,
+      llm: llmStats, // NEW: LLM service statistics
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch system status'
+    });
+  }
+});
+
+// Enhanced trending with LLM analysis and recency weighting
+router.get('/trending/smart', async (req, res) => {
+  try {
+    const { hours = 24, limit = 10 } = req.query;
+
+    // Get recent articles grouped by country
+    const articles = await Article.findRecent({
+      minDate: new Date(Date.now() - hours * 60 * 60 * 1000)
+    }, 500);
+
+    if (articles.length === 0) {
+      return res.json({
+        success: true,
+        trending: [],
+        source: 'database'
+      });
+    }
+
+    // Use LLM to extract topics with recency weights
+    const llm = require('../services/llm');
+    const trendingTopics = await llm.extractTrendingInsights(articles, parseInt(limit));
+
+    res.json({
+      success: true,
+      trending: trendingTopics,
+      source: 'llm+database',
+      articleCount: articles.length
+    });
+  } catch (error) {
+    console.error('Error fetching smart trending:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch smart trending topics'
+    });
+  }
+});
+
+// Trending topics by map location (for alarm bell visualization)
+router.get('/trending/locations', async (req, res) => {
+  try {
+    const db = require('../config/database');
+    const [rows] = await db.query(`
+      SELECT country_code, topic, article_count, recency_score
+      FROM trending_locations
+      WHERE last_updated >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+      ORDER BY country_code, recency_score DESC
+    `);
+
+    // Group by country
+    const grouped = {};
+    rows.forEach(row => {
+      if (!grouped[row.country_code]) {
+        grouped[row.country_code] = [];
+      }
+      grouped[row.country_code].push({
+        topic: row.topic,
+        count: row.article_count,
+        score: row.recency_score
+      });
+    });
+
+    // Convert to array format
+    const locations = Object.entries(grouped).map(([code, topics]) => ({
+      countryCode: code,
+      topics: topics.slice(0, 3) // Top 3 per country
+    }));
+
+    res.json({
+      success: true,
+      locations: locations,
+      source: 'database'
+    });
+  } catch (error) {
+    console.error('Error fetching trending locations:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch trending locations'
+    });
+  }
+});
+
+module.exports = router;
