@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for News Aggregator
+# Multi-stage Dockerfile for News Aggregator (PostgreSQL)
 
 # Stage 1: Build frontend
 FROM node:18-alpine AS frontend-build
@@ -25,8 +25,8 @@ COPY --from=frontend-build /app/frontend/dist ./public
 # Make startup script executable
 RUN chmod +x /app/start.sh
 
-# Expose port
-EXPOSE 3001
+# Render uses PORT=10000 (set via render.yaml); falls back to 3001 for local dev
+EXPOSE 10000
 
 # Set environment to production
 ENV NODE_ENV=production
