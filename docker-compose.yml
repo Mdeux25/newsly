@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: news-aggregator-mysql
+    container_name: newsly-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -22,44 +22,78 @@ services:
       timeout: 5s
       retries: 5
 
-  news-aggregator:
+  newsly:
     build: .
+    container_name: newsly-app
     ports:
       - "8080:3001"
     environment:
+      # Server
       - NODE_ENV=production
-      - NEWSAPI_KEY=${NEWSAPI_KEY}
-      - GNEWS_KEY=${GNEWS_KEY}
+      - PORT=3001
+
+      # Database
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_USER=news_user
       - DB_PASSWORD=news_password
       - DB_NAME=news_aggregator
+
+      # News APIs
+      - NEWSAPI_KEY=${NEWSAPI_KEY}
+      - NEWSDATA_KEY=${NEWSDATA_KEY}
+      - GNEWS_KEY=${GNEWS_KEY:-your_gnews_key_here}
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN:-your_twitter_token_here}
+
+      # OpenAI for Smart Search (NEW)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      - LLM_CACHE_ENABLED=true
+      - LLM_DAILY_BUDGET=1.00
+
+      # Worker Configuration
+      - FETCH_INTERVAL_MINUTES=15
+      - ARTICLE_RETENTION_DAYS=7
+      - MAX_ARTICLES_PER_FETCH=50
+
     restart: unless-stopped
-    volumes:
-      # For development: mount source code for hot reload
-      - ./backend:/app:delegated
-      - /app/node_modules
     depends_on:
       mysql:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Development mode services
+  # Development mode services (optional)
   backend-dev:
     image: node:18-alpine
+    container_name: newsly-backend-dev
     working_dir: /app
     command: sh -c "npm install && npm run dev"
     ports:
       - "3001:3001"
     environment:
       - NODE_ENV=development
-      - NEWSAPI_KEY=${NEWSAPI_KEY}
-      - GNEWS_KEY=${GNEWS_KEY}
+      - PORT=3001
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_USER=news_user
       - DB_PASSWORD=news_password
       - DB_NAME=news_aggregator
+      - NEWSAPI_KEY=${NEWSAPI_KEY}
+      - NEWSDATA_KEY=${NEWSDATA_KEY}
+      - GNEWS_KEY=${GNEWS_KEY:-your_gnews_key_here}
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN:-your_twitter_token_here}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      - LLM_CACHE_ENABLED=true
+      - LLM_DAILY_BUDGET=1.00
+      - FETCH_INTERVAL_MINUTES=15
+      - ARTICLE_RETENTION_DAYS=7
+      - MAX_ARTICLES_PER_FETCH=50
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -71,12 +105,14 @@ services:
 
   frontend-dev:
     image: node:18-alpine
+    container_name: newsly-frontend-dev
     working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm install && npm run dev -- --host"
     ports:
       - "5173:5173"
     environment:
       - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3001
     volumes:
       - ./frontend:/app
       - /app/node_modules
