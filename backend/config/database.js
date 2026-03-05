@@ -2,9 +2,10 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 // SSL configuration for Aiven and other managed databases
+// rejectUnauthorized: false allows self-signed certificates while still encrypting the connection
 const sslConfig = process.env.DB_SSL === 'true' ? {
   ssl: {
-    rejectUnauthorized: true
+    rejectUnauthorized: false
   }
 } : {};
 
