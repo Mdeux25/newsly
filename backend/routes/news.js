@@ -434,7 +434,7 @@ router.get('/trending/locations', async (req, res) => {
     const [rows] = await db.query(`
       SELECT country_code, topic, article_count, recency_score
       FROM trending_locations
-      WHERE last_updated >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+      WHERE last_updated >= NOW() - INTERVAL '1 hour'
       ORDER BY country_code, recency_score DESC
     `);
 

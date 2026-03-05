@@ -12,9 +12,6 @@ RUN npm run build
 FROM node:18-alpine
 WORKDIR /app
 
-# Install actual MySQL client (not MariaDB) for migrations
-RUN apk add --no-cache mysql-client --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
-
 # Install backend dependencies
 COPY backend/package*.json ./
 RUN npm install --production

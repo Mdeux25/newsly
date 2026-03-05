@@ -38,7 +38,7 @@ class Article {
       return { id: result.insertId, ...articleData };
     } catch (error) {
       // Duplicate URL - ignore
-      if (error.code === 'ER_DUP_ENTRY') {
+      if (error.code === '23505') {
         return null;
       }
       throw error;
@@ -133,7 +133,7 @@ class Article {
     }
 
     if (topic) {
-      query += ' AND (title LIKE ? OR description LIKE ?)';
+      query += ' AND (title ILIKE ? OR description ILIKE ?)';
       const searchTerm = `%${topic}%`;
       params.push(searchTerm, searchTerm);
     }
@@ -158,7 +158,7 @@ class Article {
   static async countArticles(filters = {}) {
     const { country, language, region, category, topic, minDate } = filters;
 
-    let query = 'SELECT COUNT(*) as total FROM articles WHERE 1=1';
+    let query = 'SELECT COUNT(*)::int AS total FROM articles WHERE 1=1';
     const params = [];
 
     if (country) {
@@ -187,7 +187,7 @@ class Article {
     }
 
     if (topic) {
-      query += ' AND (title LIKE ? OR description LIKE ?)';
+      query += ' AND (title ILIKE ? OR description ILIKE ?)';
       const searchTerm = `%${topic}%`;
       params.push(searchTerm, searchTerm);
     }
@@ -242,7 +242,7 @@ class Article {
     const minDate = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     const [rows] = await db.query(
-      `SELECT category, COUNT(*) as count
+      `SELECT category, COUNT(*)::int AS count
        FROM articles
        WHERE published_at >= ? AND category IS NOT NULL
        GROUP BY category
@@ -258,9 +258,9 @@ class Article {
    * @returns {Promise<Object>} Statistics object
    */
   static async getStats() {
-    const [totalRows] = await db.query('SELECT COUNT(*) as total FROM articles');
+    const [totalRows] = await db.query('SELECT COUNT(*)::int AS total FROM articles');
     const [todayRows] = await db.query(
-      'SELECT COUNT(*) as today FROM articles WHERE DATE(created_at) = CURDATE()'
+      'SELECT COUNT(*)::int AS today FROM articles WHERE DATE(fetched_at) = CURRENT_DATE'
     );
     const [sourceRows] = await db.query(
       'SELECT source, COUNT(*) as count FROM articles GROUP BY source ORDER BY count DESC LIMIT 10'
@@ -346,28 +346,28 @@ class Article {
       // English title matches (weight: 4)
       if (enTerms.length > 0) {
         enTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "en" AND title LIKE ? THEN 4 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'en' AND title ILIKE ? THEN 4 ELSE 0 END)";
         });
       }
 
       // English description matches (weight: 3)
       if (enTerms.length > 0) {
         enTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "en" AND description LIKE ? THEN 3 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'en' AND description ILIKE ? THEN 3 ELSE 0 END)";
         });
       }
 
       // Arabic title matches (weight: 2)
       if (arTerms.length > 0) {
         arTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "ar" AND title LIKE ? THEN 2 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'ar' AND title ILIKE ? THEN 2 ELSE 0 END)";
         });
       }
 
       // Arabic description matches (weight: 1)
       if (arTerms.length > 0) {
         arTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "ar" AND description LIKE ? THEN 1 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'ar' AND description ILIKE ? THEN 1 ELSE 0 END)";
         });
       }
 
@@ -375,10 +375,10 @@ class Article {
 
       // Add recency boost: score * (1.0 + (1 - daysSincePublished/7) * 0.5)
       // Recent articles (< 1 day) get up to 50% boost
-      scoreSQL = `(${scoreSQL}) * (1.0 + GREATEST(0, (1 - DATEDIFF(NOW(), published_at) / 7)) * 0.5)`;
+      scoreSQL = `(${scoreSQL}) * (1.0 + GREATEST(0, (1 - EXTRACT(EPOCH FROM (NOW() - published_at)) / 604800.0)) * 0.5)`;
 
-      // Build complete query
-      let sqlQuery = `SELECT *, ${scoreSQL} AS relevance_score FROM articles WHERE 1=1`;
+      // Build complete query — use subquery so we can filter on relevance_score alias
+      let innerQuery = `SELECT *, ${scoreSQL} AS relevance_score FROM articles WHERE 1=1`;
       const params = [];
 
       // Add all search term parameters (in order matching the SQL)
@@ -389,34 +389,32 @@ class Article {
 
       // Add filters
       if (filters.language) {
-        sqlQuery += ' AND language = ?';
+        innerQuery += ' AND language = ?';
         params.push(filters.language);
       }
 
       if (filters.country) {
         if (Array.isArray(filters.country)) {
-          sqlQuery += ` AND country IN (${filters.country.map(() => '?').join(',')})`;
+          innerQuery += ` AND country IN (${filters.country.map(() => '?').join(',')})`;
           params.push(...filters.country);
         } else {
-          sqlQuery += ' AND country = ?';
+          innerQuery += ' AND country = ?';
           params.push(filters.country);
         }
       }
 
       if (filters.region) {
-        sqlQuery += ' AND region = ?';
+        innerQuery += ' AND region = ?';
         params.push(filters.region);
       }
 
       if (filters.minDate) {
-        sqlQuery += ' AND published_at >= ?';
+        innerQuery += ' AND published_at >= ?';
         params.push(filters.minDate);
       }
 
-      // Only include articles with relevance score > 0
-      sqlQuery += ' HAVING relevance_score > 0';
-      sqlQuery += ' ORDER BY relevance_score DESC, published_at DESC';
-      sqlQuery += ' LIMIT ? OFFSET ?';
+      // Wrap in subquery so we can filter on the alias relevance_score
+      const sqlQuery = `SELECT * FROM (${innerQuery}) AS scored WHERE relevance_score > 0 ORDER BY relevance_score DESC, published_at DESC LIMIT ? OFFSET ?`;
       params.push(limit, offset);
 
       const [rows] = await db.query(sqlQuery, params);
@@ -451,24 +449,24 @@ class Article {
       let scoreSQL = '(0';
       if (enTerms.length > 0) {
         enTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "en" AND title LIKE ? THEN 4 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'en' AND title ILIKE ? THEN 4 ELSE 0 END)";
         });
         enTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "en" AND description LIKE ? THEN 3 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'en' AND description ILIKE ? THEN 3 ELSE 0 END)";
         });
       }
       if (arTerms.length > 0) {
         arTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "ar" AND title LIKE ? THEN 2 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'ar' AND title ILIKE ? THEN 2 ELSE 0 END)";
         });
         arTerms.forEach(() => {
-          scoreSQL += ' + (CASE WHEN language = "ar" AND description LIKE ? THEN 1 ELSE 0 END)';
+          scoreSQL += " + (CASE WHEN language = 'ar' AND description ILIKE ? THEN 1 ELSE 0 END)";
         });
       }
       scoreSQL += ')';
-      scoreSQL = `(${scoreSQL}) * (1.0 + GREATEST(0, (1 - DATEDIFF(NOW(), published_at) / 7)) * 0.5)`;
+      scoreSQL = `(${scoreSQL}) * (1.0 + GREATEST(0, (1 - EXTRACT(EPOCH FROM (NOW() - published_at)) / 604800.0)) * 0.5)`;
 
-      let sqlQuery = `SELECT COUNT(*) as total FROM (SELECT ${scoreSQL} AS relevance_score FROM articles WHERE 1=1`;
+      let innerQuery = `SELECT ${scoreSQL} AS relevance_score FROM articles WHERE 1=1`;
       const params = [];
 
       enTerms.forEach(term => params.push(`%${term}%`));
@@ -477,31 +475,31 @@ class Article {
       arTerms.forEach(term => params.push(`%${term}%`));
 
       if (filters.language) {
-        sqlQuery += ' AND language = ?';
+        innerQuery += ' AND language = ?';
         params.push(filters.language);
       }
 
       if (filters.country) {
         if (Array.isArray(filters.country)) {
-          sqlQuery += ` AND country IN (${filters.country.map(() => '?').join(',')})`;
+          innerQuery += ` AND country IN (${filters.country.map(() => '?').join(',')})`;
           params.push(...filters.country);
         } else {
-          sqlQuery += ' AND country = ?';
+          innerQuery += ' AND country = ?';
           params.push(filters.country);
         }
       }
 
       if (filters.region) {
-        sqlQuery += ' AND region = ?';
+        innerQuery += ' AND region = ?';
         params.push(filters.region);
       }
 
       if (filters.minDate) {
-        sqlQuery += ' AND published_at >= ?';
+        innerQuery += ' AND published_at >= ?';
         params.push(filters.minDate);
       }
 
-      sqlQuery += ' HAVING relevance_score > 0) AS scored_articles';
+      const sqlQuery = `SELECT COUNT(*)::int AS total FROM (${innerQuery}) AS scored WHERE relevance_score > 0`;
 
       const [rows] = await db.query(sqlQuery, params);
       return rows[0].total;

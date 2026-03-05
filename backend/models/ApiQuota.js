@@ -49,8 +49,8 @@ class ApiQuota {
     await db.query(
       `INSERT INTO api_quotas (api_name, daily_limit, current_usage, reset_time)
        VALUES (?, ?, 0, ?)
-       ON DUPLICATE KEY UPDATE daily_limit = ?`,
-      [apiName, dailyLimit, resetTime, dailyLimit]
+       ON CONFLICT (api_name) DO UPDATE SET daily_limit = EXCLUDED.daily_limit`,
+      [apiName, dailyLimit, resetTime]
     );
 
     return await this.getQuota(apiName);
@@ -120,8 +120,9 @@ class ApiQuota {
       [resetTime]
     );
 
-    console.log(`🔄 Reset ${result.affectedRows} API quotas`);
-    return result.affectedRows;
+    const count = result.affectedRows;
+    console.log(`🔄 Reset ${count} API quotas`);
+    return count;
   }
 
   /**

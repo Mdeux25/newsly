@@ -74,9 +74,9 @@ class LLMCache {
       await db.query(
         `INSERT INTO llm_cache (cache_key, cache_type, input_text, output_json, expires_at)
          VALUES (?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           output_json = VALUES(output_json),
-           expires_at = VALUES(expires_at),
+         ON CONFLICT (cache_key) DO UPDATE SET
+           output_json = EXCLUDED.output_json,
+           expires_at = EXCLUDED.expires_at,
            last_accessed = NOW()`,
         [cacheKey, cacheType, inputText, outputJson, expiresAt]
       );

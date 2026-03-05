@@ -1,39 +1,21 @@
+databases:
+  - name: newsly-db
+    databaseName: news_aggregator
+    plan: free
+
 services:
-  # Newsly Application (FREE TIER)
   - type: web
     name: newsly
     env: docker
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/status
-    plan: free  # FREE TIER!
+    healthCheckPath: /api/health
+    plan: free
     envVars:
-      # Render MySQL Database (Internal connection)
+      # Render PostgreSQL — auto-populated from the database above
       - key: DATABASE_URL
         fromDatabase:
           name: newsly-db
           property: connectionString
-      - key: DB_HOST
-        fromDatabase:
-          name: newsly-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: newsly-db
-          property: port
-      - key: DB_USER
-        fromDatabase:
-          name: newsly-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: newsly-db
-          property: password
-      - key: DB_NAME
-        fromDatabase:
-          name: newsly-db
-          property: database
-      - key: DB_SSL
-        value: false  # Render internal connections don't need SSL
 
       # API Keys (REQUIRED - add in dashboard)
       - key: NEWSAPI_KEY

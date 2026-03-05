@@ -34,7 +34,7 @@ async function updateTrendingLocations() {
     }
 
     // Clear old trending locations
-    await db.query('TRUNCATE TABLE trending_locations');
+    await db.query('TRUNCATE trending_locations');
 
     // Insert new trending topics by country
     let insertCount = 0;
