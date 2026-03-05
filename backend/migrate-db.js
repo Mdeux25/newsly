@@ -2,6 +2,9 @@
 const db = require('./config/database');
 
 const migrations = `
+-- Drop and recreate fetch_logs to fix schema
+DROP TABLE IF EXISTS fetch_logs;
+
 CREATE TABLE IF NOT EXISTS articles (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(500) NOT NULL,
@@ -27,7 +30,7 @@ CREATE TABLE IF NOT EXISTS articles (
   FULLTEXT INDEX idx_description (description)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS fetch_logs (
+CREATE TABLE fetch_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   api_name VARCHAR(50) NOT NULL,
   endpoint VARCHAR(200),
