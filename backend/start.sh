@@ -14,7 +14,14 @@ fi
 # Run migrations with inline SQL (no external files needed)
 echo "📝 Creating tables..."
 
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" --ssl-verify-server-cert=0 "$DB_NAME" <<'EOSQL'
+# Use SSL only if DB_SSL is true (Aiven), otherwise skip (Render internal)
+if [ "$DB_SSL" = "true" ]; then
+  SSL_FLAG="--ssl-verify-server-cert=0"
+else
+  SSL_FLAG=""
+fi
+
+mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" $SSL_FLAG "$DB_NAME" <<'EOSQL'
 
 CREATE TABLE IF NOT EXISTS articles (
   id INT AUTO_INCREMENT PRIMARY KEY,
