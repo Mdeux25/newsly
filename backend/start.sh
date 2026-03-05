@@ -14,7 +14,7 @@ fi
 # Run migrations with inline SQL (no external files needed)
 echo "📝 Creating tables..."
 
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" --ssl-mode=REQUIRED "$DB_NAME" <<'EOSQL'
+mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" --ssl "$DB_NAME" <<'EOSQL'
 
 CREATE TABLE IF NOT EXISTS articles (
   id INT AUTO_INCREMENT PRIMARY KEY,
