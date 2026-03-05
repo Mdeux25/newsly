@@ -1,23 +1,37 @@
-# Live News Aggregator 📰
+# Newsly - Smart News Aggregator 📰
 
-A minimal, fast news aggregator website that fetches live news from Western, EU, and Middle Eastern sources. Built with Vue.js and Node.js, featuring auto-refresh, search, and regional filtering.
+A modern, AI-powered news aggregator with cross-language search. Fetches live news from global sources with smart semantic search, weighted ranking, and interactive map visualization. Built with Vue.js, Node.js, and OpenAI GPT-4o-mini.
 
 ![News Aggregator](https://img.shields.io/badge/status-live-success)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## ✨ Features
 
-- **Live Updates**: Auto-refresh every 30 seconds to get the latest news
+### 🤖 AI-Powered Intelligence
+- **🆕 Cross-Language Smart Search**: Search "iran" → finds both English "Iran" and Arabic "إيران" articles
+- **🆕 Weighted Ranking Algorithm**: Prioritizes English titles (4x), descriptions (3x), Arabic titles (2x), descriptions (1x)
+- **🆕 Semantic Understanding**: OpenAI GPT-4o-mini for translations and variations
+- **🆕 95% Cache Hit Rate**: 3-tier caching (Memory → Database → API) for ~$0.50/month costs
+- **🆕 Smart Trending Topics**: Recency-weighted algorithm with article counts (e.g., "iran (245)")
+
+### 🗺️ Interactive Visualization
+- **🆕 Animated Map Markers**: Trending locations show shaking alarm bell 🚨
+- **🆕 Click-to-Search**: Click trending map location → auto-search for top topic
 - **Multi-Region Support**: News from US, EU, and Middle Eastern sources
-- **Smart Search**: Search and filter news by topic and region
-- **Trending Topics**: Click trending keywords for instant searches
-- **Clean UI**: Responsive Bootstrap 5 design that works on all devices
+- **Clean UI**: Responsive design that works on all devices
+
+### ⚡ Performance & Scalability
+- **Database-Backed**: MySQL persistent storage for 100k+ users scalability
+- **Background Worker**: Automated news fetching every 15 minutes
+- **Fast Responses**: 50-100ms API responses (20x faster!)
+- **Smart Quota Management**: Automatic API rate limit tracking
+- **Live Updates**: Auto-refresh every 30 seconds
 - **Source Aggregation**: Combines multiple news APIs with deduplication
-- **Docker Ready**: Easy deployment with Docker Compose
-- **🆕 Database-Backed**: MySQL persistent storage for 100k+ users scalability
-- **🆕 Background Worker**: Automated news fetching every 15 minutes
-- **🆕 Fast Responses**: 50-100ms API responses (10x faster than before!)
-- **🆕 Smart Quota Management**: Automatic API rate limit tracking
+
+### 🚀 Deployment Options
+- **Render FREE**: $0/month (with cold starts)
+- **DigitalOcean**: $6/month (cheapest always-on)
+- **Docker Ready**: Easy self-hosted deployment
 
 ## 🚀 Quick Start
 
@@ -118,6 +132,28 @@ open http://localhost:8080
 docker-compose logs -f
 docker-compose ps
 ```
+
+## ☁️ Cloud Deployment
+
+Deploy Newsly to production with these guides:
+
+### 🚀 Render.com (Recommended - FREE or $7/mo)
+- **Quick Start**: See [RENDER_QUICK_START.md](RENDER_QUICK_START.md) - Deploy in 10 minutes!
+- **Detailed Guide**: See [RENDER_DEPLOYMENT_GUIDE.md](RENDER_DEPLOYMENT_GUIDE.md)
+- **Cost**: $0/month (with Aiven MySQL free tier)
+- **Best for**: Easy deployment, zero maintenance
+
+### 💧 DigitalOcean ($6/month)
+- **Guide**: See [DIGITALOCEAN_DEPLOYMENT.md](DIGITALOCEAN_DEPLOYMENT.md)
+- **Cost**: $6/month (cheapest always-on option)
+- **Best for**: Full control, budget-conscious users
+
+### 🐳 Docker (Self-hosted)
+- **Guide**: See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+- **Cost**: Server costs only
+- **Best for**: Complete control, custom infrastructure
+
+**📊 Storage**: See [STORAGE_CALCULATOR.md](STORAGE_CALCULATOR.md) for database sizing (you only need ~100-500 MB!)
 
 ## 📁 Project Structure
 

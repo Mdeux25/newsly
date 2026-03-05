@@ -7,17 +7,19 @@ services:
     healthCheckPath: /api/status
     plan: free  # FREE TIER!
     envVars:
-      # Database - Use FREE external database (see options below)
+      # Aiven MySQL Database (FREE 1GB)
       - key: DB_HOST
-        sync: false  # You'll add this manually
+        value: mysql-128d5e0c-newsly-ai.d.aivencloud.com
       - key: DB_PORT
-        value: 3306
+        value: 11431
       - key: DB_USER
-        sync: false
+        value: avnadmin
       - key: DB_PASSWORD
-        sync: false
+        sync: false  # Add your Aiven password in Render dashboard
       - key: DB_NAME
         value: news_aggregator
+      - key: DB_SSL
+        value: true  # Aiven requires SSL
 
       # API Keys (REQUIRED - add in dashboard)
       - key: NEWSAPI_KEY
