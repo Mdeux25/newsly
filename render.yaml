@@ -1,55 +1,33 @@
 services:
-  # MySQL Database
-  - type: pserv
-    name: newsly-mysql
-    env: docker
-    dockerfilePath: ./Dockerfile.mysql
-    disk:
-      name: newsly-mysql-data
-      mountPath: /var/lib/mysql
-      sizeGB: 10
-    envVars:
-      - key: MYSQL_ROOT_PASSWORD
-        generateValue: true
-      - key: MYSQL_DATABASE
-        value: news_aggregator
-      - key: MYSQL_USER
-        value: news_user
-      - key: MYSQL_PASSWORD
-        generateValue: true
-
-  # Newsly Application
+  # Newsly Application (FREE TIER)
   - type: web
     name: newsly
     env: docker
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/status
+    plan: free  # FREE TIER!
     envVars:
-      # Database (connected to MySQL service)
+      # Database - Use FREE external database (see options below)
       - key: DB_HOST
-        fromService:
-          type: pserv
-          name: newsly-mysql
-          property: host
+        sync: false  # You'll add this manually
       - key: DB_PORT
         value: 3306
       - key: DB_USER
-        value: news_user
+        sync: false
       - key: DB_PASSWORD
-        fromService:
-          type: pserv
-          name: newsly-mysql
-          envVarKey: MYSQL_PASSWORD
+        sync: false
       - key: DB_NAME
         value: news_aggregator
 
-      # API Keys (set these in Render Dashboard)
+      # API Keys (REQUIRED - add in dashboard)
       - key: NEWSAPI_KEY
         sync: false
       - key: NEWSDATA_KEY
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+
+      # Optional API Keys
       - key: GNEWS_KEY
         value: optional
       - key: TWITTER_BEARER_TOKEN
@@ -67,7 +45,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3001
+        value: 10000
 
       # Worker Configuration
       - key: FETCH_INTERVAL_MINUTES
