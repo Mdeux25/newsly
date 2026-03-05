@@ -12,6 +12,9 @@ RUN npm run build
 FROM node:18-alpine
 WORKDIR /app
 
+# Install MySQL client for migrations
+RUN apk add --no-cache mysql-client
+
 # Install backend dependencies
 COPY backend/package*.json ./
 RUN npm install --production
@@ -22,11 +25,14 @@ COPY backend/ ./
 # Copy built frontend from stage 1
 COPY --from=frontend-build /app/frontend/dist ./public
 
+# Make startup script executable
+RUN chmod +x /app/start.sh
+
 # Expose port
 EXPOSE 3001
 
 # Set environment to production
 ENV NODE_ENV=production
 
-# Start the backend server (which will also serve frontend static files)
-CMD ["node", "server.js"]
+# Start with migration script
+CMD ["/bin/sh", "/app/start.sh"]
