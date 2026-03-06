@@ -104,7 +104,7 @@ export default {
     })
 
     const truncateDescription = (text) => {
-      if (!text) return 'No description available.'
+      if (!text) return t.value.news.noDescription
       return text.length > 150 ? text.substring(0, 150) + '...' : text
     }
 
@@ -116,12 +116,13 @@ export default {
       const diffMins = Math.floor(diffMs / 60000)
       const diffHours = Math.floor(diffMs / 3600000)
       const diffDays = Math.floor(diffMs / 86400000)
+      const tr = t.value
 
-      if (diffMins < 1) return 'Just now'
-      if (diffMins < 60) return `${diffMins}m ago`
-      if (diffHours < 24) return `${diffHours}h ago`
-      if (diffDays < 7) return `${diffDays}d ago`
-      return date.toLocaleDateString()
+      if (diffMins < 1) return tr.time.justNow
+      if (diffMins < 60) return `${diffMins}${tr.time.minutesAgo}`
+      if (diffHours < 24) return `${diffHours}${tr.time.hoursAgo}`
+      if (diffDays < 7) return `${diffDays}${tr.time.daysAgo}`
+      return date.toLocaleDateString(props.uiLanguage === 'ar' ? 'ar-EG' : 'en-GB')
     }
 
     const handleImageError = () => {

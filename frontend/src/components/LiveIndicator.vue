@@ -1,84 +1,58 @@
 <template>
   <div class="live-indicator">
-    <span
-      v-if="!error"
-      class="badge bg-success d-flex align-items-center"
-    >
-      <span class="pulse-dot me-2"></span>
-      <span v-if="isLoading">Updating...</span>
-      <span v-else-if="lastUpdate">
-        Updated {{ timeAgo }}
-      </span>
-      <span v-else>Live</span>
+    <span v-if="!error" class="badge bg-success">
+      <span class="pulse-dot"></span>
+      <span v-if="isLoading">{{ tr.status.updating }}</span>
+      <span v-else-if="lastUpdate">{{ tr.status.updated }} {{ timeAgo }}</span>
+      <span v-else>{{ tr.status.live }}</span>
     </span>
-    <span
-      v-else
-      class="badge bg-danger d-flex align-items-center"
-      :title="error"
-    >
-      <i class="bi bi-exclamation-circle me-1"></i>
-      Error
+    <span v-else class="badge bg-danger" :title="error">
+      <i class="bi bi-exclamation-circle"></i>
+      {{ tr.status.error }}
     </span>
   </div>
 </template>
 
 <script>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { translations } from '../i18n'
 
 export default {
   name: 'LiveIndicator',
   props: {
-    lastUpdate: {
-      type: Date,
-      default: null
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    error: {
-      type: String,
-      default: null
-    }
+    lastUpdate: { type: Date, default: null },
+    isLoading: { type: Boolean, default: false },
+    error: { type: String, default: null },
+    uiLanguage: { type: String, default: 'en' }
   },
   setup(props) {
     const now = ref(new Date())
     let interval = null
 
+    const tr = computed(() => translations[props.uiLanguage] || translations.en)
+
     const timeAgo = computed(() => {
-      if (!props.lastUpdate) return 'never'
+      if (!props.lastUpdate) return ''
+      const t = tr.value
       const diffMs = now.value - props.lastUpdate
       const diffSecs = Math.floor(diffMs / 1000)
       const diffMins = Math.floor(diffMs / 60000)
 
-      if (diffSecs < 10) return 'just now'
-      if (diffSecs < 60) return `${diffSecs}s ago`
-      if (diffMins < 60) return `${diffMins}m ago`
-      return 'over an hour ago'
+      if (diffSecs < 10) return t.time.justNow
+      if (diffSecs < 60) return `${diffSecs}${t.time.secondsAgo}`
+      if (diffMins < 60) return `${diffMins}${t.time.minutesAgo}`
+      return t.status.overAnHour
     })
 
-    onMounted(() => {
-      // Update time every second
-      interval = setInterval(() => {
-        now.value = new Date()
-      }, 1000)
-    })
+    onMounted(() => { interval = setInterval(() => { now.value = new Date() }, 5000) })
+    onUnmounted(() => { if (interval) clearInterval(interval) })
 
-    onUnmounted(() => {
-      if (interval) clearInterval(interval)
-    })
-
-    return {
-      timeAgo
-    }
+    return { tr, timeAgo }
   }
 }
 </script>
 
 <style scoped>
-/* ============================================
-   LIVE INDICATOR - Mobile-First Design
-   ============================================ */
 .live-indicator {
   display: flex;
   align-items: center;
@@ -111,30 +85,16 @@ export default {
   height: 6px;
   background-color: white;
   border-radius: 50%;
+  flex-shrink: 0;
   animation: pulse 2s infinite;
 }
 
-/* ============================================
-   ANIMATIONS
-   ============================================ */
 @keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.3);
-  }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
 }
 
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
 @media (prefers-reduced-motion: reduce) {
-  .pulse-dot {
-    animation: none;
-  }
+  .pulse-dot { animation: none; }
 }
 </style>

@@ -46,14 +46,19 @@
           </span>
         </div>
 
-        <!-- EN text -->
-        <p class="text-en">{{ pt.en }}</p>
+        <!-- Arabic locale: AR primary, EN secondary -->
+        <template v-if="uiLanguage === 'ar'">
+          <p v-if="pt.ar" class="text-primary" dir="rtl">{{ pt.ar }}</p>
+          <div class="card-divider" :style="{ background: pt.cat.border }"></div>
+          <p class="text-secondary">{{ pt.en }}</p>
+        </template>
 
-        <!-- Divider -->
-        <div class="card-divider" :style="{ background: pt.cat.border }"></div>
-
-        <!-- AR text -->
-        <p v-if="pt.ar" class="text-ar" dir="rtl">{{ pt.ar }}</p>
+        <!-- English locale: EN primary, AR secondary -->
+        <template v-else>
+          <p class="text-primary">{{ pt.en }}</p>
+          <div class="card-divider" :style="{ background: pt.cat.border }"></div>
+          <p v-if="pt.ar" class="text-secondary" dir="rtl">{{ pt.ar }}</p>
+        </template>
       </div>
 
       <!-- Right-end spacer so last card can center on scroll -->
@@ -365,7 +370,8 @@ export default {
   opacity: 0.85;
 }
 
-.text-en {
+/* Primary text — whichever language is preferred */
+.text-primary {
   font-size: 0.875rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.92);
@@ -380,12 +386,12 @@ export default {
   border-radius: 1px;
 }
 
-.text-ar {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
+/* Secondary text — the other language, muted */
+.text-secondary {
+  font-size: 0.775rem;
+  color: rgba(255, 255, 255, 0.42);
   line-height: 1.6;
   margin: 0;
-  text-align: right;
   font-family: 'Segoe UI', 'Arial', Tahoma, sans-serif;
 }
 
@@ -420,7 +426,7 @@ export default {
     width: clamp(260px, 35vw, 300px);
   }
 
-  .text-en {
+  .text-primary {
     font-size: 0.9rem;
   }
 }

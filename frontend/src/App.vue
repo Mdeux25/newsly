@@ -27,6 +27,7 @@
             :lastUpdate="lastUpdate"
             :isLoading="isLoading"
             :error="error"
+            :uiLanguage="uiLanguage"
           />
         </div>
       </div>
@@ -364,7 +365,7 @@ export default {
         lastUpdate.value = new Date()
       } catch (err) {
         console.error('Error fetching news:', err)
-        error.value = 'Unable to connect to news service. Please check your API keys.'
+        error.value = t.value.news.noResults
       } finally {
         isLoading.value = false
       }

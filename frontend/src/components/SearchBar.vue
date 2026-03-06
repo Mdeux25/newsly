@@ -44,7 +44,7 @@
     <!-- Filters row: language + time -->
     <div class="filter-row">
       <div class="filter-group">
-        <label class="filter-label">{{ tr.search.language.english === 'English' ? 'Language' : 'اللغة' }}</label>
+        <label class="filter-label">{{ tr.search.language.label }}</label>
         <select class="filter-select" :value="language" @change="updateLanguage">
           <option value="en">{{ tr.search.language.english }}</option>
           <option value="ar">{{ tr.search.language.arabic }}</option>

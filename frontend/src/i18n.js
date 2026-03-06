@@ -7,6 +7,7 @@ export const translations = {
       button: 'Refresh Now',
       trending: 'Trending:',
       language: {
+        label: 'Language',
         english: 'English',
         arabic: 'Arabic',
         both: 'Both'
@@ -29,7 +30,8 @@ export const translations = {
       translating: 'Translating...',
       showing: 'Showing',
       of: 'of',
-      articles: 'articles'
+      articles: 'articles',
+      noDescription: 'No description available.'
     },
     tweets: {
       viewTweet: 'View Tweet'
@@ -44,10 +46,12 @@ export const translations = {
       updated: 'Updated',
       ago: 'ago',
       error: 'Error',
-      updating: 'Updating...'
+      updating: 'Updating...',
+      overAnHour: 'over an hour ago'
     },
     time: {
       justNow: 'Just now',
+      secondsAgo: 's ago',
       minutesAgo: 'm ago',
       hoursAgo: 'h ago',
       daysAgo: 'd ago'
@@ -60,6 +64,7 @@ export const translations = {
       button: 'تحديث الآن',
       trending: 'الرائج:',
       language: {
+        label: 'اللغة',
         english: 'English',
         arabic: 'العربية',
         both: 'كلاهما'
@@ -82,7 +87,8 @@ export const translations = {
       translating: 'جاري الترجمة...',
       showing: 'عرض',
       of: 'من',
-      articles: 'مقالة'
+      articles: 'مقالة',
+      noDescription: 'لا يوجد وصف.'
     },
     tweets: {
       viewTweet: 'عرض التغريدة'
@@ -94,13 +100,15 @@ export const translations = {
     },
     status: {
       live: 'مباشر',
-      updated: 'آخر تحديث',
-      ago: 'منذ',
+      updated: 'منذ',
+      ago: '',
       error: 'خطأ',
-      updating: 'جاري التحديث...'
+      updating: 'جاري التحديث...',
+      overAnHour: 'منذ أكثر من ساعة'
     },
     time: {
       justNow: 'الآن',
+      secondsAgo: 'ث',
       minutesAgo: 'د',
       hoursAgo: 'س',
       daysAgo: 'ي'
