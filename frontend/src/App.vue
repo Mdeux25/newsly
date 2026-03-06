@@ -38,6 +38,7 @@
       <NewsMap
         :uiLanguage="uiLanguage"
         :trendingLocations="trendingLocations"
+        :activeLocations="selectedMapLocations"
         @locations-changed="handleLocationsChanged"
         @trending-topic-selected="handleTrendingTopicSelected"
       />

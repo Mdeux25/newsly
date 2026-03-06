@@ -39,6 +39,10 @@ export default {
     trendingLocations: {
       type: Array,
       default: () => []
+    },
+    activeLocations: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ['locations-changed', 'trending-topic-selected'],
@@ -208,6 +212,12 @@ export default {
 
     // Watch for trending locations changes
     watch(() => props.trendingLocations, () => {
+      updateMarkers()
+    }, { deep: true })
+
+    // Watch for external selection changes (e.g. chip removed from SearchBar)
+    watch(() => props.activeLocations, (newLocs) => {
+      selectedLocations.value = [...newLocs]
       updateMarkers()
     }, { deep: true })
 
