@@ -106,7 +106,7 @@
         <!-- Feed Grid -->
         <div class="feed-grid">
           <template v-for="(item, index) in combinedFeed" :key="item.type === 'article' ? item.url : item.id">
-            <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" />
+            <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" :featured="index === firstArticleIndex" />
             <TweetCard v-else-if="item.type === 'tweet'" :tweet="item" />
           </template>
         </div>
@@ -283,6 +283,10 @@ export default {
         article.description?.toLowerCase().includes(filter)
       )
     })
+
+    const firstArticleIndex = computed(() =>
+      combinedFeed.value.findIndex(item => item.type === 'article')
+    )
 
     // Combined feed: mix articles and tweets
     const combinedFeed = computed(() => {
@@ -494,7 +498,8 @@ export default {
       itemsPerPage,
       totalArticles,
       handlePageChange,
-      activePolicy
+      activePolicy,
+      firstArticleIndex
     }
   }
 }
@@ -595,7 +600,7 @@ export default {
   justify-content: center;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 4px;
   color: white;
   font-size: 1.25rem;
   cursor: pointer;
@@ -676,7 +681,7 @@ export default {
   gap: 12px;
   background: rgba(245, 117, 108, 0.15);
   border: 1px solid rgba(245, 117, 108, 0.3);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 12px 16px;
   color: #fca5a5;
 }
@@ -698,7 +703,7 @@ export default {
   justify-content: center;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 8px;
+  border-radius: 3px;
   color: white;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -779,11 +784,15 @@ export default {
   }
 }
 
-/* Desktop: 3 columns */
+/* Desktop: 3-col editorial grid — featured article spans 2 columns */
 @media (min-width: 1024px) {
   .feed-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
+  }
+
+  .feed-grid :deep(.news-card.featured) {
+    grid-column: span 2;
   }
 }
 

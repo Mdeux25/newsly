@@ -65,17 +65,37 @@
       <div class="track-end-spacer"></div>
     </div>
 
-    <!-- Progress dots -->
-    <div v-if="points.length > 1" class="dots-row">
+    <!-- Navigation row: prev arrow + dots + next arrow -->
+    <div v-if="points.length > 1" class="nav-row">
       <button
-        v-for="(pt, i) in points"
-        :key="i"
-        class="dot"
-        :class="{ active: i === activeIndex }"
-        :style="i === activeIndex ? { background: pt.cat.color } : {}"
-        @click="scrollToCard(i)"
-        :aria-label="`Point ${i + 1}`"
-      ></button>
+        class="nav-arrow"
+        :disabled="activeIndex === 0"
+        @click="scrollToCard(activeIndex - 1)"
+        :aria-label="uiLanguage === 'ar' ? 'التالي' : 'Previous'"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      <div class="dots">
+        <button
+          v-for="(pt, i) in points"
+          :key="i"
+          class="dot"
+          :class="{ active: i === activeIndex }"
+          :style="i === activeIndex ? { background: pt.cat.color } : {}"
+          @click="scrollToCard(i)"
+          :aria-label="`Point ${i + 1}`"
+        ></button>
+      </div>
+
+      <button
+        class="nav-arrow"
+        :disabled="activeIndex >= points.length - 1"
+        @click="scrollToCard(activeIndex + 1)"
+        :aria-label="uiLanguage === 'ar' ? 'السابق' : 'Next'"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </button>
     </div>
 
   </div>
@@ -146,9 +166,10 @@ export default {
 
     const scrollToCard = (i) => {
       if (!trackRef.value) return
+      const clamped = Math.max(0, Math.min(i, points.value.length - 1))
       const cards = trackRef.value.querySelectorAll('.point-card')
-      if (cards[i]) {
-        cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      if (cards[clamped]) {
+        cards[clamped].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
       }
     }
 
@@ -160,13 +181,13 @@ export default {
 <style scoped>
 /* ── Wrapper ─────────────────────────────────────── */
 .summary-wrap {
-  background: rgba(10, 14, 28, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 14px 0 12px;
-  margin-bottom: 20px;
-  animation: fadeUp 0.35s ease;
-  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 28, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 14px 0 10px;
+  margin-bottom: 16px;
+  animation: fadeUp 0.3s ease;
+  backdrop-filter: blur(8px);
   overflow: hidden;
 }
 
@@ -175,7 +196,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 14px;
   margin-bottom: 12px;
 }
 
@@ -188,16 +209,16 @@ export default {
 
 .flash-icon {
   color: #fbbf24;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
 }
 
 .summary-title {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -210,11 +231,11 @@ export default {
   color: #60a5fa;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   background: rgba(96, 165, 250, 0.1);
   border: 1px solid rgba(96, 165, 250, 0.2);
-  padding: 2px 8px;
-  border-radius: 20px;
+  padding: 2px 7px;
+  border-radius: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 180px;
@@ -228,34 +249,35 @@ export default {
 }
 
 .counter {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.7);
+  font-variant-numeric: tabular-nums;
 }
 
 .counter-sep {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.25);
   margin: 0 1px;
 }
 
 .dismiss-btn {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  color: rgba(255, 255, 255, 0.45);
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s, color 0.2s;
+  font-size: 0.85rem;
+  transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .dismiss-btn:hover {
-  background: rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.12);
   color: white;
 }
 
@@ -266,12 +288,12 @@ export default {
   gap: 10px;
   color: rgba(255, 255, 255, 0.4);
   font-size: 0.875rem;
-  padding: 8px 16px 6px;
+  padding: 8px 14px 6px;
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-top-color: #3b82f6;
   border-radius: 50%;
@@ -282,21 +304,17 @@ export default {
 /* ── Card Track ──────────────────────────────────── */
 .cards-track {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  /* Side padding creates the "peek" effect: adjacent cards visible */
-  padding: 4px 20px 8px;
-  scroll-padding: 0 20px;
+  padding: 4px 14px 10px;
+  scroll-padding: 0 14px;
 }
 
-.cards-track::-webkit-scrollbar {
-  display: none;
-}
+.cards-track::-webkit-scrollbar { display: none; }
 
-/* Invisible spacer so last card can fully center on snap */
 .track-end-spacer {
   flex-shrink: 0;
   width: 1px;
@@ -305,30 +323,25 @@ export default {
 /* ── Point Card ──────────────────────────────────── */
 .point-card {
   flex-shrink: 0;
-  /* ~2 cards visible on mobile, more on desktop */
-  width: clamp(220px, 72vw, 280px);
+  width: clamp(260px, 78vw, 320px);
   scroll-snap-align: center;
   background: var(--cat-bg);
   border: 1px solid var(--cat-border);
-  border-radius: 14px;
+  border-radius: 6px;
   padding: 14px 14px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   position: relative;
-  /* Top accent bar */
   overflow: hidden;
-  transition: transform 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Colored top-edge accent strip */
+/* Top-edge accent strip */
 .point-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--cat-color), transparent 70%);
 }
@@ -337,12 +350,10 @@ export default {
 .point-card::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 20%;
-  right: 20%;
+  bottom: 0; left: 15%; right: 15%;
   height: 40px;
   background: radial-gradient(ellipse at bottom, var(--cat-color) 0%, transparent 70%);
-  opacity: 0.08;
+  opacity: 0.07;
   pointer-events: none;
 }
 
@@ -354,27 +365,25 @@ export default {
 }
 
 .cat-emoji {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   line-height: 1;
-  /* Subtle shadow to make emoji pop on dark bg */
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
 }
 
 .card-index {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
   border: 1px solid;
   letter-spacing: 0.04em;
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
-/* Primary text — whichever language is preferred */
 .text-primary {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.93);
   line-height: 1.55;
   margin: 0;
   flex: 1;
@@ -382,58 +391,99 @@ export default {
 
 .card-divider {
   height: 1px;
-  opacity: 0.35;
-  border-radius: 1px;
+  opacity: 0.3;
 }
 
-/* Secondary text — the other language, muted */
 .text-secondary {
   font-size: 0.775rem;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.4);
   line-height: 1.6;
   margin: 0;
   font-family: 'Segoe UI', 'Arial', Tahoma, sans-serif;
 }
 
-/* ── Dots ────────────────────────────────────────── */
-.dots-row {
+/* ── Navigation row ──────────────────────────────── */
+.nav-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 4px 16px 2px;
+  gap: 10px;
+  padding: 2px 14px 4px;
+}
+
+.nav-arrow {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-arrow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.nav-arrow:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 200px;
 }
 
 .dot {
   height: 5px;
-  border-radius: 3px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.18);
   border: none;
   cursor: pointer;
-  transition: width 0.3s ease, background 0.3s ease;
+  transition: width 0.25s ease, background 0.25s ease;
   width: 5px;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
 .dot.active {
-  width: 18px;
+  width: 16px;
 }
 
-/* ── Desktop: slightly larger cards ──────────────── */
+/* ── Desktop: larger cards ───────────────────────── */
 @media (min-width: 768px) {
   .point-card {
-    width: clamp(260px, 35vw, 300px);
+    width: clamp(300px, 32vw, 360px);
   }
 
   .text-primary {
-    font-size: 0.9rem;
+    font-size: 0.925rem;
+  }
+
+  .nav-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
   }
 }
 
 /* ── Animations ──────────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 

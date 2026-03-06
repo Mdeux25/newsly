@@ -136,7 +136,7 @@ export default {
   background: rgba(26, 26, 46, 0.6);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border-radius: 6px;
   padding: 16px;
   margin-bottom: 20px;
 }
@@ -172,7 +172,7 @@ export default {
   height: 48px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 0 16px 0 48px;
   color: #ffffff;
   /* 16px to prevent iOS zoom */
@@ -202,7 +202,7 @@ export default {
   background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -231,7 +231,7 @@ export default {
   padding: 10px 14px;
   background: rgba(6, 182, 212, 0.06);
   border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: 12px;
+  border-radius: 4px;
 }
 
 .active-filter-label {
@@ -254,7 +254,7 @@ export default {
   border: 1px solid rgba(6, 182, 212, 0.4);
   color: #06b6d4;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 3px;
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -317,7 +317,7 @@ export default {
   height: 42px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 0 12px;
   color: #ffffff;
   font-size: 0.875rem;
@@ -427,7 +427,7 @@ export default {
   border: 1px solid rgba(6, 182, 212, 0.3);
   color: #06b6d4;
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: 3px;
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
@@ -494,7 +494,7 @@ export default {
 @media (min-width: 1024px) {
   .search-container {
     backdrop-filter: blur(12px);
-    border-radius: 24px;
+    border-radius: 6px;
     padding: 24px;
   }
 

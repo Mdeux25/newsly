@@ -162,7 +162,7 @@ export default {
   background: rgba(26, 26, 46, 0.6);
   backdrop-filter: blur(8px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border-radius: 4px;
   padding: 16px;
   margin-bottom: 20px;
 }
@@ -197,7 +197,7 @@ export default {
   justify-content: center;
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
+  border-radius: 3px;
   color: #3b82f6;
   font-size: 1.25rem;
   cursor: pointer;
@@ -233,7 +233,7 @@ export default {
   justify-content: center;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: 3px;
   color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 600;
@@ -288,7 +288,7 @@ export default {
 @media (min-width: 1024px) {
   .pagination-container {
     backdrop-filter: blur(12px) saturate(180%);
-    border-radius: 20px;
+    border-radius: 4px;
   }
 
   /* Desktop hover effects */

@@ -1,5 +1,5 @@
 <template>
-  <article class="news-card" @click="openArticle">
+  <article class="news-card" :class="{ featured: featured }" @click="openArticle">
     <!-- Card Image -->
     <div class="card-image-wrapper">
       <img
@@ -83,6 +83,10 @@ export default {
     uiLanguage: {
       type: String,
       default: 'en'
+    },
+    featured: {
+      type: Boolean,
+      default: false
     }
   },
   setup(props) {
@@ -193,23 +197,18 @@ export default {
 
 <style scoped>
 /* ============================================
-   NEWS CARD - Mobile-First Design
+   NEWS CARD - Professional Design
    ============================================ */
 .news-card {
-  /* Lightweight glassmorphism for mobile */
-  background: rgba(26, 26, 46, 0.6);
-  backdrop-filter: blur(8px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  background: rgba(18, 22, 36, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
   overflow: hidden;
-  /* Touch-optimized transitions */
-  transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
   width: 100%;
-  /* Remove tap highlight */
   -webkit-tap-highlight-color: transparent;
-  /* Animation */
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.4s ease;
 }
 
 /* Touch feedback (active state for mobile) */
@@ -237,12 +236,12 @@ export default {
 .placeholder-image {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 3rem;
+  color: rgba(255,255,255,0.2);
+  font-size: 2.5rem;
 }
 
 .image-gradient-overlay {
@@ -260,36 +259,35 @@ export default {
   );
 }
 
-/* Source badge (positioned in image) */
+/* Source badge */
 .source-badge {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  top: 10px;
+  left: 10px;
+  background: rgba(37, 99, 235, 0.85);
   color: white;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 /* Country badge */
 .country-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(10, 10, 15, 0.75);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255,255,255,0.85);
+  padding: 3px 7px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
   z-index: 2;
-  letter-spacing: 0.04em;
 }
 
 /* ============================================
@@ -360,29 +358,33 @@ export default {
 .action-button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s, border-color 0.15s;
   border: none;
   -webkit-tap-highlight-color: transparent;
-  /* Touch-optimized */
-  min-height: 36px;
+  min-height: 32px;
 }
 
 .action-button.secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.action-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: white;
 }
 
-/* Pre-computed translation available — highlight the button */
+/* Pre-computed translation — amber accent */
 .action-button.secondary.has-precomputed {
-  background: rgba(251, 191, 36, 0.08);
-  border-color: rgba(251, 191, 36, 0.25);
+  background: rgba(251, 191, 36, 0.07);
+  border-color: rgba(251, 191, 36, 0.2);
   color: #fbbf24;
 }
 
@@ -428,9 +430,23 @@ export default {
    ============================================ */
 @media (min-width: 1024px) {
   .news-card {
-    /* Enhanced glassmorphism for desktop */
     backdrop-filter: blur(12px) saturate(180%);
-    border-radius: 20px;
+    border-radius: 6px;
+  }
+
+  /* Featured (first article) — hero layout */
+  .news-card.featured .card-image-wrapper {
+    aspect-ratio: 21 / 9;
+  }
+
+  .news-card.featured .card-title {
+    font-size: 1.5rem;
+    -webkit-line-clamp: 3;
+  }
+
+  .news-card.featured .card-description {
+    -webkit-line-clamp: 4;
+    font-size: 0.9375rem;
   }
 
   /* Desktop hover effects (not mobile) */
