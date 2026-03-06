@@ -62,6 +62,7 @@
         :summary="summaryData"
         :loading="summaryLoading"
         :trigger="summaryTrigger"
+        :uiLanguage="uiLanguage"
         @dismiss="summaryData = null"
       />
 
@@ -79,13 +80,13 @@
       <!-- Loading State -->
       <div v-if="isLoading && articles.length === 0" class="loading-state">
         <div class="loading-spinner"></div>
-        <p>{{ $t('news.loading') }}</p>
+        <p>{{ t.news.loading }}</p>
       </div>
 
       <!-- No Results -->
       <div v-else-if="!isLoading && articles.length === 0" class="empty-state">
         <i class="bi bi-search"></i>
-        <p>{{ $t('news.noResults') }}</p>
+        <p>{{ t.news.noResults }}</p>
       </div>
 
       <!-- Combined Feed: News + Tweets -->
@@ -115,8 +116,15 @@
         />
       </div>
       <!-- Footer -->
-      <AppFooter :uiLanguage="uiLanguage" />
+      <AppFooter :uiLanguage="uiLanguage" @open-policy="activePolicy = $event" />
     </main>
+
+    <!-- Policy Modal -->
+    <PolicyModal
+      :policy="activePolicy"
+      :uiLanguage="uiLanguage"
+      @close="activePolicy = null"
+    />
 
     <!-- Bottom Navigation (mobile-only) -->
     <nav class="bottom-nav">
@@ -138,6 +146,7 @@
 
 <script>
 import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { translations } from './i18n'
 import axios from 'axios'
 import NewsCard from './components/NewsCard.vue'
 import TweetCard from './components/TweetCard.vue'
@@ -147,6 +156,7 @@ import NewsMap from './components/NewsMap.vue'
 import Pagination from './components/Pagination.vue'
 import NewsSummary from './components/NewsSummary.vue'
 import AppFooter from './components/AppFooter.vue'
+import PolicyModal from './components/PolicyModal.vue'
 
 export default {
   name: 'App',
@@ -158,7 +168,8 @@ export default {
     NewsMap,
     Pagination,
     NewsSummary,
-    AppFooter
+    AppFooter,
+    PolicyModal
   },
   setup() {
     const articles = ref([])
@@ -171,6 +182,8 @@ export default {
     const trendingLocations = ref([]) // NEW: For map visualization
     const selectedMapLocations = ref([])
     const uiLanguage = ref(localStorage.getItem('locale') || 'en')
+    const t = computed(() => translations[uiLanguage.value] || translations.en)
+    const activePolicy = ref(null) // 'privacy' | 'terms' | 'cookies' | 'dmca'
     const isDarkMode = ref(true) // Default to dark mode
     const isLoading = ref(false)
     const error = ref(null)
@@ -194,7 +207,6 @@ export default {
       summaryTrigger.value = triggerLabel
       try {
         const params = new URLSearchParams()
-        if (countries) params.set('countries', countries)
         if (topic) params.set('topic', topic)
         params.set('hours', selectedHours.value)
         const res = await fetch(`/api/news/summary?${params}`)
@@ -210,10 +222,13 @@ export default {
 
     const toggleUILanguage = () => {
       uiLanguage.value = uiLanguage.value === 'en' ? 'ar' : 'en'
-      // Sync global $t so all components re-render with new locale
       getCurrentInstance().appContext.config.globalProperties.$i18n.setLocale(uiLanguage.value)
       document.documentElement.dir = uiLanguage.value === 'ar' ? 'rtl' : 'ltr'
       document.documentElement.lang = uiLanguage.value
+      // Update briefing label if it's still the default one
+      if (!selectedMapLocations.value.length && !searchTopic.value) {
+        summaryTrigger.value = uiLanguage.value === 'ar' ? 'نشرة اليوم' : "Today's Briefing"
+      }
     }
 
     const toggleDarkMode = () => {
@@ -224,14 +239,18 @@ export default {
 
     const handleLocationsChanged = (locations) => {
       selectedMapLocations.value = locations
-      fetchNews(true)
       if (locations.length > 0) {
-        const countryCodes = locations.map(loc => loc.code).join(',')
-        const triggerLabel = locations.map(loc => loc.name).join(', ')
-        fetchSummary(countryCodes, null, triggerLabel)
+        const names = locations.map(loc => loc.name).join(' ')
+        searchTopic.value = names
+        // Switch to both languages — map click means "news about X country"
+        // in any language, not just the UI language
+        selectedLanguage.value = 'both'
+        fetchSummary(null, names, locations.map(loc => loc.name).join(', '))
       } else {
+        searchTopic.value = ''
         summaryData.value = null
       }
+      fetchNews(true)
     }
 
     const removeCountry = (code) => {
@@ -294,20 +313,16 @@ export default {
       error.value = null
 
       try {
-        // Build countries param from map selections
-        const countries = selectedMapLocations.value.length > 0
-          ? selectedMapLocations.value.map(loc => loc.code).join(',')
-          : null
-
         // Calculate offset for pagination
         const offset = (currentPage.value - 1) * itemsPerPage.value
 
         // Fetch news articles with pagination
+        // Note: map country selections are passed as topic (smart search finds
+        // articles mentioning that country in any language), not as a source filter
         const newsResponse = await axios.get('/api/news', {
           params: {
             topic: searchTopic.value,
             language: selectedLanguage.value,
-            countries: countries,
             hours: selectedHours.value,
             limit: itemsPerPage.value,
             offset: offset,
@@ -358,6 +373,8 @@ export default {
         })
         if (response.data.success) {
           trending.value = response.data.trending
+          // Derive map pin data from trending topics — no separate DB table needed
+          trendingLocations.value = deriveTrendingLocations(response.data.trending)
         }
       } catch (err) {
         console.warn('Smart trending failed, falling back to simple trending:', err)
@@ -372,16 +389,25 @@ export default {
       }
     }
 
-    // NEW: Fetch trending locations for map visualization
+    // Build trendingLocations from smart trending topics (each topic has a countries array)
+    const deriveTrendingLocations = (topics) => {
+      const byCountry = {}
+      topics.forEach(t => {
+        if (!t.countries) return
+        t.countries.forEach(code => {
+          if (!byCountry[code]) byCountry[code] = []
+          byCountry[code].push({ topic: t.topic, count: t.count, score: t.score })
+        })
+      })
+      return Object.entries(byCountry).map(([countryCode, topicList]) => ({
+        countryCode,
+        topics: topicList.sort((a, b) => b.score - a.score).slice(0, 3)
+      }))
+    }
+
+    // Keep for explicit refresh but now just re-calls fetchTrending
     const fetchTrendingLocations = async () => {
-      try {
-        const response = await axios.get('/api/trending/locations')
-        if (response.data.success) {
-          trendingLocations.value = response.data.locations
-        }
-      } catch (err) {
-        console.warn('Failed to fetch trending locations:', err)
-      }
+      await fetchTrending()
     }
 
     // NEW: Handle trending topic selection from map
@@ -420,7 +446,9 @@ export default {
 
       fetchNews()
       fetchTrending()
-      fetchTrendingLocations() // NEW: Fetch trending locations
+      fetchTrendingLocations()
+      // Show a global briefing card immediately on load
+      fetchSummary(null, null, uiLanguage.value === 'ar' ? 'نشرة اليوم' : "Today's Briefing")
       startAutoRefresh()
     })
 
@@ -429,6 +457,7 @@ export default {
     })
 
     return {
+      t,
       articles,
       tweets,
       trending,
@@ -459,7 +488,8 @@ export default {
       currentPage,
       itemsPerPage,
       totalArticles,
-      handlePageChange
+      handlePageChange,
+      activePolicy
     }
   }
 }
@@ -811,9 +841,8 @@ export default {
   direction: rtl;
 }
 
-.rtl-mode .header-content {
-  flex-direction: row-reverse;
-}
+/* direction: rtl on the container already reverses flex order naturally —
+   no flex-direction: row-reverse needed (it would cancel out the rtl effect) */
 
 /* ============================================
    ANIMATIONS

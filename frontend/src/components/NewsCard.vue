@@ -17,7 +17,7 @@
 
       <!-- Source Badge Overlay -->
       <span class="source-badge">{{ article.source || 'News' }}</span>
-      <span class="region-badge" :class="regionBadgeClass">{{ regionLabel }}</span>
+      <span v-if="article.country" class="country-badge">{{ countryFlag }} {{ article.country.toUpperCase() }}</span>
     </div>
 
     <!-- Card Content -->
@@ -38,9 +38,8 @@
           <i class="bi bi-clock"></i>
           {{ formatDate(article.publishedAt) }}
         </span>
-        <span v-if="article.region" class="meta-item">
-          <i class="bi bi-geo-alt"></i>
-          {{ regionLabel }}
+        <span v-if="article.country" class="meta-item">
+          {{ countryFlag }} {{ article.country.toUpperCase() }}
         </span>
       </div>
 
@@ -87,24 +86,13 @@ export default {
     const translatedDescription = ref('')
     const originalTitle = ref(props.article.title)
     const originalDescription = ref(props.article.description)
-    const regionBadgeClass = computed(() => {
-      const regionMap = {
-        us: 'bg-primary',
-        eu: 'bg-success',
-        middleeast: 'bg-warning text-dark',
-        other: 'bg-secondary'
-      }
-      return regionMap[props.article.region] || 'bg-secondary'
-    })
-
-    const regionLabel = computed(() => {
-      const labelMap = {
-        us: 'US',
-        eu: 'EU',
-        middleeast: 'Middle East',
-        other: 'Other'
-      }
-      return labelMap[props.article.region] || 'Other'
+    // Convert country code to flag emoji (e.g. 'fr' → '🇫🇷')
+    const countryFlag = computed(() => {
+      const code = props.article.country
+      if (!code || code.length !== 2) return ''
+      return Array.from(code.toUpperCase())
+        .map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65))
+        .join('')
     })
 
     const truncateDescription = (text) => {
@@ -169,8 +157,7 @@ export default {
     })
 
     return {
-      regionBadgeClass,
-      regionLabel,
+      countryFlag,
       truncateDescription,
       formatDate,
       handleImageError,
@@ -270,37 +257,21 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Region badge */
-.region-badge {
+/* Country badge */
+.country-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 6px 12px;
-  border-radius: 12px;
+  background: rgba(10, 10, 15, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 10px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.region-badge.bg-primary {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
-}
-
-.region-badge.bg-success {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  color: white;
-}
-
-.region-badge.bg-warning {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  color: #0a0a0f;
-}
-
-.region-badge.bg-secondary {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
+  letter-spacing: 0.04em;
 }
 
 /* ============================================

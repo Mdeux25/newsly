@@ -2,7 +2,7 @@
   <footer class="app-footer" :class="{ rtl: uiLanguage === 'ar' }">
     <div class="footer-inner">
 
-      <!-- Brand + About -->
+      <!-- Brand + Tagline -->
       <div class="footer-brand">
         <div class="footer-logo">
           <span class="footer-logo-text">{{ uiLanguage === 'ar' ? 'نيوزلي' : 'Newsly' }}</span>
@@ -15,17 +15,14 @@
         </p>
       </div>
 
-      <!-- Divider -->
       <div class="footer-divider"></div>
 
-      <!-- Three columns -->
+      <!-- Four columns -->
       <div class="footer-columns">
 
         <!-- About DU Soft -->
-        <div class="footer-col">
-          <h4 class="footer-col-title">
-            {{ uiLanguage === 'ar' ? 'من نحن' : 'About' }}
-          </h4>
+        <div class="footer-col footer-col-wide">
+          <h4 class="footer-col-title">{{ uiLanguage === 'ar' ? 'من نحن' : 'About' }}</h4>
           <p class="footer-about-text">
             {{ uiLanguage === 'ar'
               ? 'نيوزلي من تطوير شركة DU Soft، شركة مصرية متخصصة في بناء تطبيقات الويب والذكاء الاصطناعي من القاهرة. نؤمن بأن الوصول إلى الأخبار الموثوقة حق للجميع.'
@@ -35,41 +32,72 @@
             <i class="bi bi-geo-alt-fill"></i>
             <span>{{ uiLanguage === 'ar' ? 'القاهرة، مصر' : 'Cairo, Egypt' }}</span>
           </div>
+          <a href="https://dusoft.org" target="_blank" rel="noopener noreferrer" class="footer-dusoft-link">
+            dusoft.org <i class="bi bi-arrow-up-right-square"></i>
+          </a>
         </div>
 
-        <!-- Product links -->
+        <!-- Product -->
         <div class="footer-col">
-          <h4 class="footer-col-title">
-            {{ uiLanguage === 'ar' ? 'المنتج' : 'Product' }}
-          </h4>
+          <h4 class="footer-col-title">{{ uiLanguage === 'ar' ? 'المنتج' : 'Product' }}</h4>
           <ul class="footer-links">
             <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'الرئيسية' : 'Home' }}</a></li>
-            <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'متابعة النزاعات' : 'Conflict Tracker' }}</a></li>
-            <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'الأخبار العاجلة' : 'Breaking News' }}</a></li>
-            <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'الإعلانات معنا' : 'Advertise with Us' }}</a></li>
+            <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'خريطة الأخبار' : 'News Map' }}</a></li>
+            <li><a href="#" class="footer-link footer-link-soon">
+              {{ uiLanguage === 'ar' ? 'متابعة النزاعات' : 'Conflict Tracker' }}
+              <span class="soon-badge">{{ uiLanguage === 'ar' ? 'قريبًا' : 'Soon' }}</span>
+            </a></li>
+            <li><a href="#" class="footer-link footer-link-soon">
+              {{ uiLanguage === 'ar' ? 'تنبيهات الأخبار' : 'News Alerts' }}
+              <span class="soon-badge">{{ uiLanguage === 'ar' ? 'قريبًا' : 'Soon' }}</span>
+            </a></li>
+            <li><a href="mailto:ads@dusoft.org" class="footer-link">{{ uiLanguage === 'ar' ? 'الإعلان معنا' : 'Advertise' }}</a></li>
           </ul>
         </div>
 
-        <!-- Company links -->
+        <!-- Legal -->
         <div class="footer-col">
-          <h4 class="footer-col-title">
-            {{ uiLanguage === 'ar' ? 'الشركة' : 'Company' }}
-          </h4>
+          <h4 class="footer-col-title">{{ uiLanguage === 'ar' ? 'قانوني' : 'Legal' }}</h4>
           <ul class="footer-links">
-            <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</a></li>
-            <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'شروط الاستخدام' : 'Terms of Use' }}</a></li>
-            <li><a href="#" class="footer-link">{{ uiLanguage === 'ar' ? 'تواصل معنا' : 'Contact Us' }}</a></li>
             <li>
-              <a href="https://dusoft.io" target="_blank" rel="noopener" class="footer-link footer-link-highlight">
-                DU Soft {{ uiLanguage === 'ar' ? '↗' : '↗' }}
-              </a>
+              <button class="footer-link footer-link-btn" @click="$emit('open-policy', 'privacy')">
+                {{ uiLanguage === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}
+              </button>
             </li>
+            <li>
+              <button class="footer-link footer-link-btn" @click="$emit('open-policy', 'terms')">
+                {{ uiLanguage === 'ar' ? 'شروط الاستخدام' : 'Terms of Service' }}
+              </button>
+            </li>
+            <li>
+              <button class="footer-link footer-link-btn" @click="$emit('open-policy', 'cookies')">
+                {{ uiLanguage === 'ar' ? 'سياسة الكوكيز' : 'Cookie Policy' }}
+              </button>
+            </li>
+            <li>
+              <button class="footer-link footer-link-btn" @click="$emit('open-policy', 'dmca')">
+                {{ uiLanguage === 'ar' ? 'حقوق النشر / DMCA' : 'Copyright & DMCA' }}
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">{{ uiLanguage === 'ar' ? 'الدعم' : 'Support' }}</h4>
+          <ul class="footer-links">
+            <li><a href="mailto:support@dusoft.org" class="footer-link">{{ uiLanguage === 'ar' ? 'تواصل معنا' : 'Contact Us' }}</a></li>
+            <li><a href="mailto:legal@dusoft.org" class="footer-link">{{ uiLanguage === 'ar' ? 'الإبلاغ عن محتوى' : 'Report Content' }}</a></li>
+            <li><a href="#" class="footer-link footer-link-soon">
+              {{ uiLanguage === 'ar' ? 'الأسئلة الشائعة' : 'FAQ' }}
+              <span class="soon-badge">{{ uiLanguage === 'ar' ? 'قريبًا' : 'Soon' }}</span>
+            </a></li>
+            <li><a href="mailto:support@dusoft.org" class="footer-link">{{ uiLanguage === 'ar' ? 'الإبلاغ عن خطأ' : 'Report a Bug' }}</a></li>
           </ul>
         </div>
 
       </div>
 
-      <!-- Divider -->
       <div class="footer-divider"></div>
 
       <!-- Bottom bar -->
@@ -81,7 +109,7 @@
         <div class="footer-socials">
           <a href="#" class="social-icon" aria-label="X / Twitter"><i class="bi bi-twitter-x"></i></a>
           <a href="#" class="social-icon" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
-          <a href="#" class="social-icon" aria-label="GitHub"><i class="bi bi-github"></i></a>
+          <a href="https://github.com" target="_blank" rel="noopener" class="social-icon" aria-label="GitHub"><i class="bi bi-github"></i></a>
         </div>
       </div>
 
@@ -97,6 +125,7 @@ export default {
   props: {
     uiLanguage: { type: String, default: 'en' }
   },
+  emits: ['open-policy'],
   setup() {
     const currentYear = computed(() => new Date().getFullYear())
     return { currentYear }
@@ -106,11 +135,10 @@ export default {
 
 <style scoped>
 .app-footer {
-  background: rgba(8, 10, 20, 0.85);
+  background: rgba(8, 10, 20, 0.9);
   backdrop-filter: blur(12px);
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  padding: 40px 24px 32px;
-  /* Stay above mobile bottom-nav padding handled by content-wrapper */
+  padding: 48px 24px 32px;
   margin-top: 48px;
 }
 
@@ -119,7 +147,7 @@ export default {
   margin: 0 auto;
 }
 
-/* ── Brand ─────────────────────────── */
+/* ── Brand ───────────────────────── */
 .footer-brand {
   margin-bottom: 28px;
 }
@@ -150,19 +178,19 @@ export default {
 .footer-tagline {
   margin: 0;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.4);
   line-height: 1.6;
-  max-width: 420px;
+  max-width: 440px;
 }
 
-/* ── Divider ────────────────────────── */
+/* ── Divider ─────────────────────── */
 .footer-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.07);
   margin: 28px 0;
 }
 
-/* ── Columns ────────────────────────── */
+/* ── Columns ─────────────────────── */
 .footer-columns {
   display: grid;
   grid-template-columns: 1fr;
@@ -171,26 +199,33 @@ export default {
 
 @media (min-width: 640px) {
   .footer-columns {
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 40px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer-columns {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
   }
 }
 
 .footer-col-title {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.3);
   margin: 0 0 14px;
 }
 
-/* ── About text ─────────────────────── */
+/* ── About col ───────────────────── */
 .footer-about-text {
   margin: 0 0 12px;
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.75;
 }
 
 .footer-location {
@@ -198,15 +233,33 @@ export default {
   align-items: center;
   gap: 6px;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 12px;
 }
 
 .footer-location i {
   color: #06b6d4;
-  font-size: 0.875rem;
 }
 
-/* ── Links ──────────────────────────── */
+.footer-dusoft-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-dusoft-link:hover {
+  color: #60a5fa;
+}
+
+.footer-dusoft-link i {
+  font-size: 0.75rem;
+}
+
+/* ── Links ───────────────────────── */
 .footer-links {
   list-style: none;
   margin: 0;
@@ -218,24 +271,48 @@ export default {
 
 .footer-link {
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.48);
   text-decoration: none;
   transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .footer-link:hover {
   color: #06b6d4;
 }
 
-.footer-link-highlight {
-  color: #3b82f6;
+/* Policy links are buttons (no href) */
+.footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: start;
 }
 
-.footer-link-highlight:hover {
-  color: #60a5fa;
+.footer-link-soon {
+  cursor: default;
+  opacity: 0.6;
 }
 
-/* ── Bottom bar ─────────────────────── */
+.footer-link-soon:hover {
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.soon-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #818cf8;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Bottom bar ──────────────────── */
 .footer-bottom {
   display: flex;
   align-items: center;
@@ -246,46 +323,38 @@ export default {
 
 .footer-copyright {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .footer-socials {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .social-icon {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.45);
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 0.875rem;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .social-icon:hover {
-  background: rgba(6, 182, 212, 0.15);
+  background: rgba(6, 182, 212, 0.12);
   color: #06b6d4;
-  border-color: rgba(6, 182, 212, 0.3);
+  border-color: rgba(6, 182, 212, 0.25);
 }
 
-/* ── RTL ────────────────────────────── */
+/* ── RTL ─────────────────────────── */
 .rtl {
   direction: rtl;
-}
-
-.rtl .footer-bottom {
-  flex-direction: row-reverse;
-}
-
-.rtl .footer-logo {
-  flex-direction: row-reverse;
 }
 
 .rtl .footer-tagline,
@@ -293,7 +362,12 @@ export default {
   text-align: right;
 }
 
-.rtl .footer-location {
+.rtl .footer-link-btn {
+  text-align: end;
+}
+
+.rtl .footer-location,
+.rtl .footer-dusoft-link {
   flex-direction: row-reverse;
 }
 </style>

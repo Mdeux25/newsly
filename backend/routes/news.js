@@ -12,24 +12,17 @@ router.get('/news', async (req, res) => {
   try {
     const {
       topic = 'breaking news',
-      region = 'all',
       limit = 20,
       offset = 0,
       language = 'en',
-      countries = null,
-      smartSearch = 'false' // NEW: Enable smart cross-language search
+      hours = 168,
+      smartSearch = 'false'
     } = req.query;
 
-    // Parse countries parameter
-    const countryArray = countries ? countries.split(',') : null;
+    const countryArray = null; // geographic filtering now done via topic/smart-search
     const useSmartSearch = smartSearch === 'true' && topic && topic !== 'breaking news';
 
-    // Log request with logic explanation
-    if (countryArray && countryArray.length > 0) {
-      console.log(`Fetching news: topic="${topic}", countries="${countries}", language="${language}", offset=${offset}, limit=${limit}, smartSearch=${useSmartSearch} (region="${region}" ignored because countries are selected)`);
-    } else {
-      console.log(`Fetching news: topic="${topic}", region="${region}", language="${language}", offset=${offset}, limit=${limit}, smartSearch=${useSmartSearch}, countries="all"`);
-    }
+    console.log(`Fetching news: topic="${topic}", language="${language}", hours=${hours}, offset=${offset}, limit=${limit}, smartSearch=${useSmartSearch}`);
 
     let articles = [];
     let totalCount = 0;
@@ -39,10 +32,7 @@ router.get('/news', async (req, res) => {
     try {
       const filters = {
         language: language === 'both' ? null : language,
-        // IMPORTANT: Ignore region when specific countries are selected (user's point #1)
-        region: (countryArray && countryArray.length > 0) ? null : (region !== 'all' ? region : null),
-        country: countryArray,
-        minDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days (matches retention)
+        minDate: new Date(Date.now() - parseInt(hours) * 60 * 60 * 1000)
       };
 
       let dbArticles;
@@ -98,10 +88,10 @@ router.get('/news', async (req, res) => {
       // If Arabic is selected, fetch both Arabic and English news, then translate English
       if (language === 'ar' || language === 'both') {
         // Fetch Arabic news
-        const arabicArticles = await newsapi.fetchNews(topic, region, Math.floor(limit / 2), 'ar', countries);
+        const arabicArticles = await newsapi.fetchNews(topic, 'all', Math.floor(limit / 2), 'ar', null);
 
         // Fetch English news
-        const englishArticles = await newsapi.fetchNews(topic, region, Math.floor(limit / 2), 'en', countries);
+        const englishArticles = await newsapi.fetchNews(topic, 'all', Math.floor(limit / 2), 'en', null);
 
         // Auto-translate English articles to Arabic
         console.log(`Auto-translating ${englishArticles.length} English articles to Arabic...`);
@@ -113,32 +103,18 @@ router.get('/news', async (req, res) => {
         articles = [...articles, ...arabicArticles, ...translatedArticles];
       } else {
         // English only - fetch English news
-        let apiArticles = await newsapi.fetchNews(topic, region, limit, language, countries);
+        let apiArticles = await newsapi.fetchNews(topic, 'all', limit, language, null);
 
         // IMPORTANT: When countries are selected, filter results by language (user's requirement #2)
         // This is needed because top-headlines endpoint doesn't support language filter
-        if (countries && language !== 'both') {
-          console.log(`Filtering ${apiArticles.length} articles by language: ${language}`);
-          apiArticles = apiArticles.filter(article => {
-            const articleLang = article.language || 'en';
-            return articleLang === language;
-          });
-          console.log(`After language filter: ${apiArticles.length} articles`);
-        }
-
-        // If no results with country filter, try without country filter
-        if (apiArticles.length === 0 && countries) {
-          console.log('No results with country filter, trying without country filter...');
-          const fallbackArticles = await newsapi.fetchNews(topic, region, limit, language, null);
-          articles = [...articles, ...fallbackArticles];
-        } else {
+        {
           articles = [...articles, ...apiArticles];
         }
 
         // If still no results, try GNews as backup
         if (articles.length === 0 && process.env.GNEWS_KEY) {
           console.log('Falling back to GNews API');
-          const gnewsArticles = await gnews.fetchNews(topic, region, Math.min(limit, 10), language);
+          const gnewsArticles = await gnews.fetchNews(topic, 'all', Math.min(limit, 10), language);
           articles = [...articles, ...gnewsArticles];
         }
       }

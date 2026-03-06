@@ -22,7 +22,7 @@ services:
         sync: false
       - key: NEWSDATA_KEY
         sync: false
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
 
       # Optional API Keys
@@ -31,9 +31,9 @@ services:
       - key: TWITTER_BEARER_TOKEN
         value: optional
 
-      # OpenAI Configuration
-      - key: OPENAI_MODEL
-        value: gpt-4o-mini
+      # Gemini Configuration
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
       - key: LLM_CACHE_ENABLED
         value: true
       - key: LLM_DAILY_BUDGET

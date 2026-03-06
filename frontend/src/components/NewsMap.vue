@@ -5,31 +5,6 @@
         <i class="bi bi-geo-alt-fill"></i>
         {{ uiLanguage === 'ar' ? 'خريطة الأخبار' : 'News Map' }}
       </h5>
-      <div>
-        <button
-          v-if="selectedLocations.length > 0"
-          class="btn-sm"
-          @click="clearSelections"
-        >
-          <i class="bi bi-x-circle"></i>
-          {{ uiLanguage === 'ar' ? 'مسح الكل' : 'Clear All' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Selected Locations -->
-    <div v-if="selectedLocations.length > 0" class="selected-locations">
-      <small>{{ uiLanguage === 'ar' ? 'المناطق المحددة:' : 'Selected:' }}</small>
-      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-        <span
-          v-for="location in selectedLocations"
-          :key="location.code"
-          class="badge"
-        >
-          {{ location.name }}
-          <i class="bi bi-x" @click="removeLocation(location.code)"></i>
-        </span>
-      </div>
     </div>
 
     <!-- Map -->
