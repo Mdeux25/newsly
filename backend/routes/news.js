@@ -353,11 +353,9 @@ function extractKeywords(articles) {
 router.get('/status', async (req, res) => {
   try {
     const stats = await Article.getStats();
-    // const quotas = await ApiQuota.getAllQuotas();
-    const quotas = []; // Disabled API quotas temporarily
-    // const FetchLog = require('../models/FetchLog');
-    // const recentLogs = await FetchLog.getSummary(24);
-    const recentLogs = []; // Disabled fetch logs temporarily
+    const quotas = await ApiQuota.getAllQuotas();
+    const FetchLog = require('../models/FetchLog');
+    const recentLogs = await FetchLog.getSummary(24);
 
     // Get LLM service stats
     let llmStats = null;
