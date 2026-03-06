@@ -9,7 +9,7 @@ services:
     env: docker
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
-    plan: free
+    plan: starter
     envVars:
       # Render PostgreSQL — auto-populated from the database above
       - key: DATABASE_URL
