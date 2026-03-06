@@ -45,4 +45,5 @@ temp/
 tmp/
 backups/
 *.sql
+!backend/migrations/*.sql
 .envrc

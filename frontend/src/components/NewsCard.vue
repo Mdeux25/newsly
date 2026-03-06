@@ -48,10 +48,11 @@
         <button
           v-if="!isTranslated && article.language !== 'ar'"
           class="action-button secondary"
+          :class="{ 'has-precomputed': article.title_ar }"
           @click.stop="translateArticle"
           :disabled="isTranslating"
         >
-          <i class="bi bi-translate"></i>
+          <i :class="article.title_ar ? 'bi bi-lightning-charge-fill' : 'bi bi-translate'"></i>
           {{ isTranslating ? t.news.translating : t.news.translate }}
         </button>
         <button
@@ -128,11 +129,18 @@ export default {
     }
 
     const translateArticle = async () => {
+      // Use pre-computed DB translation if available (instant, no API call)
+      if (props.article.title_ar) {
+        translatedTitle.value = props.article.title_ar
+        translatedDescription.value = props.article.description_ar || ''
+        isTranslated.value = true
+        return
+      }
+
       isTranslating.value = true
       try {
         const response = await axios.post('/api/translate', {
-          article: props.article,
-          targetLang: 'ar'
+          article: props.article
         })
 
         if (response.data.success) {
@@ -368,6 +376,13 @@ export default {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
+}
+
+/* Pre-computed translation available — highlight the button */
+.action-button.secondary.has-precomputed {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.25);
+  color: #fbbf24;
 }
 
 .action-button.secondary:active {

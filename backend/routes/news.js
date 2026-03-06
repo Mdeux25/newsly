@@ -63,6 +63,8 @@ router.get('/news', async (req, res) => {
         articles = dbArticles.map(article => ({
           title: article.title,
           description: article.description,
+          title_ar: article.title_ar || null,
+          description_ar: article.description_ar || null,
           url: article.url,
           image: article.image_url,
           source: article.source,
@@ -195,30 +197,41 @@ router.get('/trending', async (req, res) => {
   }
 });
 
-// Translate article to Arabic
+// Translate article to Arabic via Gemini LLM (DB-cached permanently)
 router.post('/translate', async (req, res) => {
   try {
-    const { article, targetLang = 'ar' } = req.body;
+    const { article } = req.body;
 
-    if (!article) {
-      return res.status(400).json({
-        success: false,
-        error: 'Article data required'
-      });
+    if (!article || !article.title) {
+      return res.status(400).json({ success: false, error: 'Article data required' });
     }
 
-    const translatedArticle = await translator.translateArticle(article, targetLang);
+    // 1. Check articles table first — translation already computed
+    if (article.url) {
+      const dbArticle = await Article.findByUrl(article.url);
+      if (dbArticle && dbArticle.title_ar) {
+        console.log(`📚 Translation DB hit for: ${article.url.slice(0, 60)}`);
+        return res.json({
+          success: true,
+          article: { title: dbArticle.title_ar, description: dbArticle.description_ar || '' }
+        });
+      }
+    }
 
-    res.json({
-      success: true,
-      article: translatedArticle
-    });
+    // 2. Translate via Gemini (also uses LLM 3-tier cache)
+    const llm = require('../services/llm');
+    const translated = await llm.translateArticle(article.title, article.description, article.url);
+
+    // 3. Persist back to articles row so next click is instant (best-effort)
+    if (article.url) {
+      Article.saveTranslation(article.url, translated.title, translated.description)
+        .catch(err => console.warn('Could not save translation to DB:', err.message));
+    }
+
+    res.json({ success: true, article: translated });
   } catch (error) {
     console.error('Error translating article:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Translation failed'
-    });
+    res.status(500).json({ success: false, error: 'Translation failed' });
   }
 });
 

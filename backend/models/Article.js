@@ -511,6 +511,19 @@ class Article {
   }
 
   /**
+   * Save LLM-generated Arabic translation for an article
+   * @param {string} url - Article URL (primary key lookup)
+   * @param {string} titleAr - Arabic title
+   * @param {string} descriptionAr - Arabic description
+   */
+  static async saveTranslation(url, titleAr, descriptionAr) {
+    await db.query(
+      'UPDATE articles SET title_ar = ?, description_ar = ? WHERE url = ?',
+      [titleAr || null, descriptionAr || null, url]
+    );
+  }
+
+  /**
    * Helper: Check if text is primarily English (simple heuristic)
    * @param {string} text - Text to check
    * @returns {boolean} True if appears to be English

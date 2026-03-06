@@ -500,6 +500,53 @@ Return a JSON object: { "term1": "translation1", "term2": "translation2", ... }`
 }
 
 /**
+ * Translate a single article title + description to Arabic using Gemini.
+ * Cached by article URL (or title prefix if URL not provided).
+ *
+ * @param {string} title
+ * @param {string} description
+ * @param {string} articleUrl - used as cache key
+ * @returns {Promise<{ title: string, description: string }>}
+ */
+async function translateArticle(title, description, articleUrl = null) {
+  if (!title) return { title: '', description: '' };
+
+  const keySource = articleUrl || title.slice(0, 100);
+  const cacheKey = `translation:article:${keySource}`;
+
+  if (isBudgetExceeded()) {
+    console.warn('Budget exceeded, returning untranslated article');
+    return { title, description: description || '' };
+  }
+
+  return await getCachedOrCompute(cacheKey, 'translation', async () => {
+    try {
+      const prompt = `Translate the following news article to Modern Standard Arabic. Use natural journalistic language.
+
+Return ONLY this JSON (no extra text):
+{"title": "Arabic title here", "description": "Arabic description here"}
+
+Title: ${title}
+Description: ${description || ''}`;
+
+      const result = await callGemini(prompt, { temperature: 0.3, maxOutputTokens: 400, jsonMode: true });
+
+      const usage = result.usageMetadata;
+      const cost = estimateCost(usage?.promptTokenCount || 0, usage?.candidatesTokenCount || 0);
+      dailyCost += cost;
+      totalCalls++;
+
+      console.log(`🌐 Article translated → $${cost.toFixed(6)}`);
+
+      return JSON.parse(result.text);
+    } catch (error) {
+      console.error('translateArticle failed:', error.message);
+      return { title, description: description || '' };
+    }
+  });
+}
+
+/**
  * Get current LLM service statistics
  */
 function getStats() {
@@ -521,6 +568,7 @@ module.exports = {
   generateSemanticVariations,
   extractTrendingInsights,
   summarizeArticles,
+  translateArticle,
   batchTranslate,
   getStats,
   isBudgetExceeded
