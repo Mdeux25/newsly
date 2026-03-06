@@ -1,12 +1,12 @@
 <template>
-  <div class="pagination-container" v-if="totalPages > 1">
+  <div class="pagination-container" v-if="totalItems > 0">
     <div class="pagination-info">
       <span class="info-text">
-        Showing {{ startItem }}-{{ endItem }} of {{ totalItems }} articles
+        {{ tr.news.showing }} {{ startItem }}-{{ endItem }} {{ tr.news.of }} {{ totalItems }} {{ tr.news.articles }}
       </span>
     </div>
 
-    <div class="pagination-controls">
+    <div class="pagination-controls" v-if="totalPages > 1">
       <!-- Previous Button -->
       <button
         class="page-button"
@@ -84,6 +84,7 @@
 
 <script>
 import { computed } from 'vue'
+import { translations } from '../i18n'
 
 export default {
   name: 'Pagination',
@@ -102,10 +103,15 @@ export default {
       type: Number,
       required: true,
       default: 0
+    },
+    uiLanguage: {
+      type: String,
+      default: 'en'
     }
   },
   emits: ['page-change'],
   setup(props, { emit }) {
+    const tr = computed(() => translations[props.uiLanguage] || translations.en)
     const totalPages = computed(() => {
       return Math.ceil(props.totalItems / props.itemsPerPage)
     })
@@ -136,6 +142,7 @@ export default {
     }
 
     return {
+      tr,
       totalPages,
       startItem,
       endItem,

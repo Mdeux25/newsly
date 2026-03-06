@@ -3,7 +3,7 @@
     <!-- Card Image -->
     <div class="card-image-wrapper">
       <img
-        v-if="article.image"
+        v-if="article.image && !imageError"
         :src="article.image"
         class="card-image"
         :alt="article.title"
@@ -52,7 +52,7 @@
           :disabled="isTranslating"
         >
           <i class="bi bi-translate"></i>
-          {{ isTranslating ? 'Translating...' : 'ترجم' }}
+          {{ isTranslating ? t.news.translating : t.news.translate }}
         </button>
         <button
           v-if="isTranslated"
@@ -60,7 +60,7 @@
           @click.stop="showOriginal"
         >
           <i class="bi bi-arrow-counterclockwise"></i>
-          Original
+          {{ t.news.original }}
         </button>
       </div>
     </div>
@@ -70,6 +70,7 @@
 <script>
 import { computed, ref } from 'vue'
 import axios from 'axios'
+import { translations } from '../i18n'
 
 export default {
   name: 'NewsCard',
@@ -77,15 +78,21 @@ export default {
     article: {
       type: Object,
       required: true
+    },
+    uiLanguage: {
+      type: String,
+      default: 'en'
     }
   },
   setup(props) {
     const isTranslating = ref(false)
     const isTranslated = ref(false)
+    const imageError = ref(false)
     const translatedTitle = ref('')
     const translatedDescription = ref('')
     const originalTitle = ref(props.article.title)
     const originalDescription = ref(props.article.description)
+    const t = computed(() => translations[props.uiLanguage] || translations.en)
     // Convert country code to flag emoji (e.g. 'fr' → '🇫🇷')
     const countryFlag = computed(() => {
       const code = props.article.country
@@ -116,8 +123,8 @@ export default {
       return date.toLocaleDateString()
     }
 
-    const handleImageError = (event) => {
-      event.target.style.display = 'none'
+    const handleImageError = () => {
+      imageError.value = true
     }
 
     const translateArticle = async () => {
@@ -157,10 +164,12 @@ export default {
     })
 
     return {
+      t,
       countryFlag,
       truncateDescription,
       formatDate,
       handleImageError,
+      imageError,
       isTranslating,
       isTranslated,
       translateArticle,

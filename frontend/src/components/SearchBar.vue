@@ -64,7 +64,10 @@
       </div>
 
       <!-- Smart search toggle, inline -->
-      <label class="toggle-label smart-inline">
+      <label
+        class="toggle-label smart-inline"
+        :title="uiLanguage === 'ar' ? 'البحث الذكي يستخدم الذكاء الاصطناعي للعثور على مقالات ذات صلة بموضوع البحث' : 'Smart search uses AI to find articles semantically related to your query'"
+      >
         <input type="checkbox" :checked="smartSearch" @change="updateSmartSearch" />
         <span class="toggle-text">
           <i class="bi bi-stars"></i>
@@ -84,6 +87,7 @@
           v-for="item in trending.slice(0, 8)"
           :key="item.topic || item"
           class="trending-tag"
+          :class="{ active: topic === (item.topic || item) }"
           @click="selectTrending(item.topic || item)"
         >
           {{ item.topic || item }}
@@ -109,7 +113,7 @@ export default {
     uiLanguage: { type: String, default: 'en' },
     selectedCountries: { type: Array, default: () => [] }
   },
-  emits: ['update:topic', 'update:language', 'update:hours', 'update:smartSearch', 'search', 'refresh', 'remove-country', 'clear-countries'],
+  emits: ['update:topic', 'update:language', 'update:hours', 'update:smartSearch', 'search', 'refresh', 'remove-country', 'clear-countries', 'trending-selected'],
   setup(props, { emit }) {
     const tr = computed(() => translations[props.uiLanguage] || translations.en)
 
@@ -117,7 +121,7 @@ export default {
     const updateLanguage = (event) => { emit('update:language', event.target.value); emit('search') }
     const updateHours = (event) => { emit('update:hours', event.target.value); emit('search') }
     const updateSmartSearch = (event) => emit('update:smartSearch', event.target.checked)
-    const selectTrending = (keyword) => { emit('update:topic', keyword); emit('search') }
+    const selectTrending = (keyword) => emit('trending-selected', keyword)
 
     return { tr, updateTopic, updateLanguage, updateHours, updateSmartSearch, selectTrending }
   }
@@ -439,6 +443,12 @@ export default {
 .trending-tag:active {
   background: rgba(6, 182, 212, 0.2);
   transform: scale(0.95);
+}
+
+.trending-tag.active {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: white;
+  border-color: transparent;
 }
 
 .tag-count {

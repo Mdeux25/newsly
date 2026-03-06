@@ -26,10 +26,18 @@ export const translations = {
       readMore: 'Read More',
       translate: 'Translate',
       original: 'Original',
-      translating: 'Translating...'
+      translating: 'Translating...',
+      showing: 'Showing',
+      of: 'of',
+      articles: 'articles'
     },
     tweets: {
       viewTweet: 'View Tweet'
+    },
+    nav: {
+      news: 'News',
+      refresh: 'Refresh',
+      tweets: 'Tweets'
     },
     status: {
       live: 'Live',
@@ -71,10 +79,18 @@ export const translations = {
       readMore: 'اقرأ المزيد',
       translate: 'ترجم',
       original: 'الأصلي',
-      translating: 'جاري الترجمة...'
+      translating: 'جاري الترجمة...',
+      showing: 'عرض',
+      of: 'من',
+      articles: 'مقالة'
     },
     tweets: {
       viewTweet: 'عرض التغريدة'
+    },
+    nav: {
+      news: 'الأخبار',
+      refresh: 'تحديث',
+      tweets: 'تغريدات'
     },
     status: {
       live: 'مباشر',

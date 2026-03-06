@@ -56,6 +56,7 @@
         @refresh="refreshNow"
         @remove-country="removeCountry"
         @clear-countries="clearCountries"
+        @trending-selected="handleTrendingTopicSelected"
       />
 
       <!-- Bilingual News Summary (shown on map click or trending topic click) -->
@@ -97,13 +98,14 @@
           :currentPage="currentPage"
           :itemsPerPage="itemsPerPage"
           :totalItems="totalArticles"
+          :uiLanguage="uiLanguage"
           @page-change="handlePageChange"
         />
 
         <!-- Feed Grid -->
         <div class="feed-grid">
           <template v-for="(item, index) in combinedFeed" :key="item.type === 'article' ? item.url : item.id">
-            <NewsCard v-if="item.type === 'article'" :article="item" />
+            <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" />
             <TweetCard v-else-if="item.type === 'tweet'" :tweet="item" />
           </template>
         </div>
@@ -113,6 +115,7 @@
           :currentPage="currentPage"
           :itemsPerPage="itemsPerPage"
           :totalItems="totalArticles"
+          :uiLanguage="uiLanguage"
           @page-change="handlePageChange"
         />
       </div>
@@ -131,15 +134,15 @@
     <nav class="bottom-nav">
       <button class="nav-item active">
         <i class="bi bi-newspaper"></i>
-        <span>News</span>
+        <span>{{ t.nav.news }}</span>
       </button>
       <button class="nav-item" @click="refreshNow">
         <i class="bi bi-arrow-clockwise"></i>
-        <span>Refresh</span>
+        <span>{{ t.nav.refresh }}</span>
       </button>
       <button class="nav-item">
         <i class="bi bi-twitter"></i>
-        <span>Tweets</span>
+        <span>{{ t.nav.tweets }}</span>
       </button>
     </nav>
   </div>
@@ -414,6 +417,7 @@ export default {
     // NEW: Handle trending topic selection from map
     const handleTrendingTopicSelected = (topic) => {
       searchTopic.value = topic
+      selectedMapLocations.value = [] // Clear map country chips
       fetchNews(true) // Reset to page 1
       fetchSummary(null, topic, topic)
     }
@@ -447,7 +451,6 @@ export default {
 
       fetchNews()
       fetchTrending()
-      fetchTrendingLocations()
       // Show a global briefing card immediately on load
       fetchSummary(null, null, uiLanguage.value === 'ar' ? 'نشرة اليوم' : "Today's Briefing")
       startAutoRefresh()
