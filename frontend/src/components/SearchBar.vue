@@ -8,54 +8,76 @@
           type="search"
           inputmode="search"
           class="search-input"
-          placeholder="Search news..."
+          :placeholder="tr.search.placeholder"
           :value="topic"
+          :dir="uiLanguage === 'ar' ? 'rtl' : 'ltr'"
           @input="updateTopic"
           @keyup.enter="$emit('search')"
         />
       </div>
       <button class="search-button" @click="$emit('search')">
         <i class="bi bi-search"></i>
-        <span class="button-text">Search</span>
+        <span class="button-text">{{ tr.search.button }}</span>
       </button>
     </div>
 
-    <!-- Smart Search Toggle -->
-    <div class="smart-search-toggle">
-      <label class="toggle-label">
-        <input
-          type="checkbox"
-          :checked="smartSearch"
-          @change="updateSmartSearch"
-        />
-        <span class="toggle-text">
-          <i class="bi bi-stars"></i>
-          Smart search (cross-language)
-        </span>
-      </label>
+    <!-- Active country chips from map selection -->
+    <div v-if="selectedCountries && selectedCountries.length > 0" class="active-filters">
+      <span class="active-filter-label">
+        <i class="bi bi-geo-alt-fill"></i>
+        {{ uiLanguage === 'ar' ? 'تصفية حسب:' : 'Filtering by:' }}
+      </span>
+      <span
+        v-for="loc in selectedCountries"
+        :key="loc.code"
+        class="country-chip"
+        @click="$emit('remove-country', loc.code)"
+      >
+        {{ loc.name }}
+        <i class="bi bi-x"></i>
+      </span>
+      <button class="clear-all" @click="$emit('clear-countries')">
+        {{ uiLanguage === 'ar' ? 'مسح الكل' : 'Clear all' }}
+      </button>
     </div>
 
-    <!-- Filter Dropdowns -->
+    <!-- Filters row: language + time -->
     <div class="filter-row">
-      <select class="filter-select" :value="language" @change="updateLanguage">
-        <option value="en">English</option>
-        <option value="ar">العربية</option>
-        <option value="both">Both</option>
-      </select>
+      <div class="filter-group">
+        <label class="filter-label">{{ tr.search.language.english === 'English' ? 'Language' : 'اللغة' }}</label>
+        <select class="filter-select" :value="language" @change="updateLanguage">
+          <option value="en">{{ tr.search.language.english }}</option>
+          <option value="ar">{{ tr.search.language.arabic }}</option>
+          <option value="both">{{ tr.search.language.both }}</option>
+        </select>
+      </div>
 
-      <select class="filter-select" :value="region" @change="updateRegion">
-        <option value="all">All Regions</option>
-        <option value="us">US/Western</option>
-        <option value="eu">Europe</option>
-        <option value="middleeast">Middle East</option>
-      </select>
+      <div class="filter-group">
+        <label class="filter-label">{{ tr.search.time.label }}</label>
+        <select class="filter-select" :value="hours" @change="updateHours">
+          <option value="3">{{ tr.search.time.h3 }}</option>
+          <option value="12">{{ tr.search.time.h12 }}</option>
+          <option value="24">{{ tr.search.time.h24 }}</option>
+          <option value="72">{{ tr.search.time.d3 }}</option>
+          <option value="168">{{ tr.search.time.d7 }}</option>
+        </select>
+      </div>
+
+      <!-- Smart search toggle, inline -->
+      <label class="toggle-label smart-inline">
+        <input type="checkbox" :checked="smartSearch" @change="updateSmartSearch" />
+        <span class="toggle-text">
+          <i class="bi bi-stars"></i>
+          {{ uiLanguage === 'ar' ? 'ذكي' : 'Smart' }}
+        </span>
+      </label>
     </div>
 
     <!-- Trending Topics -->
     <div v-if="trending.length > 0" class="trending-section">
       <small class="trending-label">
         <i class="bi bi-fire"></i>
-        Trending Now
+        {{ tr.search.trending }}
       </small>
       <div class="trending-tags">
         <span
@@ -73,62 +95,31 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { translations } from '../i18n'
+
 export default {
   name: 'SearchBar',
   props: {
-    topic: {
-      type: String,
-      default: ''
-    },
-    region: {
-      type: String,
-      default: 'all'
-    },
-    language: {
-      type: String,
-      default: 'en'
-    },
-    smartSearch: {
-      type: Boolean,
-      default: false
-    },
-    trending: {
-      type: Array,
-      default: () => []
-    }
+    topic: { type: String, default: '' },
+    language: { type: String, default: 'en' },
+    hours: { type: [String, Number], default: '168' },
+    smartSearch: { type: Boolean, default: false },
+    trending: { type: Array, default: () => [] },
+    uiLanguage: { type: String, default: 'en' },
+    selectedCountries: { type: Array, default: () => [] }
   },
-  emits: ['update:topic', 'update:region', 'update:language', 'update:smartSearch', 'search', 'refresh'],
+  emits: ['update:topic', 'update:language', 'update:hours', 'update:smartSearch', 'search', 'refresh', 'remove-country', 'clear-countries'],
   setup(props, { emit }) {
-    const updateTopic = (event) => {
-      emit('update:topic', event.target.value)
-    }
+    const tr = computed(() => translations[props.uiLanguage] || translations.en)
 
-    const updateRegion = (event) => {
-      emit('update:region', event.target.value)
-      emit('search')
-    }
+    const updateTopic = (event) => emit('update:topic', event.target.value)
+    const updateLanguage = (event) => { emit('update:language', event.target.value); emit('search') }
+    const updateHours = (event) => { emit('update:hours', event.target.value); emit('search') }
+    const updateSmartSearch = (event) => emit('update:smartSearch', event.target.checked)
+    const selectTrending = (keyword) => { emit('update:topic', keyword); emit('search') }
 
-    const updateLanguage = (event) => {
-      emit('update:language', event.target.value)
-      emit('search')
-    }
-
-    const updateSmartSearch = (event) => {
-      emit('update:smartSearch', event.target.checked)
-    }
-
-    const selectTrending = (keyword) => {
-      emit('update:topic', keyword)
-      emit('search')
-    }
-
-    return {
-      updateTopic,
-      updateRegion,
-      updateLanguage,
-      updateSmartSearch,
-      selectTrending
-    }
+    return { tr, updateTopic, updateLanguage, updateHours, updateSmartSearch, selectTrending }
   }
 }
 </script>
@@ -225,54 +216,101 @@ export default {
 }
 
 /* ============================================
-   SMART SEARCH TOGGLE
+   ACTIVE COUNTRY CHIPS
    ============================================ */
-.smart-search-toggle {
-  margin-top: 12px;
-  margin-bottom: 12px;
-  padding: 8px 0;
-}
-
-.toggle-label {
+.active-filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  margin: 10px 0 14px;
+  padding: 10px 14px;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 12px;
+}
+
+.active-filter-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.active-filter-label i {
+  color: #06b6d4;
+}
+
+.country-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  color: #06b6d4;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.875rem;
+  transition: background 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.toggle-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+.country-chip:hover {
+  background: rgba(6, 182, 212, 0.25);
+}
+
+.country-chip i {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.clear-all {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  background: none;
+  border: none;
   cursor: pointer;
-  accent-color: #06b6d4;
+  padding: 4px 6px;
+  transition: color 0.2s ease;
+  margin-left: auto;
 }
 
-.toggle-text {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.toggle-text i {
-  color: #06b6d4;
-  font-size: 1rem;
+.clear-all:hover {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* ============================================
-   FILTER ROW - Mobile-First
+   FILTER ROW - Language + Time + Smart toggle
    ============================================ */
 .filter-row {
   display: flex;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 10px;
   margin-bottom: 16px;
 }
 
-.filter-select {
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   flex: 1;
-  height: 44px;
+}
+
+.filter-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.35);
+  padding-left: 2px;
+}
+
+.filter-select {
+  width: 100%;
+  height: 42px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -293,6 +331,49 @@ export default {
 .filter-select option {
   background: #1a1a2e;
   color: #ffffff;
+}
+
+/* Smart toggle inline with filters */
+.smart-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 2px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.smart-inline input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #06b6d4;
+  margin-top: 4px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toggle-text i {
+  color: #06b6d4;
+  font-size: 1rem;
 }
 
 /* ============================================

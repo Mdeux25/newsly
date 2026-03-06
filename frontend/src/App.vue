@@ -7,7 +7,7 @@
     <header class="mobile-header">
       <div class="header-content">
         <h1 class="logo">
-          <span class="gradient-text">Newsly</span>
+          <span class="gradient-text">{{ uiLanguage === 'ar' ? 'نيوزلي' : 'Newsly' }}</span>
           <span class="pulse-dot"></span>
         </h1>
 
@@ -45,12 +45,24 @@
       <!-- Search and Filters -->
       <SearchBar
         v-model:topic="searchTopic"
-        v-model:region="selectedRegion"
         v-model:language="selectedLanguage"
+        v-model:hours="selectedHours"
         v-model:smartSearch="smartSearchEnabled"
         :trending="trending"
+        :uiLanguage="uiLanguage"
+        :selectedCountries="selectedMapLocations"
         @search="fetchNews(true)"
         @refresh="refreshNow"
+        @remove-country="removeCountry"
+        @clear-countries="clearCountries"
+      />
+
+      <!-- Bilingual News Summary (shown on map click or trending topic click) -->
+      <NewsSummary
+        :summary="summaryData"
+        :loading="summaryLoading"
+        :trigger="summaryTrigger"
+        @dismiss="summaryData = null"
       />
 
       <!-- Error Message -->
@@ -102,6 +114,8 @@
           @page-change="handlePageChange"
         />
       </div>
+      <!-- Footer -->
+      <AppFooter :uiLanguage="uiLanguage" />
     </main>
 
     <!-- Bottom Navigation (mobile-only) -->
@@ -123,7 +137,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 import axios from 'axios'
 import NewsCard from './components/NewsCard.vue'
 import TweetCard from './components/TweetCard.vue'
@@ -131,6 +145,8 @@ import SearchBar from './components/SearchBar.vue'
 import LiveIndicator from './components/LiveIndicator.vue'
 import NewsMap from './components/NewsMap.vue'
 import Pagination from './components/Pagination.vue'
+import NewsSummary from './components/NewsSummary.vue'
+import AppFooter from './components/AppFooter.vue'
 
 export default {
   name: 'App',
@@ -140,15 +156,17 @@ export default {
     SearchBar,
     LiveIndicator,
     NewsMap,
-    Pagination
+    Pagination,
+    NewsSummary,
+    AppFooter
   },
   setup() {
     const articles = ref([])
     const tweets = ref([])
     const trending = ref([])
-    const searchTopic = ref('') // Changed from 'US Iran war' to empty
-    const selectedRegion = ref('all')
-    const selectedLanguage = ref('both') // Changed from 'en' to 'both'
+    const searchTopic = ref('')
+    const selectedLanguage = ref('both')
+    const selectedHours = ref('168') // Default: last 7 days
     const smartSearchEnabled = ref(true) // NEW: Enable smart search by default
     const trendingLocations = ref([]) // NEW: For map visualization
     const selectedMapLocations = ref([])
@@ -166,10 +184,34 @@ export default {
 
     let autoRefreshInterval = null
 
+    const summaryData = ref(null)
+    const summaryLoading = ref(false)
+    const summaryTrigger = ref('')
+
+    const fetchSummary = async (countries, topic, triggerLabel) => {
+      summaryLoading.value = true
+      summaryData.value = null
+      summaryTrigger.value = triggerLabel
+      try {
+        const params = new URLSearchParams()
+        if (countries) params.set('countries', countries)
+        if (topic) params.set('topic', topic)
+        params.set('hours', selectedHours.value)
+        const res = await fetch(`/api/news/summary?${params}`)
+        const data = await res.json()
+        summaryData.value = data.summary || null
+      } catch (err) {
+        console.warn('Summary fetch failed:', err)
+        summaryData.value = null
+      } finally {
+        summaryLoading.value = false
+      }
+    }
+
     const toggleUILanguage = () => {
       uiLanguage.value = uiLanguage.value === 'en' ? 'ar' : 'en'
-      localStorage.setItem('locale', uiLanguage.value)
-      // Update document direction
+      // Sync global $t so all components re-render with new locale
+      getCurrentInstance().appContext.config.globalProperties.$i18n.setLocale(uiLanguage.value)
       document.documentElement.dir = uiLanguage.value === 'ar' ? 'rtl' : 'ltr'
       document.documentElement.lang = uiLanguage.value
     }
@@ -182,7 +224,24 @@ export default {
 
     const handleLocationsChanged = (locations) => {
       selectedMapLocations.value = locations
-      fetchNews(true) // Reset to page 1 when filters change
+      fetchNews(true)
+      if (locations.length > 0) {
+        const countryCodes = locations.map(loc => loc.code).join(',')
+        const triggerLabel = locations.map(loc => loc.name).join(', ')
+        fetchSummary(countryCodes, null, triggerLabel)
+      } else {
+        summaryData.value = null
+      }
+    }
+
+    const removeCountry = (code) => {
+      selectedMapLocations.value = selectedMapLocations.value.filter(loc => loc.code !== code)
+      handleLocationsChanged(selectedMapLocations.value)
+    }
+
+    const clearCountries = () => {
+      selectedMapLocations.value = []
+      handleLocationsChanged([])
     }
 
     const handlePageChange = (page) => {
@@ -247,12 +306,12 @@ export default {
         const newsResponse = await axios.get('/api/news', {
           params: {
             topic: searchTopic.value,
-            region: selectedRegion.value,
             language: selectedLanguage.value,
             countries: countries,
+            hours: selectedHours.value,
             limit: itemsPerPage.value,
             offset: offset,
-            smartSearch: smartSearchEnabled.value // NEW: Smart search parameter
+            smartSearch: smartSearchEnabled.value
           }
         })
 
@@ -294,9 +353,8 @@ export default {
 
     const fetchTrending = async () => {
       try {
-        // Use smart trending endpoint if available
         const response = await axios.get('/api/trending/smart', {
-          params: { hours: 24, limit: 10 }
+          params: { hours: parseInt(selectedHours.value) || 168, limit: 10 }
         })
         if (response.data.success) {
           trending.value = response.data.trending
@@ -330,6 +388,7 @@ export default {
     const handleTrendingTopicSelected = (topic) => {
       searchTopic.value = topic
       fetchNews(true) // Reset to page 1
+      fetchSummary(null, topic, topic)
     }
 
     const refreshNow = () => {
@@ -374,10 +433,10 @@ export default {
       tweets,
       trending,
       searchTopic,
-      selectedRegion,
       selectedLanguage,
-      smartSearchEnabled, // NEW
-      trendingLocations, // NEW
+      selectedHours,
+      smartSearchEnabled,
+      trendingLocations,
       selectedMapLocations,
       uiLanguage,
       isDarkMode,
@@ -391,8 +450,12 @@ export default {
       toggleUILanguage,
       toggleDarkMode,
       handleLocationsChanged,
-      handleTrendingTopicSelected, // NEW
-      // Pagination
+      handleTrendingTopicSelected,
+      removeCountry,
+      clearCountries,
+      summaryData,
+      summaryLoading,
+      summaryTrigger,
       currentPage,
       itemsPerPage,
       totalArticles,
@@ -748,8 +811,7 @@ export default {
   direction: rtl;
 }
 
-.rtl-mode .header-content,
-.rtl-mode .header-actions {
+.rtl-mode .header-content {
   flex-direction: row-reverse;
 }
 

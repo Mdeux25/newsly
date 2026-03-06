@@ -396,6 +396,64 @@ function extractTrendingSimple(articles, topN = 10) {
 }
 
 /**
+ * Generate a bilingual (EN + AR) summary for a set of articles
+ *
+ * @param {Array} articles - Array of article objects
+ * @param {Object} opts - { topic, country }
+ * @returns {Promise<{en: string, ar: string}>}
+ */
+async function summarizeArticles(articles, { topic = null, country = null } = {}) {
+  if (!articles || articles.length === 0) return null;
+
+  // Cache key rotates every hour so summaries stay fresh
+  const hourSlot = new Date().toISOString().slice(0, 13); // "2026-03-06T14"
+  const countryStr = Array.isArray(country) ? country.join(',') : (country || '');
+  const cacheKey = `summary:${topic || ''}:${countryStr}:${hourSlot}`;
+
+  if (isBudgetExceeded()) return summaryFallback(articles);
+
+  return await getCachedOrCompute(cacheKey, 'summary', async () => {
+    try {
+      const top = articles.slice(0, 15);
+      const articleText = top.map((a, i) =>
+        `${i + 1}. [${a.source}] ${a.title}. ${a.description || ''}`
+      ).join('\n');
+
+      const locationStr = Array.isArray(country) ? country.join(', ') : country;
+      const prompt = `You are a news analyst. Given these recent news articles${topic ? ` about "${topic}"` : ''}${locationStr ? ` from ${locationStr}` : ''}, write a concise 2-3 sentence summary of what is happening. Respond ONLY with valid JSON: {"en": "English summary here", "ar": "Arabic summary here"}\n\nArticles:\n${articleText}`;
+
+      const completion = await openai.chat.completions.create({
+        model: MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.4,
+        max_tokens: 300,
+        response_format: { type: 'json_object' }
+      });
+
+      const usage = completion.usage;
+      const cost = estimateCost(usage.prompt_tokens, usage.completion_tokens);
+      dailyCost += cost;
+      totalCalls++;
+
+      console.log(`📰 Summary: topic="${topic}", country="${countryStr}" → $${cost.toFixed(6)}`);
+
+      return JSON.parse(completion.choices[0].message.content);
+    } catch (error) {
+      console.error('summarizeArticles failed:', error.message);
+      return summaryFallback(articles);
+    }
+  });
+}
+
+/**
+ * Fallback summary when budget is exceeded — returns first 3 article titles
+ */
+function summaryFallback(articles) {
+  const titles = articles.slice(0, 3).map(a => a.title).join(' | ');
+  return { en: titles, ar: titles };
+}
+
+/**
  * Batch translate multiple terms (cost optimization)
  *
  * @param {string[]} terms - Array of terms to translate
@@ -487,6 +545,7 @@ module.exports = {
   translateQuery,
   generateSemanticVariations,
   extractTrendingInsights,
+  summarizeArticles,
   batchTranslate,
   getStats,
   isBudgetExceeded

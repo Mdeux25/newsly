@@ -469,4 +469,34 @@ router.get('/trending/locations', async (req, res) => {
   }
 });
 
+// Bilingual summary for a map country click or trending topic click
+router.get('/news/summary', async (req, res) => {
+  try {
+    const { topic, countries, hours = 6 } = req.query;
+    const countryArray = countries ? countries.split(',') : null;
+
+    const filters = {
+      country: countryArray,
+      topic: topic || null,
+      minDate: new Date(Date.now() - hours * 60 * 60 * 1000)
+    };
+
+    const articles = await Article.findRecent(filters, 20);
+    if (articles.length === 0) {
+      return res.json({ success: true, summary: null, reason: 'no_articles' });
+    }
+
+    const llm = require('../services/llm');
+    const summary = await llm.summarizeArticles(articles, {
+      topic: topic || null,
+      country: countryArray
+    });
+
+    res.json({ success: true, summary, articleCount: articles.length });
+  } catch (error) {
+    console.error('Summary error:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to generate summary' });
+  }
+});
+
 module.exports = router;

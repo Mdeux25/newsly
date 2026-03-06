@@ -11,11 +11,13 @@ export const translations = {
         arabic: 'Arabic',
         both: 'Both'
       },
-      region: {
-        all: 'All Regions',
-        us: 'US/Western',
-        eu: 'Europe',
-        middleeast: 'Middle East'
+      time: {
+        label: 'Time',
+        h3: 'Last 3 hours',
+        h12: 'Last 12 hours',
+        h24: 'Last 24 hours',
+        d3: 'Last 3 days',
+        d7: 'Last 7 days'
       }
     },
     news: {
@@ -54,11 +56,13 @@ export const translations = {
         arabic: 'العربية',
         both: 'كلاهما'
       },
-      region: {
-        all: 'كل المناطق',
-        us: 'أمريكا/الغرب',
-        eu: 'أوروبا',
-        middleeast: 'الشرق الأوسط'
+      time: {
+        label: 'الفترة',
+        h3: 'آخر 3 ساعات',
+        h12: 'آخر 12 ساعة',
+        h24: 'آخر 24 ساعة',
+        d3: 'آخر 3 أيام',
+        d7: 'آخر 7 أيام'
       }
     },
     news: {
@@ -89,24 +93,23 @@ export const translations = {
 }
 
 export function createI18n() {
-  let currentLocale = localStorage.getItem('locale') || 'en'
+  // Use an object so mutations are visible to the closed-over t() function
+  const state = { locale: localStorage.getItem('locale') || 'en' }
+
+  const t = (key) => {
+    const keys = key.split('.')
+    let value = translations[state.locale]
+    for (const k of keys) value = value?.[k]
+    return value || key
+  }
 
   return {
-    locale: currentLocale,
-    t: (key) => {
-      const keys = key.split('.')
-      let value = translations[currentLocale]
-
-      for (const k of keys) {
-        value = value?.[k]
-      }
-
-      return value || key
-    },
+    get locale() { return state.locale },
+    t,
     setLocale: (locale) => {
-      currentLocale = locale
+      state.locale = locale
       localStorage.setItem('locale', locale)
     },
-    getLocale: () => currentLocale
+    getLocale: () => state.locale
   }
 }
