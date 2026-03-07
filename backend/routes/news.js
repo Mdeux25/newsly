@@ -28,17 +28,26 @@ router.get('/news', async (req, res) => {
     let totalCount = 0;
     let source = 'database'; // Track where articles came from
 
+    // Detect cross-language search: English query with Arabic language filter
+    // In this case, remove language restriction from DB query and prioritize Arabic in sort
+    const hasTopic = topic && topic !== 'breaking news';
+    const isEnglishQuery = hasTopic && /^[\x20-\x7E]+$/.test(topic.trim());
+    const isCrossLangSearch = isEnglishQuery && language === 'ar';
+
     // TRY DATABASE FIRST (fast, no rate limits!)
     try {
       const filters = {
-        language: language === 'both' ? null : language,
+        // Cross-language: search all articles, sort Arabic first after
+        language: (language === 'both' || isCrossLangSearch) ? null : language,
         minDate: new Date(Date.now() - parseInt(hours) * 60 * 60 * 1000)
       };
 
+      // Always use smart search for cross-language or when checkbox enabled
+      const shouldSmartSearch = (useSmartSearch || isCrossLangSearch) && hasTopic;
+
       let dbArticles;
 
-      // Use smart search if enabled and topic provided
-      if (useSmartSearch) {
+      if (shouldSmartSearch) {
         console.log(`🔍 Smart search: "${topic}" (cross-language + weighted ranking)`);
         try {
           dbArticles = await Article.smartSearch(topic, filters, parseInt(limit), parseInt(offset));
@@ -46,16 +55,24 @@ router.get('/news', async (req, res) => {
           source = 'smart-search';
         } catch (smartError) {
           console.warn('⚠️  Smart search failed, falling back to simple search:', smartError.message);
-          // Fallback to simple search
           filters.topic = topic;
           dbArticles = await Article.findRecent(filters, parseInt(limit), parseInt(offset));
           totalCount = await Article.countArticles(filters);
         }
       } else {
         // Simple search (original behavior)
-        filters.topic = topic !== 'breaking news' ? topic : null;
+        filters.topic = hasTopic ? topic : null;
         dbArticles = await Article.findRecent(filters, parseInt(limit), parseInt(offset));
         totalCount = await Article.countArticles(filters);
+      }
+
+      // For cross-language: sort Arabic articles first, then English
+      if (isCrossLangSearch && dbArticles) {
+        dbArticles.sort((a, b) => {
+          const aAr = a.language === 'ar' ? 0 : 1;
+          const bAr = b.language === 'ar' ? 0 : 1;
+          return aAr - bAr;
+        });
       }
 
       if (dbArticles && dbArticles.length > 0) {
