@@ -7,11 +7,11 @@
       <stop offset="100%" style="stop-color:#0f1829"/>
     </linearGradient>
 
-    <!-- Saffron gradient for Arabic name -->
-    <linearGradient id="saffron" x1="100%" y1="0%" x2="0%" y2="0%">
-      <stop offset="0%"   style="stop-color:#d97706"/>
-      <stop offset="50%"  style="stop-color:#f59e0b"/>
-      <stop offset="100%" style="stop-color:#fde68a"/>
+    <!-- Lapis-to-saffron gradient for "Newsly" -->
+    <linearGradient id="nameGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   style="stop-color:#1e3a5f"/>
+      <stop offset="45%"  style="stop-color:#2d6a9f"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
     </linearGradient>
 
     <!-- Blue-purple gradient for .ai suffix -->
@@ -20,21 +20,21 @@
       <stop offset="100%" style="stop-color:#c084fc"/>
     </linearGradient>
 
-    <!-- Warm ambient glow behind text -->
-    <radialGradient id="warmOrb" cx="58%" cy="52%" r="38%">
-      <stop offset="0%"   style="stop-color:#d97706;stop-opacity:0.12"/>
-      <stop offset="100%" style="stop-color:#d97706;stop-opacity:0"/>
+    <!-- Warm ambient glow -->
+    <radialGradient id="warmOrb" cx="52%" cy="52%" r="40%">
+      <stop offset="0%"   style="stop-color:#1e3a5f;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#1e3a5f;stop-opacity:0"/>
     </radialGradient>
 
-    <!-- Cool AI glow on the left -->
-    <radialGradient id="aiOrb" cx="28%" cy="52%" r="25%">
-      <stop offset="0%"   style="stop-color:#818cf8;stop-opacity:0.14"/>
+    <!-- AI glow on the right -->
+    <radialGradient id="aiOrb" cx="75%" cy="52%" r="28%">
+      <stop offset="0%"   style="stop-color:#818cf8;stop-opacity:0.15"/>
       <stop offset="100%" style="stop-color:#818cf8;stop-opacity:0"/>
     </radialGradient>
 
-    <!-- Soft glow filter for the name -->
+    <!-- Glow filter for main name -->
     <filter id="nameGlow" x="-20%" y="-40%" width="140%" height="180%">
-      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feGaussianBlur stdDeviation="14" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
 
@@ -48,37 +48,36 @@
   <!-- Background -->
   <rect width="1200" height="630" fill="url(#bg)"/>
 
-  <!-- Subtle dot-grid pattern (AI aesthetic) -->
+  <!-- Dot-grid pattern -->
   <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
     <circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.04)"/>
   </pattern>
   <rect width="1200" height="630" fill="url(#dots)"/>
 
   <!-- Ambient orbs -->
-  <ellipse cx="700" cy="315" rx="420" ry="220" fill="url(#warmOrb)"/>
-  <ellipse cx="310" cy="315" rx="280" ry="180" fill="url(#aiOrb)"/>
+  <ellipse cx="520" cy="315" rx="440" ry="230" fill="url(#warmOrb)"/>
+  <ellipse cx="870" cy="315" rx="280" ry="180" fill="url(#aiOrb)"/>
 
-  <!-- Thin horizontal accent lines (AI grid feel) -->
+  <!-- Accent lines -->
   <line x1="0" y1="140" x2="1200" y2="140" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
   <line x1="0" y1="490" x2="1200" y2="490" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
 
   <!-- ── Main name row ── -->
 
-  <!-- Arabic name: نيوزلي — right portion, saffron -->
+  <!-- "Newsly" — left-aligned within the centered group -->
   <text
-    x="680" y="360"
-    font-family="'Geeza Pro','Arabic Typesetting','Simplified Arabic',Tahoma,Arial,sans-serif"
+    x="490" y="360"
+    font-family="'SF Pro Display','-apple-system','Helvetica Neue',Arial,sans-serif"
     font-size="188"
-    font-weight="700"
+    font-weight="800"
     text-anchor="middle"
-    fill="url(#saffron)"
+    fill="url(#nameGrad)"
     filter="url(#nameGlow)"
-    direction="rtl"
-    unicode-bidi="bidi-override">نيوزلي</text>
+    letter-spacing="-4">Newsly</text>
 
-  <!-- .ai suffix — left of Arabic, blue-purple -->
+  <!-- ".ai" suffix -->
   <text
-    x="338" y="357"
+    x="852" y="357"
     font-family="'SF Pro Display','-apple-system','Helvetica Neue',Arial,sans-serif"
     font-size="108"
     font-weight="700"
@@ -88,19 +87,20 @@
     filter="url(#aiGlow)"
     letter-spacing="-1">.ai</text>
 
-  <!-- Dot separator between .ai and Arabic (like a domain) -->
-  <circle cx="465" cy="328" r="6" fill="rgba(255,255,255,0.15)"/>
+  <!-- Divider between name and .ai -->
+  <circle cx="730" cy="328" r="6" fill="rgba(255,255,255,0.15)"/>
 
   <!-- ── Divider ── -->
-  <line x1="380" y1="410" x2="820" y2="410" stroke="rgba(217,119,6,0.2)" stroke-width="1"/>
+  <line x1="360" y1="410" x2="840" y2="410" stroke="rgba(30,58,95,0.4)" stroke-width="1"/>
 
   <!-- ── Taglines ── -->
   <text x="600" y="453"
-    font-family="'Geeza Pro','Simplified Arabic',Tahoma,Arial,sans-serif"
+    font-family="'-apple-system','Helvetica Neue',Arial,sans-serif"
     font-size="25"
+    font-weight="500"
     text-anchor="middle"
-    fill="rgba(255,255,255,0.32)"
-    direction="rtl">أخبار ذكية · ملخصات AI · خريطة تفاعلية · الشرق الأوسط والعالم</text>
+    fill="rgba(255,255,255,0.35)"
+    letter-spacing="0.3">Smart News · AI Summaries · Interactive Map · Middle East &amp; World</text>
 
   <text x="600" y="486"
     font-family="'-apple-system','Helvetica Neue',Arial,sans-serif"
@@ -108,7 +108,7 @@
     font-weight="300"
     text-anchor="middle"
     fill="rgba(255,255,255,0.18)"
-    letter-spacing="0.5">Smart Bilingual News · AI Summaries · Interactive Map · Middle East &amp; World</text>
+    letter-spacing="0.5">أخبار ذكية بالعربية والإنجليزية · الشرق الأوسط والعالم</text>
 
   <!-- ── Bottom bar ── -->
   <rect x="0" y="565" width="1200" height="65" fill="rgba(0,0,0,0.5)"/>

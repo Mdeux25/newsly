@@ -579,8 +579,10 @@ export default {
   bottom: 0;
   left: 0;
   height: 2px;
-  width: 0%;
+  width: 100%;
   background: linear-gradient(90deg, #f97316, #fb923c);
+  transform: scaleX(0);
+  transform-origin: left center;
   animation: rssProgress 4.5s linear forwards;
   border-radius: 0 2px 0 0;
 }
@@ -612,13 +614,13 @@ export default {
 }
 
 @keyframes rssPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 6px #f97316; }
-  50% { opacity: 0.25; box-shadow: 0 0 2px #f97316; }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
 }
 
 @keyframes rssProgress {
-  from { width: 0%; }
-  to   { width: 100%; }
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }
 
 /* ── Navigation row ──────────────────────────────── */

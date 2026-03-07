@@ -353,12 +353,12 @@ export default {
 }
 
 @keyframes bell-ring {
-  0%,  55%, 100% { transform: rotate(0deg) scale(1);    filter: drop-shadow(0 0 6px rgba(255,68,68,0.6));  }
-  5%,  15%       { transform: rotate(-18deg) scale(1.1); filter: drop-shadow(0 0 14px rgba(255,68,68,1));   }
-  10%, 20%       { transform: rotate(18deg) scale(1.1);  filter: drop-shadow(0 0 14px rgba(255,68,68,1));   }
+  0%,  55%, 100% { transform: rotate(0deg) scale(1);    }
+  5%,  15%       { transform: rotate(-18deg) scale(1.1); }
+  10%, 20%       { transform: rotate(18deg) scale(1.1);  }
   25%, 35%       { transform: rotate(-10deg) scale(1.05);}
   30%, 40%       { transform: rotate(10deg) scale(1.05); }
-  50%            { transform: rotate(0deg) scale(1.15);  filter: drop-shadow(0 0 18px rgba(255,68,68,1));   }
+  50%            { transform: rotate(0deg) scale(1.15);  }
 }
 
 @media (prefers-reduced-motion: reduce) {
