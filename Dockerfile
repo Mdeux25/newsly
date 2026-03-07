@@ -6,6 +6,11 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ ./
+# VITE_* vars are baked in at build time — pass via --build-arg or docker-compose args
+ARG VITE_AD_ENABLED=false
+ARG VITE_ADSENSE_CLIENT=ca-pub-7094371363598928
+ENV VITE_AD_ENABLED=$VITE_AD_ENABLED
+ENV VITE_ADSENSE_CLIENT=$VITE_ADSENSE_CLIENT
 RUN npm run build
 
 # Stage 2: Setup backend and serve
