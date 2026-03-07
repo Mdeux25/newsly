@@ -94,6 +94,18 @@ class Article {
     return rows[0] || null;
   }
 
+  static async findBySlug(slug) {
+    const terms = slug.split('-').filter(w => w.length > 2);
+    if (terms.length === 0) return null;
+    const conditions = terms.map(() => 'title LIKE ?').join(' AND ');
+    const params = terms.map(t => `%${t}%`);
+    const [rows] = await db.query(
+      `SELECT * FROM articles WHERE ${conditions} ORDER BY published_at DESC LIMIT 1`,
+      params
+    );
+    return rows[0] || null;
+  }
+
   /**
    * Find recent articles with filters
    * @param {Object} filters - Filter options

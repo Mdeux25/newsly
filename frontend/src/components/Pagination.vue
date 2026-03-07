@@ -15,7 +15,7 @@
         @click="goToPage(currentPage - 1)"
         aria-label="Previous page"
       >
-        <i class="bi bi-chevron-left"></i>
+        <i :class="uiLanguage === 'ar' ? 'bi bi-chevron-right' : 'bi bi-chevron-left'"></i>
       </button>
 
       <!-- Page Numbers (mobile-optimized: show limited pages) -->
@@ -76,7 +76,7 @@
         @click="goToPage(currentPage + 1)"
         aria-label="Next page"
       >
-        <i class="bi bi-chevron-right"></i>
+        <i :class="uiLanguage === 'ar' ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
       </button>
     </div>
   </div>

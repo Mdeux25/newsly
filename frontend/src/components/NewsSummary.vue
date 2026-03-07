@@ -6,7 +6,7 @@
       <div class="header-left">
         <i class="bi bi-lightning-charge-fill flash-icon"></i>
         <span class="summary-title">
-          {{ uiLanguage === 'ar' ? 'موجز الأخبار' : 'News Brief' }}
+          {{ uiLanguage === 'ar' ? 'ملخص الذكاء الاصطناعي' : 'AI Summary' }}
           <span v-if="trigger" class="trigger-chip">{{ trigger }}</span>
         </span>
       </div>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Navigation row: prev arrow + dots + next arrow -->
-    <div v-if="points.length > 1" class="nav-row">
+    <div v-if="points.length > 1" class="nav-row" dir="ltr">
       <button
         class="nav-arrow"
         :disabled="activeIndex === 0"
@@ -214,14 +214,13 @@ export default {
 }
 
 .summary-title {
-  font-size: 0.68rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   white-space: nowrap;
   overflow: hidden;
 }

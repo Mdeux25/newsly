@@ -5,143 +5,105 @@
         <i class="bi bi-geo-alt-fill"></i>
         {{ uiLanguage === 'ar' ? 'خريطة الأخبار' : 'News Map' }}
       </h5>
+      <div class="map-legend-row">
+        <small v-if="trendingLocations.length > 0" class="legend-item">
+          <i class="bi bi-bell-fill" style="color:#ff4444"></i>
+          {{ uiLanguage === 'ar' ? 'رائج' : 'Trending' }}
+        </small>
+        <small class="legend-item">
+          <i class="bi bi-geo-alt-fill" style="color:#f5756c"></i>
+          {{ uiLanguage === 'ar' ? 'انقر للتصفية' : 'Click to filter' }}
+        </small>
+      </div>
     </div>
 
-    <!-- Map -->
     <div ref="mapContainer" class="map" :style="{ height: mapHeight }"></div>
-
-    <!-- Legend -->
-    <div class="map-legend">
-      <small>
-        <i class="bi bi-info-circle"></i>
-        {{ uiLanguage === 'ar' ? 'انقر على المناطق لتصفية الأخبار' : 'Click regions to filter news' }}
-      </small>
-      <small v-if="trendingLocations.length > 0" class="legend-item">
-        <i class="bi bi-bell-fill" style="color: #ff4444"></i>
-        {{ uiLanguage === 'ar' ? 'مواضيع رائجة' : 'Trending topics' }}
-      </small>
-    </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, watch, inject } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 export default {
   name: 'NewsMap',
   props: {
-    uiLanguage: {
-      type: String,
-      default: 'en'
-    },
-    trendingLocations: {
-      type: Array,
-      default: () => []
-    },
-    activeLocations: {
-      type: Array,
-      default: () => []
-    }
+    uiLanguage: { type: String, default: 'en' },
+    trendingLocations: { type: Array, default: () => [] },
+    activeLocations: { type: Array, default: () => [] }
   },
   emits: ['locations-changed', 'trending-topic-selected'],
   setup(props, { emit }) {
     const mapContainer = ref(null)
     const map = ref(null)
     const selectedLocations = ref([])
-    const mapHeight = ref('400px')
+    const mapHeight = ref('340px')
 
-    // Define major news regions with coordinates
     const regions = [
-      { code: 'us', name: 'United States', lat: 37.0902, lng: -95.7129, zoom: 4 },
-      { code: 'uk', name: 'United Kingdom', lat: 55.3781, lng: -3.4360, zoom: 6 },
-      { code: 'fr', name: 'France', lat: 46.2276, lng: 2.2137, zoom: 6 },
-      { code: 'de', name: 'Germany', lat: 51.1657, lng: 10.4515, zoom: 6 },
-      { code: 'ru', name: 'Russia', lat: 61.5240, lng: 105.3188, zoom: 3 },
-      { code: 'cn', name: 'China', lat: 35.8617, lng: 104.1954, zoom: 4 },
-      { code: 'jp', name: 'Japan', lat: 36.2048, lng: 138.2529, zoom: 5 },
-      { code: 'in', name: 'India', lat: 20.5937, lng: 78.9629, zoom: 5 },
-      { code: 'sa', name: 'Saudi Arabia', lat: 23.8859, lng: 45.0792, zoom: 6 },
-      { code: 'ae', name: 'UAE', lat: 23.4241, lng: 53.8478, zoom: 7 },
-      { code: 'eg', name: 'Egypt', lat: 26.8206, lng: 30.8025, zoom: 6 },
-      { code: 'il', name: 'Israel', lat: 31.0461, lng: 34.8516, zoom: 7 },
-      { code: 'ir', name: 'Iran', lat: 32.4279, lng: 53.6880, zoom: 5 },
-      { code: 'tr', name: 'Turkey', lat: 38.9637, lng: 35.2433, zoom: 6 },
-      { code: 'br', name: 'Brazil', lat: -14.2350, lng: -51.9253, zoom: 4 },
-      { code: 'au', name: 'Australia', lat: -25.2744, lng: 133.7751, zoom: 4 },
-      { code: 'za', name: 'South Africa', lat: -30.5595, lng: 22.9375, zoom: 5 },
-      { code: 'ng', name: 'Nigeria', lat: 9.0820, lng: 8.6753, zoom: 6 },
-      { code: 'mx', name: 'Mexico', lat: 23.6345, lng: -102.5528, zoom: 5 },
-      { code: 'ca', name: 'Canada', lat: 56.1304, lng: -106.3468, zoom: 4 }
+      { code: 'us', name: 'United States',  lat: 37.09,  lng: -95.71 },
+      { code: 'uk', name: 'United Kingdom', lat: 55.38,  lng: -3.44  },
+      { code: 'fr', name: 'France',         lat: 46.23,  lng: 2.21   },
+      { code: 'de', name: 'Germany',        lat: 51.17,  lng: 10.45  },
+      { code: 'ru', name: 'Russia',         lat: 61.52,  lng: 105.32 },
+      { code: 'cn', name: 'China',          lat: 35.86,  lng: 104.20 },
+      { code: 'jp', name: 'Japan',          lat: 36.20,  lng: 138.25 },
+      { code: 'in', name: 'India',          lat: 20.59,  lng: 78.96  },
+      { code: 'sa', name: 'Saudi Arabia',   lat: 23.89,  lng: 45.08  },
+      { code: 'ae', name: 'UAE',            lat: 23.42,  lng: 53.85  },
+      { code: 'eg', name: 'Egypt',          lat: 26.82,  lng: 30.80  },
+      { code: 'il', name: 'Israel',         lat: 31.05,  lng: 34.85  },
+      { code: 'ir', name: 'Iran',           lat: 32.43,  lng: 53.69  },
+      { code: 'tr', name: 'Turkey',         lat: 38.96,  lng: 35.24  },
+      { code: 'br', name: 'Brazil',         lat: -14.24, lng: -51.93 },
+      { code: 'au', name: 'Australia',      lat: -25.27, lng: 133.78 },
+      { code: 'za', name: 'South Africa',   lat: -30.56, lng: 22.94  },
+      { code: 'ng', name: 'Nigeria',        lat: 9.08,   lng: 8.68   },
+      { code: 'mx', name: 'Mexico',         lat: 23.63,  lng: -102.55},
+      { code: 'ca', name: 'Canada',         lat: 56.13,  lng: -106.35},
+      { code: 'pk', name: 'Pakistan',       lat: 30.38,  lng: 69.35  },
+      { code: 'ua', name: 'Ukraine',        lat: 48.38,  lng: 31.17  },
+      { code: 'ps', name: 'Palestine',      lat: 31.95,  lng: 35.23  }
     ]
 
     const markers = ref([])
 
-    // Check if a region has trending topics
-    const getTrendingData = (regionCode) => {
-      return props.trendingLocations.find(loc => loc.countryCode === regionCode)
-    }
+    const getTrendingData = (regionCode) =>
+      props.trendingLocations.find(loc => loc.countryCode === regionCode)
 
-    const initMap = () => {
-      if (!mapContainer.value) return
+    const buildIconHtml = (region, isSelected) => {
+      const trendingData = getTrendingData(region.code)
+      const isTrending = !!(trendingData?.topics?.length)
 
-      // Initialize map
-      map.value = L.map(mapContainer.value, {
-        center: [20, 0],
-        zoom: 2,
-        minZoom: 2,
-        maxZoom: 10,
-        worldCopyJump: true
-      })
-
-      // Add OpenStreetMap tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      }).addTo(map.value)
-
-      // Add markers for each region
-      regions.forEach(region => {
-        const marker = createMarker(region)
-        marker.addTo(map.value)
-        markers.value.push({ region, marker })
-      })
+      if (isTrending) {
+        const count = trendingData.topics[0].count
+        return `<div class="marker-pin trending ${isSelected ? 'selected' : ''}">
+                  <i class="bi bi-bell-fill alarm-bell"></i>
+                  <span class="trending-count">${count}</span>
+                </div>
+                <div class="marker-label trending ${isSelected ? 'selected' : ''}">${region.name}</div>`
+      }
+      return `<div class="marker-pin ${isSelected ? 'selected' : ''}">
+                <i class="bi bi-geo-alt-fill"></i>
+              </div>
+              <div class="marker-label ${isSelected ? 'selected' : ''}">${region.name}</div>`
     }
 
     const createMarker = (region) => {
-      const trendingData = getTrendingData(region.code)
-      const isTrending = !!trendingData
-
-      let iconHtml
-      if (isTrending && trendingData.topics.length > 0) {
-        const topTopic = trendingData.topics[0]
-        iconHtml = `<div class="marker-pin trending">
-                      <i class="bi bi-bell-fill alarm-bell"></i>
-                      <span class="trending-count">${topTopic.count}</span>
-                    </div>
-                    <div class="marker-label trending">${region.name}</div>`
-      } else {
-        iconHtml = `<div class="marker-pin">
-                      <i class="bi bi-geo-alt-fill"></i>
-                    </div>
-                    <div class="marker-label">${region.name}</div>`
-      }
-
+      const isSelected = selectedLocations.value.some(loc => loc.code === region.code)
       const marker = L.marker([region.lat, region.lng], {
         icon: L.divIcon({
           className: 'custom-marker',
-          html: iconHtml,
+          html: buildIconHtml(region, isSelected),
           iconSize: [30, 42],
           iconAnchor: [15, 42]
         })
       })
 
       marker.on('click', () => {
-        if (isTrending && trendingData.topics.length > 0) {
-          // Emit trending topic selection
-          const topTopic = trendingData.topics[0].topic
-          emit('trending-topic-selected', topTopic)
+        const trendingData = getTrendingData(region.code)
+        if (trendingData?.topics?.length) {
+          emit('trending-topic-selected', trendingData.topics[0].topic)
         }
         toggleLocation(region)
       })
@@ -149,25 +111,30 @@ export default {
       return marker
     }
 
+    const updateMarkers = () => {
+      markers.value.forEach(({ region, marker }) => {
+        const isSelected = selectedLocations.value.some(loc => loc.code === region.code)
+        marker.setIcon(L.divIcon({
+          className: 'custom-marker',
+          html: buildIconHtml(region, isSelected),
+          iconSize: [30, 42],
+          iconAnchor: [15, 42]
+        }))
+      })
+    }
+
     const toggleLocation = (region) => {
-      const index = selectedLocations.value.findIndex(loc => loc.code === region.code)
-
-      if (index !== -1) {
-        // Remove location
-        selectedLocations.value.splice(index, 1)
-      } else {
-        // Add location
-        selectedLocations.value.push(region)
-      }
-
+      const idx = selectedLocations.value.findIndex(loc => loc.code === region.code)
+      if (idx !== -1) selectedLocations.value.splice(idx, 1)
+      else selectedLocations.value.push(region)
       updateMarkers()
       emit('locations-changed', selectedLocations.value)
     }
 
     const removeLocation = (code) => {
-      const index = selectedLocations.value.findIndex(loc => loc.code === code)
-      if (index !== -1) {
-        selectedLocations.value.splice(index, 1)
+      const idx = selectedLocations.value.findIndex(loc => loc.code === code)
+      if (idx !== -1) {
+        selectedLocations.value.splice(idx, 1)
         updateMarkers()
         emit('locations-changed', selectedLocations.value)
       }
@@ -176,195 +143,99 @@ export default {
     const clearSelections = () => {
       selectedLocations.value = []
       updateMarkers()
-      emit('locations-changed', selectedLocations.value)
+      emit('locations-changed', [])
     }
 
-    const updateMarkers = () => {
-      markers.value.forEach(({ region, marker }) => {
-        const isSelected = selectedLocations.value.some(loc => loc.code === region.code)
-        const trendingData = getTrendingData(region.code)
-        const isTrending = !!trendingData
+    const initMap = () => {
+      if (!mapContainer.value) return
 
-        let iconHtml
-        if (isTrending && trendingData.topics.length > 0) {
-          const topTopic = trendingData.topics[0]
-          iconHtml = `<div class="marker-pin trending ${isSelected ? 'selected' : ''}">
-                        <i class="bi bi-bell-fill alarm-bell"></i>
-                        <span class="trending-count">${topTopic.count}</span>
-                      </div>
-                      <div class="marker-label trending ${isSelected ? 'selected' : ''}">${region.name}</div>`
-        } else {
-          iconHtml = `<div class="marker-pin ${isSelected ? 'selected' : ''}">
-                        <i class="bi bi-geo-alt-fill"></i>
-                      </div>
-                      <div class="marker-label ${isSelected ? 'selected' : ''}">${region.name}</div>`
-        }
+      map.value = L.map(mapContainer.value, {
+        center: [20, 15],
+        zoom: 2,
+        minZoom: 2,
+        maxZoom: 10,
+        worldCopyJump: true,
+        zoomControl: false
+      })
 
-        const icon = L.divIcon({
-          className: 'custom-marker',
-          html: iconHtml,
-          iconSize: [30, 42],
-          iconAnchor: [15, 42]
-        })
-        marker.setIcon(icon)
+      L.control.zoom({ position: 'bottomright' }).addTo(map.value)
+
+      // Dark CartoDB tiles
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map.value)
+
+      regions.forEach(region => {
+        const marker = createMarker(region)
+        marker.addTo(map.value)
+        markers.value.push({ region, marker })
       })
     }
 
-    // Watch for trending locations changes
-    watch(() => props.trendingLocations, () => {
-      updateMarkers()
-    }, { deep: true })
-
-    // Watch for external selection changes (e.g. chip removed from SearchBar)
+    watch(() => props.trendingLocations, updateMarkers, { deep: true })
     watch(() => props.activeLocations, (newLocs) => {
       selectedLocations.value = [...newLocs]
       updateMarkers()
     }, { deep: true })
 
-    onMounted(() => {
-      initMap()
-    })
+    onMounted(() => { initMap() })
 
-    return {
-      mapContainer,
-      selectedLocations,
-      mapHeight,
-      removeLocation,
-      clearSelections
-    }
+    return { mapContainer, selectedLocations, mapHeight, removeLocation, clearSelections }
   }
 }
 </script>
 
 <style scoped>
-/* ============================================
-   MAP CONTAINER - Mobile-First Design
-   ============================================ */
 .map-container {
-  background: rgba(26, 26, 46, 0.6);
+  background: rgba(10, 14, 26, 0.8);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  padding: 12px 14px 0;
+  margin-bottom: 0;
 }
 
 .map-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .map-header h5 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: #ffffff;
   display: flex;
   align-items: center;
+  gap: 5px;
 }
 
-.map-header i {
-  color: #06b6d4;
-}
+.map-header i { color: #06b6d4; }
 
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 0.875rem;
-  border-radius: 8px;
+.map-legend-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(245, 117, 108, 0.15);
-  border: 1px solid rgba(245, 117, 108, 0.3);
-  color: #f5756c;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-sm:active {
-  background: rgba(245, 117, 108, 0.25);
-  transform: scale(0.95);
-}
-
-/* ============================================
-   SELECTED LOCATIONS - Mobile-First
-   ============================================ */
-.selected-locations {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  margin-bottom: 12px;
-}
-
-.selected-locations small {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-.selected-locations .badge {
-  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.selected-locations .badge i {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.selected-locations .badge i:active {
-  transform: scale(0.9);
-}
-
-/* ============================================
-   MAP - Mobile-First
-   ============================================ */
-.map {
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ============================================
-   MAP LEGEND - Mobile-First
-   ============================================ */
-.map-legend {
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 12px;
-}
-
-.map-legend small {
-  color: #718096;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.map-legend i {
-  color: #06b6d4;
+  gap: 12px;
 }
 
 .legend-item {
-  margin-left: 16px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-/* ============================================
-   CUSTOM MARKERS - Mobile-Optimized
-   ============================================ */
+.map {
+  border-radius: 4px 4px 0 0;
+  overflow: hidden;
+}
+
+/* ── Custom markers (dark style) ── */
 :deep(.custom-marker) {
   background: none;
   border: none;
@@ -375,11 +246,11 @@ export default {
   height: 42px;
   position: relative;
   color: #f5756c;
-  font-size: 2rem;
+  font-size: 1.8rem;
   text-align: center;
-  transition: all 0.3s;
+  transition: all 0.25s;
   cursor: pointer;
-  filter: drop-shadow(0 2px 8px rgba(245, 117, 108, 0.4));
+  filter: drop-shadow(0 2px 6px rgba(245,117,108,0.5));
 }
 
 :deep(.marker-pin:hover) {
@@ -390,44 +261,41 @@ export default {
 :deep(.marker-pin.selected) {
   color: #3b82f6;
   transform: scale(1.3);
-  animation: pulse 2s infinite;
+  filter: drop-shadow(0 2px 10px rgba(59,130,246,0.7));
 }
 
 :deep(.marker-label) {
   position: absolute;
-  top: 45px;
+  top: 43px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(10, 10, 15, 0.9);
-  backdrop-filter: blur(8px);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  background: rgba(8, 12, 22, 0.92);
+  backdrop-filter: blur(6px);
+  padding: 3px 7px;
+  border-radius: 3px;
+  font-size: 10px;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   pointer-events: none;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 :deep(.marker-label.selected) {
-  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  background: linear-gradient(135deg, #2563eb, #0891b2);
+  border-color: transparent;
   color: white;
-  border: none;
 }
 
-/* Trending marker styles */
 :deep(.marker-pin.trending) {
   position: relative;
-  animation: pulse-ring 2s infinite;
 }
 
-:deep(.marker-pin.trending .alarm-bell) {
+:deep(.alarm-bell) {
   color: #ff4444;
-  animation: shake 2s ease-in-out infinite;
-  font-size: 1.5rem;
-  filter: drop-shadow(0 2px 8px rgba(255, 68, 68, 0.6));
+  animation: shake 2.5s ease-in-out infinite;
+  font-size: 1.4rem;
+  filter: drop-shadow(0 2px 8px rgba(255,68,68,0.7));
 }
 
 :deep(.marker-pin.trending.selected .alarm-bell) {
@@ -436,125 +304,39 @@ export default {
 
 :deep(.trending-count) {
   position: absolute;
-  top: -8px;
+  top: -6px;
   right: -8px;
   background: #ff4444;
   color: white;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  font-size: 10px;
-  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.9);
+  border: 1.5px solid rgba(255,255,255,0.85);
   z-index: 10;
 }
 
 :deep(.marker-label.trending) {
-  background: rgba(255, 68, 68, 0.15);
-  border: 1px solid rgba(255, 68, 68, 0.5);
-  color: #ff4444;
+  background: rgba(255,68,68,0.15);
+  border-color: rgba(255,68,68,0.4);
+  color: #ff6666;
   font-weight: 700;
 }
 
-/* ============================================
-   TABLET ENHANCEMENT (min-width: 768px)
-   ============================================ */
-@media (min-width: 768px) {
-  .map-container {
-    padding: 20px;
-  }
-
-  .map-header h5 {
-    font-size: 1.25rem;
-  }
-}
-
-/* ============================================
-   DESKTOP ENHANCEMENT (min-width: 1024px)
-   ============================================ */
-@media (min-width: 1024px) {
-  .map-container {
-    backdrop-filter: blur(12px);
-    border-radius: 24px;
-    padding: 24px;
-  }
-
-  .btn-sm:hover {
-    background: rgba(245, 117, 108, 0.25);
-    transform: translateY(-2px);
-  }
-
-  .btn-sm:active {
-    transform: scale(0.95);
-  }
-}
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
 @keyframes shake {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  10%, 30%, 50%, 70%, 90% {
-    transform: rotate(-10deg);
-  }
-  20%, 40%, 60%, 80% {
-    transform: rotate(10deg);
-  }
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50%, 70%, 90% { transform: rotate(-8deg); }
+  20%, 40%, 60%, 80% { transform: rotate(8deg); }
 }
 
-@keyframes pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 15px rgba(255, 68, 68, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
-  }
-}
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
 @media (prefers-reduced-motion: reduce) {
-  :deep(.marker-pin),
-  :deep(.marker-pin.selected),
-  :deep(.marker-pin.trending),
-  :deep(.alarm-bell) {
+  :deep(.marker-pin), :deep(.alarm-bell) {
     animation: none !important;
     transition: none;
-  }
-}
-
-/* Mobile: Reduce animation intensity */
-@media (max-width: 768px) {
-  @keyframes shake {
-    0%, 100% {
-      transform: rotate(0deg);
-    }
-    25%, 75% {
-      transform: rotate(-5deg);
-    }
-    50% {
-      transform: rotate(5deg);
-    }
   }
 }
 </style>

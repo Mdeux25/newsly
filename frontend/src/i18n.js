@@ -31,7 +31,11 @@ export const translations = {
       showing: 'Showing',
       of: 'of',
       articles: 'articles',
-      noDescription: 'No description available.'
+      noDescription: 'No description available.',
+      share: 'Share',
+      factCheck: 'Fact Check',
+      sources: 'sources',
+      confirmedBy: 'Confirmed by'
     },
     tweets: {
       viewTweet: 'View Tweet'
@@ -88,7 +92,11 @@ export const translations = {
       showing: 'عرض',
       of: 'من',
       articles: 'مقالة',
-      noDescription: 'لا يوجد وصف.'
+      noDescription: 'لا يوجد وصف.',
+      share: 'مشاركة',
+      factCheck: 'تحقق',
+      sources: 'مصادر',
+      confirmedBy: 'مؤكد من'
     },
     tweets: {
       viewTweet: 'عرض التغريدة'

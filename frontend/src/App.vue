@@ -13,9 +13,11 @@
 
         <div class="header-actions">
           <!-- Language Toggle -->
-          <button class="icon-button" @click="toggleUILanguage" aria-label="Toggle language">
-            <i class="bi bi-translate"></i>
-          </button>
+          <div class="lang-toggle" @click="toggleUILanguage" role="button" aria-label="Toggle language">
+            <span :class="{ active: uiLanguage !== 'ar' }">EN</span>
+            <span class="lang-sep">|</span>
+            <span :class="{ active: uiLanguage === 'ar' }">عربي</span>
+          </div>
 
           <!-- Dark Mode Toggle -->
           <button class="icon-button theme-toggle" @click="toggleDarkMode" aria-label="Toggle theme">
@@ -31,34 +33,49 @@
           />
         </div>
       </div>
+
+      <!-- Category Strip -->
+      <div class="header-categories">
+        <button
+          v-for="cat in categories"
+          :key="cat.key"
+          class="cat-pill"
+          :class="{ active: searchTopic === cat.key && !selectedMapLocations.length }"
+          @click="setCategory(cat.key)"
+        >
+          {{ uiLanguage === 'ar' ? cat.ar : cat.en }}
+        </button>
+      </div>
     </header>
 
     <!-- Main Content -->
     <main class="content-wrapper">
-      <!-- Interactive Map -->
-      <NewsMap
-        :uiLanguage="uiLanguage"
-        :trendingLocations="trendingLocations"
-        :activeLocations="selectedMapLocations"
-        @locations-changed="handleLocationsChanged"
-        @trending-topic-selected="handleTrendingTopicSelected"
-      />
-
-      <!-- Search and Filters -->
-      <SearchBar
-        v-model:topic="searchTopic"
-        v-model:language="selectedLanguage"
-        v-model:hours="selectedHours"
-        v-model:smartSearch="smartSearchEnabled"
-        :trending="trending"
-        :uiLanguage="uiLanguage"
-        :selectedCountries="selectedMapLocations"
-        @search="fetchNews(true)"
-        @refresh="refreshNow"
-        @remove-country="removeCountry"
-        @clear-countries="clearCountries"
-        @trending-selected="handleTrendingTopicSelected"
-      />
+      <!-- Map + Search overlaid -->
+      <div class="map-search-stack">
+        <NewsMap
+          :uiLanguage="uiLanguage"
+          :trendingLocations="trendingLocations"
+          :activeLocations="selectedMapLocations"
+          @locations-changed="handleLocationsChanged"
+          @trending-topic-selected="handleTrendingTopicSelected"
+        />
+        <div class="search-overlay">
+          <SearchBar
+            v-model:topic="searchTopic"
+            v-model:language="selectedLanguage"
+            v-model:hours="selectedHours"
+            v-model:smartSearch="smartSearchEnabled"
+            :trending="trending"
+            :uiLanguage="uiLanguage"
+            :selectedCountries="selectedMapLocations"
+            @search="fetchNews(true)"
+            @refresh="refreshNow"
+            @remove-country="removeCountry"
+            @clear-countries="clearCountries"
+            @trending-selected="handleTrendingTopicSelected"
+          />
+        </div>
+      </div>
 
       <!-- Bilingual News Summary (shown on map click or trending topic click) -->
       <NewsSummary
@@ -106,7 +123,7 @@
         <!-- Feed Grid -->
         <div class="feed-grid">
           <template v-for="(item, index) in combinedFeed" :key="item.type === 'article' ? item.url : item.id">
-            <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" :featured="index === firstArticleIndex" />
+            <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" :featured="index === firstArticleIndex" @open-detail="handleOpenDetail" />
             <TweetCard v-else-if="item.type === 'tweet'" :tweet="item" />
           </template>
         </div>
@@ -123,6 +140,30 @@
       <!-- Footer -->
       <AppFooter :uiLanguage="uiLanguage" @open-policy="activePolicy = $event" />
     </main>
+
+    <!-- Article Detail Modal: opened via card tap -->
+    <ArticleDetailModal
+      v-if="activeDetailArticle"
+      :article="activeDetailArticle"
+      :uiLanguage="uiLanguage"
+      @close="activeDetailArticle = null"
+    />
+
+    <!-- Article Detail Modal: opened via shared Newsly link (#article=slug) -->
+    <ArticleDetailModal
+      v-else-if="articleDetailSlug"
+      :articleSlug="articleDetailSlug"
+      :uiLanguage="uiLanguage"
+      @close="closeArticleDetail"
+    />
+
+    <!-- Article Detail Modal: opened via shared Newsly link (#article=BASE64) -->
+    <ArticleDetailModal
+      v-else-if="articleDetailUrl"
+      :articleUrl="articleDetailUrl"
+      :uiLanguage="uiLanguage"
+      @close="closeArticleDetail"
+    />
 
     <!-- Policy Modal -->
     <PolicyModal
@@ -162,6 +203,7 @@ import Pagination from './components/Pagination.vue'
 import NewsSummary from './components/NewsSummary.vue'
 import AppFooter from './components/AppFooter.vue'
 import PolicyModal from './components/PolicyModal.vue'
+import ArticleDetailModal from './components/ArticleDetailModal.vue'
 
 export default {
   name: 'App',
@@ -174,7 +216,8 @@ export default {
     Pagination,
     NewsSummary,
     AppFooter,
-    PolicyModal
+    PolicyModal,
+    ArticleDetailModal
   },
   setup() {
     const articles = ref([])
@@ -189,6 +232,13 @@ export default {
     const uiLanguage = ref(localStorage.getItem('locale') || 'en')
     const t = computed(() => translations[uiLanguage.value] || translations.en)
     const activePolicy = ref(null) // 'privacy' | 'terms' | 'cookies' | 'dmca'
+    const articleDetailUrl = ref(null)  // set from #article=BASE64 hash
+    const articleDetailSlug = ref(null) // set from #article=slug hash
+    const activeDetailArticle = ref(null) // set when user taps a card in the feed
+
+    const handleOpenDetail = (article) => {
+      activeDetailArticle.value = article
+    }
     const isDarkMode = ref(true) // Default to dark mode
     const isLoading = ref(false)
     const error = ref(null)
@@ -223,6 +273,24 @@ export default {
       } finally {
         summaryLoading.value = false
       }
+    }
+
+    const categories = [
+      { key: '', en: 'All', ar: 'الكل' },
+      { key: 'world', en: 'World', ar: 'العالم' },
+      { key: 'politics', en: 'Politics', ar: 'سياسة' },
+      { key: 'business', en: 'Business', ar: 'أعمال' },
+      { key: 'technology', en: 'Tech', ar: 'تقنية' },
+      { key: 'sports', en: 'Sports', ar: 'رياضة' },
+      { key: 'health', en: 'Health', ar: 'صحة' },
+    ]
+
+    const setCategory = (key) => {
+      searchTopic.value = key
+      selectedMapLocations.value = []
+      fetchNews(true)
+      if (key) fetchSummary(null, key, key)
+      else summaryData.value = null
     }
 
     const toggleUILanguage = () => {
@@ -284,6 +352,28 @@ export default {
       )
     })
 
+    // Enrich articles with multi-source cluster count
+    const STOP = new Set(['about','after','been','before','could','every','first','found','given','going','having','makes','other','people','state','their','there','these','those','three','under','where','which','while','would'])
+    const articlesWithMeta = computed(() =>
+      articles.value.map(article => {
+        const words = (article.title || '')
+          .toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/)
+          .filter(w => w.length > 4 && !STOP.has(w))
+        const wordSet = new Set(words)
+        const sameStory = articles.value.filter(other => {
+          if (other.url === article.url || other.source === article.source) return false
+          const overlap = (other.title || '').toLowerCase().replace(/[^a-z\s]/g, '')
+            .split(/\s+/).filter(w => wordSet.has(w)).length
+          return overlap >= 3
+        })
+        return {
+          ...article,
+          confirmedBy: sameStory.length + 1,
+          confirmedSources: [...new Set([article.source, ...sameStory.map(m => m.source)].filter(Boolean))]
+        }
+      })
+    )
+
     const firstArticleIndex = computed(() =>
       combinedFeed.value.findIndex(item => item.type === 'article')
     )
@@ -293,7 +383,7 @@ export default {
       const feed = []
 
       // Add articles with type marker
-      articles.value.forEach(article => {
+      articlesWithMeta.value.forEach(article => {
         feed.push({ ...article, type: 'article' })
       })
 
@@ -427,6 +517,14 @@ export default {
       fetchSummary(null, topic, topic)
     }
 
+    const closeArticleDetail = () => {
+      articleDetailUrl.value = null
+      articleDetailSlug.value = null
+      if (window.location.hash.startsWith('#article=')) {
+        history.replaceState(null, '', window.location.pathname)
+      }
+    }
+
     const refreshNow = () => {
       fetchNews(true) // Reset to page 1 on refresh
       fetchTrending()
@@ -453,6 +551,22 @@ export default {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       isDarkMode.value = savedMode !== null ? savedMode === 'true' : prefersDark
       document.documentElement.classList.toggle('dark', isDarkMode.value)
+
+      // Detect shared article link: /#article=slug or /#article=BASE64_URL
+      const hash = window.location.hash
+      if (hash.startsWith('#article=')) {
+        const identifier = hash.slice(9)
+        if (/^[a-z0-9][a-z0-9-]{2,79}$/.test(identifier)) {
+          // New slug format — pass via separate ref
+          articleDetailSlug.value = identifier
+        } else {
+          try {
+            articleDetailUrl.value = decodeURIComponent(atob(identifier))
+          } catch (e) {
+            console.warn('Invalid article hash', e)
+          }
+        }
+      }
 
       fetchNews()
       fetchTrending()
@@ -499,7 +613,14 @@ export default {
       totalArticles,
       handlePageChange,
       activePolicy,
-      firstArticleIndex
+      firstArticleIndex,
+      articleDetailUrl,
+      articleDetailSlug,
+      activeDetailArticle,
+      closeArticleDetail,
+      handleOpenDetail,
+      categories,
+      setCategory
     }
   }
 }
@@ -591,6 +712,62 @@ export default {
   gap: 8px;
 }
 
+/* Language toggle pill */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 0 12px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.3);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+  user-select: none;
+}
+.lang-toggle:hover { background: rgba(255, 255, 255, 0.12); }
+.lang-toggle .active { color: #3b82f6; }
+.lang-sep { color: rgba(255, 255, 255, 0.2); font-size: 0.6rem; }
+
+/* Category strip */
+.header-categories {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 0 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.header-categories::-webkit-scrollbar { display: none; }
+
+.cat-pill {
+  flex-shrink: 0;
+  padding: 4px 13px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cat-pill:active { transform: scale(0.95); }
+.cat-pill.active {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: #60a5fa;
+}
+
 /* Touch-optimized icon buttons */
 .icon-button {
   width: 44px;
@@ -643,6 +820,11 @@ export default {
     transform: translateY(-2px);
   }
 
+  .cat-pill:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.75);
+  }
+
   .icon-button:active {
     transform: scale(0.95);
   }
@@ -652,7 +834,7 @@ export default {
    CONTENT WRAPPER - Mobile-First Spacing
    ============================================ */
 .content-wrapper {
-  padding-top: calc(56px + max(12px, env(safe-area-inset-top)) + 16px);
+  padding-top: calc(56px + 38px + max(12px, env(safe-area-inset-top)) + 16px);
   padding-bottom: calc(72px + max(16px, env(safe-area-inset-bottom)));
   padding-left: max(16px, env(safe-area-inset-left));
   padding-right: max(16px, env(safe-area-inset-right));
@@ -762,6 +944,77 @@ export default {
 .empty-state p {
   color: var(--text-secondary);
   font-size: 0.875rem;
+}
+
+/* ============================================
+   MAP + SEARCH STACK - Search pinned to bottom of map
+   ============================================ */
+.map-search-stack {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* SearchBar anchored to the bottom edge of the map */
+.search-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Compact, bottom-docked search bar */
+.search-overlay :deep(.search-container) {
+  margin-bottom: 0;
+  border-radius: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  padding: 10px 12px 8px;
+  background: rgba(8, 12, 22, 0.88);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Compact inputs */
+.search-overlay :deep(.search-input) {
+  height: 34px;
+  font-size: 0.8125rem;
+  border-radius: 3px;
+}
+
+.search-overlay :deep(.search-button) {
+  height: 34px;
+  font-size: 0.8125rem;
+  border-radius: 3px;
+}
+
+.search-overlay :deep(.search-form) {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.search-overlay :deep(.filter-select) {
+  height: 30px;
+  font-size: 0.775rem;
+  border-radius: 3px;
+  padding: 0 8px;
+}
+
+.search-overlay :deep(.filter-row) {
+  margin-bottom: 0;
+  gap: 8px;
+}
+
+.search-overlay :deep(.filter-label) {
+  font-size: 0.6rem;
+  margin-bottom: 2px;
+}
+
+/* Hide trending section — too tall for map overlay */
+.search-overlay :deep(.trending-section) {
+  display: none;
 }
 
 /* ============================================

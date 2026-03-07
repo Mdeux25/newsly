@@ -16,9 +16,15 @@
       <div class="image-gradient-overlay"></div>
 
       <!-- Source Badge Overlay -->
-      <span class="source-badge">{{ article.source || 'News' }}</span>
+      <span class="source-badge" :class="sourceTier ? `tier-${sourceTier}` : ''">
+        <i v-if="sourceTier === 'verified'" class="bi bi-patch-check-fill tier-icon"></i>
+        {{ article.source || 'News' }}
+      </span>
       <span v-if="article.country" class="country-badge">{{ countryFlag }} {{ article.country.toUpperCase() }}</span>
     </div>
+
+    <!-- Share Modal -->
+    <ShareModal v-if="showShare" :article="article" :uiLanguage="uiLanguage" @close="showShare = false" />
 
     <!-- Card Content -->
     <div class="card-content">
@@ -40,6 +46,10 @@
         </span>
         <span v-if="article.country" class="meta-item">
           {{ countryFlag }} {{ article.country.toUpperCase() }}
+        </span>
+        <span v-if="article.confirmedBy > 2" class="meta-item confirmed-chip">
+          <i class="bi bi-check-all"></i>
+          {{ article.confirmedBy }} {{ t.news.sources }}
         </span>
       </div>
 
@@ -63,6 +73,21 @@
           <i class="bi bi-arrow-counterclockwise"></i>
           {{ t.news.original }}
         </button>
+        <button class="action-button share-action" @click.stop="showShare = true">
+          <i class="bi bi-share"></i>
+          {{ t.news.share }}
+        </button>
+        <a
+          v-if="article.language !== 'ar'"
+          class="action-button fact-action"
+          :href="`https://toolbox.google.com/factcheck/explorer/search/${encodeURIComponent(article.title)}`"
+          target="_blank"
+          rel="noopener noreferrer"
+          @click.stop
+        >
+          <i class="bi bi-shield-check"></i>
+          {{ t.news.factCheck }}
+        </a>
       </div>
     </div>
   </article>
@@ -72,9 +97,13 @@
 import { computed, ref } from 'vue'
 import axios from 'axios'
 import { translations } from '../i18n'
+import sourceReputation from '../data/sourceReputation.json'
+import ShareModal from './ShareModal.vue'
 
 export default {
   name: 'NewsCard',
+  components: { ShareModal },
+  emits: ['open-detail'],
   props: {
     article: {
       type: Object,
@@ -89,10 +118,24 @@ export default {
       default: false
     }
   },
-  setup(props) {
+  setup(props, { emit }) {
     const isTranslating = ref(false)
     const isTranslated = ref(false)
     const imageError = ref(false)
+    const showShare = ref(false)
+
+    // Normalize source name for fuzzy matching (DB stores e.g. "theguardiantheguardian")
+    const _norm = (s) => (s || '').toLowerCase().replace(/[^a-z]/g, '')
+    const _repEntries = Object.entries(sourceReputation).map(([k, v]) => [_norm(k), v])
+    const sourceTier = computed(() => {
+      const norm = _norm(props.article.source)
+      if (!norm) return null
+      const direct = _repEntries.find(([k]) => k === norm)
+      if (direct) return direct[1]
+      // substring: "theguardiantheguardian" matches "theguardian"
+      const sub = _repEntries.find(([k]) => k.length > 4 && (norm.includes(k) || k.includes(norm)))
+      return sub ? sub[1] : null
+    })
     const translatedTitle = ref('')
     const translatedDescription = ref('')
     const originalTitle = ref(props.article.title)
@@ -165,7 +208,7 @@ export default {
     }
 
     const openArticle = () => {
-      window.open(props.article.url, '_blank', 'noopener,noreferrer')
+      emit('open-detail', props.article)
     }
 
     const displayTitle = computed(() => {
@@ -189,7 +232,9 @@ export default {
       showOriginal,
       openArticle,
       displayTitle,
-      displayDescription
+      displayDescription,
+      showShare,
+      sourceTier
     }
   }
 }
@@ -379,6 +424,58 @@ export default {
 .action-button.secondary:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+}
+
+/* ── Source tier badges ── */
+.source-badge.tier-verified {
+  background: rgba(251, 191, 36, 0.22);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  color: #fef3c7;
+}
+
+.source-badge.tier-trusted {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.tier-icon {
+  font-size: 0.6rem;
+  vertical-align: middle;
+  margin-right: 2px;
+}
+
+/* ── Confirmed-by chip ── */
+.confirmed-chip {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+
+.confirmed-chip i {
+  color: #4ade80 !important;
+}
+
+/* ── Share button ── */
+.action-button.share-action {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+/* ── Fact-check button ── */
+.action-button.fact-action {
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+}
+
+.action-button.fact-action:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* Pre-computed translation — amber accent */

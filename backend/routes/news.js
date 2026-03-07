@@ -127,8 +127,18 @@ router.get('/news', async (req, res) => {
     // Deduplicate by title (simple similarity check)
     const uniqueArticles = deduplicateArticles(articles);
 
-    // Sort by publication date
-    uniqueArticles.sort((a, b) => new Date(b.publishedAt || b.published_at) - new Date(a.publishedAt || a.published_at));
+    // When language is "both", Arabic articles come first, then sort by date within each group
+    if (language === 'both') {
+      uniqueArticles.sort((a, b) => {
+        const aAr = a.language === 'ar' ? 0 : 1;
+        const bAr = b.language === 'ar' ? 0 : 1;
+        if (aAr !== bAr) return aAr - bAr;
+        return new Date(b.publishedAt || b.published_at) - new Date(a.publishedAt || a.published_at);
+      });
+    } else {
+      // Sort by publication date
+      uniqueArticles.sort((a, b) => new Date(b.publishedAt || b.published_at) - new Date(a.publishedAt || a.published_at));
+    }
 
     res.json({
       success: true,
@@ -485,6 +495,40 @@ router.get('/news/summary', async (req, res) => {
   } catch (error) {
     console.error('Summary error:', error.message);
     res.status(500).json({ success: false, error: 'Failed to generate summary' });
+  }
+});
+
+// Fetch a single article by its original URL or title slug (used for Newsly share-link detail pages)
+router.get('/article', async (req, res) => {
+  try {
+    const { url, slug } = req.query;
+    if (!url && !slug) return res.status(400).json({ success: false, error: 'url or slug is required' });
+
+    const article = slug
+      ? await Article.findBySlug(decodeURIComponent(slug))
+      : await Article.findByUrl(decodeURIComponent(url));
+    if (!article) return res.status(404).json({ success: false, error: 'Article not found' });
+
+    res.json({
+      success: true,
+      article: {
+        title: article.title,
+        description: article.description,
+        title_ar: article.title_ar || null,
+        description_ar: article.description_ar || null,
+        url: article.url,
+        image: article.image_url,
+        source: article.source,
+        author: article.author,
+        publishedAt: article.published_at,
+        language: article.language,
+        country: article.country,
+        category: article.category
+      }
+    });
+  } catch (error) {
+    console.error('Article fetch error:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to fetch article' });
   }
 });
 
