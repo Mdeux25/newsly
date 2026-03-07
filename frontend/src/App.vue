@@ -415,7 +415,7 @@ export default {
 
     const handlePageChange = (page) => {
       currentPage.value = page
-      fetchNews()
+      fetchNews(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
