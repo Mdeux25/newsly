@@ -86,8 +86,8 @@
         @dismiss="summaryData = null"
       />
 
-      <!-- Ad slot: below AI summary (high-visibility, above fold) -->
-      <AdUnit ad-slot="XXXXXXXXXX" format="auto" :full-width="true" />
+      <!-- Ad slot: below AI summary (full-width banner) -->
+      <AdUnit ad-slot="XXXXXXXXXX" format="horizontal" :banner="true" />
 
       <!-- Error Message -->
       <div v-if="error" class="error-banner">
@@ -153,12 +153,11 @@
             <template v-for="(item, index) in visibleFeed" :key="item.type === 'article' ? item.url : item.id">
               <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" :featured="index === firstArticleIndex" @open-detail="handleOpenDetail" />
               <TweetCard v-else-if="item.type === 'tweet'" :tweet="item" />
-              <!-- Ad unit every 5 items (desktop grid only — skipped inside mobile snap scroll) -->
+              <!-- Ad card every 5 items — fits in swipe deck on mobile, grid on desktop -->
               <AdUnit
                 v-if="index > 0 && index % 5 === 0"
                 ad-slot="XXXXXXXXXX"
-                format="auto"
-                :full-width="true"
+                format="rectangle"
                 class="feed-ad"
               />
             </template>
@@ -1245,7 +1244,8 @@ export default {
 
 /* Each card fills the viewport width */
 .feed-grid :deep(.news-card),
-.feed-grid :deep(.tweet-card) {
+.feed-grid :deep(.tweet-card),
+.feed-grid :deep(.ad-card) {
   flex-shrink: 0;
   width: 100vw;
   scroll-snap-align: start;
@@ -1287,11 +1287,6 @@ export default {
 /* Hide pagination on mobile — swipe + auto-load handles it */
 .pagination-desktop { display: none; }
 
-/* Hide feed ads inside mobile swipe deck — they break snap scroll */
-.feed-ad {
-  display: none;
-}
-
 /* ── Tablet: 2-column grid ── */
 @media (min-width: 768px) {
   .feed-grid {
@@ -1305,7 +1300,8 @@ export default {
   }
 
   .feed-grid :deep(.news-card),
-  .feed-grid :deep(.tweet-card) {
+  .feed-grid :deep(.tweet-card),
+  .feed-grid :deep(.ad-card) {
     width: auto;
     border-radius: 6px;
     border-left: revert;
@@ -1318,11 +1314,6 @@ export default {
   .swipe-counter { display: none; }
   .pagination-desktop { display: block; }
 
-  /* Show feed ads in desktop/tablet grid — spans full row */
-  .feed-ad {
-    display: block;
-    grid-column: 1 / -1;
-  }
 }
 
 /* ── Desktop: 3-col editorial grid ── */

@@ -1,5 +1,6 @@
 <template>
-  <div v-if="adEnabled" class="ad-unit" :class="`ad-unit--${format}`">
+  <div v-if="adEnabled" class="ad-card" :class="[`ad-card--${format}`, { 'ad-card--banner': banner }]">
+    <span class="ad-sponsored-label">Sponsored</span>
     <ins
       class="adsbygoogle"
       style="display:block"
@@ -29,6 +30,12 @@ export default {
     fullWidth: {
       type: Boolean,
       default: false
+    },
+    // banner=true: full-width strip (e.g. below NewsSummary)
+    // banner=false (default): card-style, fits in the feed grid/swipe deck
+    banner: {
+      type: Boolean,
+      default: false
     }
   },
   setup() {
@@ -50,18 +57,57 @@ export default {
 </script>
 
 <style scoped>
-.ad-unit {
-  width: 100%;
-  min-height: 90px;
-  background: transparent;
-  margin: 8px 0;
-}
-
-.ad-unit--rectangle {
+/* ── Card style (in-feed, matches NewsCard) ── */
+.ad-card {
+  position: relative;
+  background: rgba(18, 22, 36, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
   min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.ad-unit--horizontal {
+/* ── Sponsored label (top-left, mirrors source-badge) ── */
+.ad-sponsored-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(100, 116, 139, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── Banner variant (full-width strip, e.g. below NewsSummary) ── */
+.ad-card--banner {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
   min-height: 90px;
+  margin: 8px 0;
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ad-card--banner .ad-sponsored-label {
+  font-size: 0.6rem;
+  top: 4px;
+  left: 8px;
+}
+
+/* ins fills the card */
+.ad-card .adsbygoogle {
+  width: 100%;
 }
 </style>
