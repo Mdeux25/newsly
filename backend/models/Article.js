@@ -94,6 +94,66 @@ class Article {
     return rows[0] || null;
   }
 
+  /**
+   * Semantic search using cosine similarity on embedding vectors.
+   * Falls back gracefully if no embeddings exist yet.
+   */
+  static async semanticSearch(queryVector, filters = {}, limit = 20, offset = 0) {
+    const { language, minDate } = filters;
+    const vectorStr = `[${queryVector.join(',')}]`;
+
+    let conditions = 'embedding IS NOT NULL';
+    const params = [vectorStr];
+
+    if (language) {
+      conditions += ' AND language = ?';
+      params.push(language);
+    }
+    if (minDate) {
+      conditions += ' AND published_at >= ?';
+      params.push(minDate);
+    }
+
+    params.push(limit, offset);
+
+    const [rows] = await db.query(
+      `SELECT *, (embedding <=> ?) AS distance
+       FROM articles
+       WHERE ${conditions}
+       ORDER BY distance ASC
+       LIMIT ? OFFSET ?`,
+      params
+    );
+    return rows;
+  }
+
+  static async countSemantic(queryVector, filters = {}) {
+    const { language, minDate } = filters;
+    const vectorStr = `[${queryVector.join(',')}]`;
+
+    let conditions = 'embedding IS NOT NULL';
+    const params = [vectorStr];
+
+    if (language) {
+      conditions += ' AND language = ?';
+      params.push(language);
+    }
+    if (minDate) {
+      conditions += ' AND published_at >= ?';
+      params.push(minDate);
+    }
+
+    params.push(0.6); // max distance threshold for relevance
+
+    const [rows] = await db.query(
+      `SELECT COUNT(*)::int AS total
+       FROM articles
+       WHERE ${conditions} AND (embedding <=> ?) < ?`,
+      [...params.slice(0, -1), params[params.length - 1]]
+    );
+    return rows[0]?.total || 0;
+  }
+
   static async findBySlug(slug) {
     const terms = slug.split('-').filter(w => w.length > 2);
     if (terms.length === 0) return null;

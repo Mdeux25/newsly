@@ -3,6 +3,8 @@ const FetchLog = require('../models/FetchLog');
 const ApiQuota = require('../models/ApiQuota');
 const { fetchNews: fetchFromNewsAPI } = require('../services/newsapi');
 const { fetchNews: fetchFromNewsData } = require('../services/newsdata');
+const { fetchNews: fetchFromAJRSS } = require('../services/aljazeera');
+const { fetchNews: fetchFromRapidAPIArabic } = require('../services/rapidapi-arabic');
 
 // Configuration
 const FETCH_TOPICS = [
@@ -106,6 +108,8 @@ async function fetchFromSingleAPI(apiName, topic, country, language = 'en') {
       articles = await fetchFromNewsData(topic, country, language, 10);
     } else if (apiName === 'NewsAPI') {
       articles = await fetchFromNewsAPI(topic, getRegion(country), 50, language, country);
+    } else if (apiName === 'RapidAPIArabic') {
+      articles = await fetchFromRapidAPIArabic(topic, 20);
     }
 
     // Increment quota usage
@@ -142,7 +146,12 @@ async function fetchFromSingleAPI(apiName, topic, country, language = 'en') {
     }
 
     // Log the fetch
-    const endpoint = apiName === 'NewsData' ? '/api/1/news' : '/v2/top-headlines';
+    const endpointMap = {
+      NewsData: '/api/1/news',
+      NewsAPI: '/v2/top-headlines',
+      RapidAPIArabic: '/akhbar'
+    };
+    const endpoint = endpointMap[apiName] || '/unknown';
     await FetchLog.create({
       api_name: apiName,
       endpoint,
@@ -162,7 +171,12 @@ async function fetchFromSingleAPI(apiName, topic, country, language = 'en') {
     console.error(`❌ [${apiName}] Error fetching ${topic} for ${country}:`, error.message);
 
     // Log the error
-    const endpoint = apiName === 'NewsData' ? '/api/1/news' : '/v2/top-headlines';
+    const endpointMap = {
+      NewsData: '/api/1/news',
+      NewsAPI: '/v2/top-headlines',
+      RapidAPIArabic: '/akhbar'
+    };
+    const endpoint = endpointMap[apiName] || '/unknown';
     await FetchLog.create({
       api_name: apiName,
       endpoint,
@@ -218,6 +232,20 @@ async function fetchAllNews() {
     }
   }
 
+  // Fetch from Al Jazeera RSS (EN + AR) — free, no quota
+  console.log('\n📡 Fetching from Al Jazeera RSS...');
+  const ajStored = await fetchFromRSSSources();
+  totalStored += ajStored;
+
+  // Fetch from RapidAPI Arabic News for top topics
+  console.log('\n📡 Fetching from RapidAPI Arabic News...');
+  for (const { topic } of sortedTopics.slice(0, 3)) { // top 3 priority topics only
+    const result = await fetchFromSingleAPI('RapidAPIArabic', topic, null, 'ar');
+    totalFetched += result.fetched;
+    totalStored += result.stored;
+    await sleep(1000);
+  }
+
   const totalTime = ((Date.now() - overallStart) / 1000).toFixed(2);
 
   console.log('\n✅ ===== Fetch Cycle Complete =====');
@@ -239,6 +267,67 @@ async function fetchAllNews() {
   console.log('=====================================\n');
 
   return { totalFetched, totalStored };
+}
+
+/**
+ * Fetch from RSS sources (Al Jazeera EN + AR) — called once per cycle
+ */
+async function fetchFromRSSSources() {
+  const startTime = Date.now();
+  let totalStored = 0;
+
+  for (const language of ['en', 'ar']) {
+    try {
+      const articles = await fetchFromAJRSS(language, 30);
+      if (!articles.length) continue;
+
+      const articlesWithMetadata = articles.map(article => ({
+        title: article.title,
+        description: article.description,
+        url: article.url,
+        image_url: article.image,
+        source: article.source,
+        author: article.author || null,
+        content: article.content || null,
+        published_at: article.publishedAt || new Date(),
+        country: article.country,
+        language: article.language,
+        region: article.region,
+        category: article.category
+      }));
+
+      const result = await Article.bulkCreate(articlesWithMetadata);
+      totalStored += result.inserted;
+
+      console.log(`✅ [AlJazeeraRSS] Stored ${result.inserted}/${articles.length} articles (${language})`);
+
+      await FetchLog.create({
+        api_name: 'AlJazeeraRSS',
+        endpoint: `/xml/rss/all.xml`,
+        country: 'qa',
+        topic: 'general',
+        language,
+        articles_fetched: articles.length,
+        articles_stored: result.inserted,
+        status: 'success',
+        response_time_ms: Date.now() - startTime
+      });
+    } catch (error) {
+      console.error(`❌ [AlJazeeraRSS] Error (${language}):`, error.message);
+      await FetchLog.create({
+        api_name: 'AlJazeeraRSS',
+        endpoint: `/xml/rss/all.xml`,
+        country: 'qa',
+        topic: 'general',
+        language,
+        status: 'error',
+        error_message: error.message,
+        response_time_ms: Date.now() - startTime
+      });
+    }
+  }
+
+  return totalStored;
 }
 
 /**

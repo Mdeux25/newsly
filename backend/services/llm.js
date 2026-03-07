@@ -563,6 +563,42 @@ function getStats() {
   };
 }
 
+/**
+ * Generate a 768-dim embedding vector for a text string using Gemini text-embedding-004.
+ * Results are cached in memory for 24h (embeddings are deterministic).
+ */
+async function embedText(text) {
+  if (!text || text.trim().length === 0) return null;
+  const key = `emb:${text.slice(0, 200)}`;
+  const cached = memoryCache.get(key);
+  if (cached) return cached;
+
+  const result = await ai.models.embedContent({
+    model: 'text-embedding-004',
+    contents: text.slice(0, 2000)  // API limit
+  });
+  const vector = result.embeddings[0].values;
+  memoryCache.set(key, vector, 86400);  // 24h cache
+  return vector;
+}
+
+/**
+ * Generate and store embedding for a single article by ID.
+ * Uses title + description as the text to embed (multilingual — works for Arabic and English).
+ */
+async function embedArticle(articleId, title, description) {
+  const text = [title, description].filter(Boolean).join(' ').slice(0, 2000);
+  const vector = await embedText(text);
+  if (!vector) return null;
+
+  const db = require('../config/database');
+  await db.query(
+    'UPDATE articles SET embedding = ? WHERE id = ?',
+    [`[${vector.join(',')}]`, articleId]
+  );
+  return vector;
+}
+
 module.exports = {
   translateQuery,
   generateSemanticVariations,
@@ -571,5 +607,7 @@ module.exports = {
   translateArticle,
   batchTranslate,
   getStats,
-  isBudgetExceeded
+  isBudgetExceeded,
+  embedText,
+  embedArticle
 };
