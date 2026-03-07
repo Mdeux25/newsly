@@ -106,4 +106,10 @@ export default {
 }
 
 .ad-card .adsbygoogle { width: 100%; }
+
+@media (max-width: 640px) {
+  .ad-card {
+    min-height: 90px;
+  }
+}
 </style>

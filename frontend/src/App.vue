@@ -78,16 +78,7 @@
         </div>
       </div>
 
-      <!-- Bilingual News Summary (shown on map click or trending topic click) -->
-      <NewsSummary
-        :summary="summaryData"
-        :loading="summaryLoading"
-        :trigger="summaryTrigger"
-        :uiLanguage="uiLanguage"
-        @dismiss="summaryData = null"
-      />
-
-      <!-- Ad slot: below AI summary (full-width banner) -->
+      <!-- Ad slot: below search/map -->
       <AdUnit ad-slot="XXXXXXXXXX" format="horizontal" :banner="true" />
 
       <!-- Error Message -->
@@ -195,6 +186,15 @@
           />
         </div>
       </div>
+      <!-- Bilingual News Summary — last before footer -->
+      <NewsSummary
+        :summary="summaryData"
+        :loading="summaryLoading"
+        :trigger="summaryTrigger"
+        :uiLanguage="uiLanguage"
+        @dismiss="summaryData = null"
+      />
+
       <!-- Footer -->
       <AppFooter :uiLanguage="uiLanguage" @open-policy="activePolicy = $event" />
     </main>
