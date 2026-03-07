@@ -293,7 +293,7 @@ export default {
     const smartSearchEnabled = ref(true) // NEW: Enable smart search by default
     const trendingLocations = ref([]) // NEW: For map visualization
     const selectedMapLocations = ref([])
-    const uiLanguage = ref(localStorage.getItem('locale') || 'en')
+    const uiLanguage = ref(localStorage.getItem('locale') || 'ar')
     const t = computed(() => translations[uiLanguage.value] || translations.en)
     const activePolicy = ref(null) // 'privacy' | 'terms' | 'cookies' | 'dmca'
     const articleDetailUrl = ref(null)  // set from #article=BASE64 hash
