@@ -86,6 +86,9 @@
         @dismiss="summaryData = null"
       />
 
+      <!-- Ad slot: below AI summary (high-visibility, above fold) -->
+      <AdUnit ad-slot="XXXXXXXXXX" format="auto" :full-width="true" />
+
       <!-- Error Message -->
       <div v-if="error" class="error-banner">
         <div class="error-content">
@@ -150,6 +153,14 @@
             <template v-for="(item, index) in visibleFeed" :key="item.type === 'article' ? item.url : item.id">
               <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" :featured="index === firstArticleIndex" @open-detail="handleOpenDetail" />
               <TweetCard v-else-if="item.type === 'tweet'" :tweet="item" />
+              <!-- Ad unit every 5 items (desktop grid only — skipped inside mobile snap scroll) -->
+              <AdUnit
+                v-if="index > 0 && index % 5 === 0"
+                ad-slot="XXXXXXXXXX"
+                format="auto"
+                :full-width="true"
+                class="feed-ad"
+              />
             </template>
             <div class="swipe-sentinel" ref="swipeSentinelRef"></div>
           </div>
@@ -251,6 +262,7 @@ import NewsSummary from './components/NewsSummary.vue'
 import AppFooter from './components/AppFooter.vue'
 import PolicyModal from './components/PolicyModal.vue'
 import ArticleDetailModal from './components/ArticleDetailModal.vue'
+import AdUnit from './components/AdUnit.vue'
 
 export default {
   name: 'App',
@@ -264,7 +276,8 @@ export default {
     NewsSummary,
     AppFooter,
     PolicyModal,
-    ArticleDetailModal
+    ArticleDetailModal,
+    AdUnit
   },
   setup() {
     const articles = ref([])
@@ -1274,6 +1287,11 @@ export default {
 /* Hide pagination on mobile — swipe + auto-load handles it */
 .pagination-desktop { display: none; }
 
+/* Hide feed ads inside mobile swipe deck — they break snap scroll */
+.feed-ad {
+  display: none;
+}
+
 /* ── Tablet: 2-column grid ── */
 @media (min-width: 768px) {
   .feed-grid {
@@ -1299,6 +1317,12 @@ export default {
   .swipe-sentinel { display: none; }
   .swipe-counter { display: none; }
   .pagination-desktop { display: block; }
+
+  /* Show feed ads in desktop/tablet grid — spans full row */
+  .feed-ad {
+    display: block;
+    grid-column: 1 / -1;
+  }
 }
 
 /* ── Desktop: 3-col editorial grid ── */
