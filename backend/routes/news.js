@@ -515,6 +515,58 @@ router.get('/news/summary', async (req, res) => {
   }
 });
 
+// Semantic search endpoint — query by meaning, not keywords
+router.get('/news/semantic', async (req, res) => {
+  try {
+    const { query, language, hours = 168, limit = 20, offset = 0 } = req.query;
+    if (!query) return res.status(400).json({ success: false, error: 'query is required' });
+
+    const llm = require('../services/llm');
+    const queryVector = await llm.embedText(query);
+    if (!queryVector) return res.status(500).json({ success: false, error: 'Embedding failed' });
+
+    const filters = {
+      language: language === 'both' ? null : (language || null),
+      minDate: new Date(Date.now() - parseInt(hours) * 60 * 60 * 1000)
+    };
+
+    const articles = await Article.semanticSearch(queryVector, filters, parseInt(limit), parseInt(offset));
+    const totalCount = await Article.countSemantic(queryVector, filters);
+
+    const formatted = articles.map(a => ({
+      title: a.title,
+      description: a.description,
+      url: a.url,
+      image: a.image_url,
+      source: a.source,
+      author: a.author,
+      publishedAt: a.published_at,
+      language: a.language,
+      country: a.country,
+      category: a.category,
+      relevanceScore: a.distance ? +(1 - a.distance).toFixed(3) : null
+    }));
+
+    res.json({ success: true, articles: formatted, totalCount, count: formatted.length });
+  } catch (error) {
+    console.error('Semantic search error:', error.message);
+    res.status(500).json({ success: false, error: 'Semantic search failed' });
+  }
+});
+
+// Live RSS feed endpoint — returns latest Al Jazeera articles directly from RSS
+router.get('/rss', async (req, res) => {
+  try {
+    const { language = 'en', limit = 15 } = req.query;
+    const { fetchNews } = require('../services/aljazeera');
+    const articles = await fetchNews(language, parseInt(limit));
+    res.json({ success: true, articles });
+  } catch (error) {
+    console.error('RSS fetch error:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to fetch RSS feed' });
+  }
+});
+
 // Fetch a single article by its original URL or title slug (used for Newsly share-link detail pages)
 router.get('/article', async (req, res) => {
   try {

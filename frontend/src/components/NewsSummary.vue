@@ -1,5 +1,8 @@
 <template>
-  <div class="summary-wrap" v-if="loading || points.length > 0">
+  <div class="summary-wrap" v-if="loading || points.length > 0 || rssArticles.length > 0 || rssLoading">
+
+    <!-- AI Summary section (only when active) -->
+    <template v-if="loading || points.length">
 
     <!-- Header -->
     <div class="summary-header">
@@ -65,7 +68,41 @@
       <div class="track-end-spacer"></div>
     </div>
 
-    <!-- Navigation row: prev arrow + dots + next arrow -->
+    </template>
+
+    <!-- RSS Ticker Section -->
+    <div class="rss-section" :class="{ 'rss-section--divided': loading || points.length }">
+      <div class="rss-label">
+        <span class="rss-dot"></span>
+        <span>{{ uiLanguage === 'ar' ? 'الجزيرة مباشر' : 'Al Jazeera Live' }}</span>
+        <span v-if="rssArticles.length" class="rss-counter">
+          {{ currentRssIndex + 1 }}<span class="rss-counter-sep">/</span>{{ rssArticles.length }}
+        </span>
+      </div>
+
+      <div v-if="rssLoading" class="rss-loading">
+        <div class="spinner"></div>
+      </div>
+
+      <div v-else-if="rssArticles.length" class="rss-ticker-wrap">
+        <Transition name="rss-ticker">
+          <a
+            :key="currentRssIndex"
+            class="rss-ticker-card"
+            :href="rssArticles[currentRssIndex].url"
+            target="_blank"
+            rel="noopener noreferrer"
+            :dir="uiLanguage === 'ar' ? 'rtl' : 'ltr'"
+          >
+            <span class="rss-source">{{ rssArticles[currentRssIndex].source }}</span>
+            <span class="rss-headline">{{ rssArticles[currentRssIndex].title }}</span>
+            <div class="rss-progress" :key="`p-${currentRssIndex}`"></div>
+          </a>
+        </Transition>
+      </div>
+    </div>
+
+    <!-- Navigation row: prev arrow + dots + next arrow (AI section only) -->
     <div v-if="points.length > 1" class="nav-row" dir="ltr">
       <button
         class="nav-arrow"
@@ -102,7 +139,7 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 
 function detectCategory(text = '') {
   const t = text.toLowerCase()
@@ -137,6 +174,43 @@ export default {
   setup(props) {
     const trackRef = ref(null)
     const activeIndex = ref(0)
+    const rssArticles = ref([])
+    const rssLoading = ref(false)
+    const currentRssIndex = ref(0)
+    let rssTimer = null
+
+    function startTicker() {
+      stopTicker()
+      if (rssArticles.value.length < 2) return
+      rssTimer = setInterval(() => {
+        currentRssIndex.value = (currentRssIndex.value + 1) % rssArticles.value.length
+      }, 4500)
+    }
+
+    function stopTicker() {
+      if (rssTimer) { clearInterval(rssTimer); rssTimer = null }
+    }
+
+    async function fetchRSS() {
+      stopTicker()
+      rssLoading.value = true
+      currentRssIndex.value = 0
+      try {
+        const lang = props.uiLanguage === 'ar' ? 'ar' : 'en'
+        const res = await fetch(`/api/rss?language=${lang}&limit=15`)
+        const data = await res.json()
+        if (data.success) rssArticles.value = data.articles || []
+      } catch (e) {
+        console.warn('RSS fetch failed:', e)
+      } finally {
+        rssLoading.value = false
+        startTicker()
+      }
+    }
+
+    onMounted(fetchRSS)
+    onUnmounted(stopTicker)
+    watch(() => props.uiLanguage, fetchRSS)
 
     const points = computed(() => {
       const en = Array.isArray(props.summary?.en) ? props.summary.en : []
@@ -173,7 +247,7 @@ export default {
       }
     }
 
-    return { points, trackRef, activeIndex, onScroll, scrollToCard }
+    return { points, trackRef, activeIndex, rssArticles, rssLoading, currentRssIndex, onScroll, scrollToCard }
   }
 }
 </script>
@@ -399,6 +473,153 @@ export default {
   line-height: 1.6;
   margin: 0;
   font-family: 'Segoe UI', 'Arial', Tahoma, sans-serif;
+}
+
+/* ── RSS Ticker ───────────────────────────────────── */
+.rss-section {
+  padding-top: 10px;
+  margin-top: 2px;
+}
+
+.rss-section--divided {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.rss-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.32);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rss-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f97316;
+  box-shadow: 0 0 6px #f97316;
+  animation: rssPulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.rss-counter {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.2);
+  font-variant-numeric: tabular-nums;
+}
+
+.rss-counter-sep {
+  margin: 0 1px;
+  opacity: 0.5;
+}
+
+.rss-loading {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 10px;
+}
+
+/* Ticker wrapper clips the sliding card */
+.rss-ticker-wrap {
+  position: relative;
+  overflow: hidden;
+  padding: 0 14px 12px;
+  min-height: 62px;
+}
+
+/* The card itself */
+.rss-ticker-card {
+  display: block;
+  position: relative;
+  text-decoration: none;
+  background: rgba(249, 115, 22, 0.06);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  border-radius: 5px;
+  padding: 9px 12px 16px;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.rss-ticker-card:hover {
+  background: rgba(249, 115, 22, 0.11);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.rss-source {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #f97316;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.rss-headline {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+
+/* Progress bar — fills over 4.5s, resets on :key change */
+.rss-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, #f97316, #fb923c);
+  animation: rssProgress 4.5s linear forwards;
+  border-radius: 0 2px 0 0;
+}
+
+/* Vue transition — slide left out, slide right in */
+.rss-ticker-enter-active {
+  transition: transform 0.38s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.38s ease;
+}
+.rss-ticker-leave-active {
+  transition: transform 0.28s cubic-bezier(0.4, 0, 1, 1), opacity 0.25s ease;
+  position: absolute;
+  width: calc(100% - 28px);
+}
+.rss-ticker-enter-from {
+  transform: translateX(40px);
+  opacity: 0;
+}
+.rss-ticker-enter-to {
+  transform: translateX(0);
+  opacity: 1;
+}
+.rss-ticker-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+.rss-ticker-leave-to {
+  transform: translateX(-40px);
+  opacity: 0;
+}
+
+@keyframes rssPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px #f97316; }
+  50% { opacity: 0.25; box-shadow: 0 0 2px #f97316; }
+}
+
+@keyframes rssProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
 }
 
 /* ── Navigation row ──────────────────────────────── */
