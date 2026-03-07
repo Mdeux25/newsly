@@ -427,6 +427,7 @@ export default {
       }
     }
 
+    let scrollTimer = null
     const onFeedScroll = () => {
       if (!feedSwipeRef.value) return
       const el = feedSwipeRef.value
@@ -435,15 +436,18 @@ export default {
       const idx = isRTL ? (visibleFeed.value.length - 1 - rawIdx) : rawIdx
       swipeIndex.value = Math.max(0, Math.min(idx, visibleFeed.value.length - 1))
 
-      // Auto-load next batch when 4 cards from the end
-      if (
-        swipeIndex.value >= visibleFeed.value.length - 4 &&
-        !isLoading.value &&
-        articles.value.length < totalArticles.value
-      ) {
-        currentPage.value += 1
-        fetchNews(false)
-      }
+      // Debounce the fetch — only trigger after scrolling settles
+      if (scrollTimer) clearTimeout(scrollTimer)
+      scrollTimer = setTimeout(() => {
+        if (
+          swipeIndex.value >= visibleFeed.value.length - 4 &&
+          !isLoading.value &&
+          articles.value.length < totalArticles.value
+        ) {
+          currentPage.value += 1
+          fetchNews(false)
+        }
+      }, 200)
     }
 
     const filteredArticles = computed(() => {
@@ -549,10 +553,10 @@ export default {
           if (resetPage) {
             articles.value = newsResponse.data.articles
           } else {
-            // Append for infinite swipe — avoid duplicates by URL
+            // Append for infinite swipe — avoid duplicates, cap at 60 to prevent O(n²) hang
             const existingUrls = new Set(articles.value.map(a => a.url))
             const newOnes = newsResponse.data.articles.filter(a => !existingUrls.has(a.url))
-            articles.value = [...articles.value, ...newOnes]
+            articles.value = [...articles.value, ...newOnes].slice(0, 60)
           }
           totalArticles.value = newsResponse.data.totalCount || 0
 
@@ -651,17 +655,15 @@ export default {
 
     const refreshNow = () => {
       trackEvent('manual_refresh')
-      fetchNews(true) // Reset to page 1 on refresh
+      fetchNews(true)
       fetchTrending()
-      fetchTrendingLocations() // NEW: Refresh trending locations
     }
 
     const startAutoRefresh = () => {
-      // Refresh every 30 seconds
+      // Refresh every 5 minutes — 30s was too aggressive with O(n²) article enrichment
       autoRefreshInterval = setInterval(() => {
-        console.log('Auto-refreshing news...')
-        fetchNews()
-      }, 30000)
+        fetchNews(true)
+      }, 300000)
     }
 
     const stopAutoRefresh = () => {
