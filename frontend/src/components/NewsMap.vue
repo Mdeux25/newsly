@@ -31,12 +31,14 @@ export default {
   props: {
     uiLanguage: { type: String, default: 'en' },
     trendingLocations: { type: Array, default: () => [] },
-    activeLocations: { type: Array, default: () => [] }
+    activeLocations: { type: Array, default: () => [] },
+    isDarkMode: { type: Boolean, default: false }
   },
   emits: ['locations-changed', 'trending-topic-selected'],
   setup(props, { emit }) {
     const mapContainer = ref(null)
     const map = ref(null)
+    const tileLayer = ref(null)
     const selectedLocations = ref([])
     const mapHeight = ref('340px')
 
@@ -160,12 +162,13 @@ export default {
 
       L.control.zoom({ position: 'bottomright' }).addTo(map.value)
 
-      // Light CartoDB tiles
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      const style = props.isDarkMode ? 'dark_all' : 'light_all'
+      tileLayer.value = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 19
-      }).addTo(map.value)
+      })
+      tileLayer.value.addTo(map.value)
 
       regions.forEach(region => {
         const marker = createMarker(region)
@@ -173,6 +176,18 @@ export default {
         markers.value.push({ region, marker })
       })
     }
+
+    watch(() => props.isDarkMode, (dark) => {
+      if (!map.value) return
+      if (tileLayer.value) map.value.removeLayer(tileLayer.value)
+      const style = dark ? 'dark_all' : 'light_all'
+      tileLayer.value = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+      })
+      tileLayer.value.addTo(map.value)
+    })
 
     watch(() => props.trendingLocations, updateMarkers, { deep: true })
     watch(() => props.activeLocations, (newLocs) => {
@@ -245,23 +260,23 @@ export default {
   width: 30px;
   height: 42px;
   position: relative;
-  color: #1e3a5f;
+  color: #f5756c;
   font-size: 1.8rem;
   text-align: center;
   transition: all 0.25s;
   cursor: pointer;
-  filter: drop-shadow(0 2px 6px rgba(30,58,95,0.4));
+  filter: drop-shadow(0 2px 6px rgba(245,117,108,0.5));
 }
 
 :deep(.marker-pin:hover) {
   transform: scale(1.2);
-  color: #2d5f8a;
+  color: #3b82f6;
 }
 
 :deep(.marker-pin.selected) {
-  color: #2d5f8a;
+  color: #3b82f6;
   transform: scale(1.3);
-  filter: drop-shadow(0 2px 10px rgba(30,58,95,0.6));
+  filter: drop-shadow(0 2px 10px rgba(59,130,246,0.7));
 }
 
 :deep(.marker-label) {
