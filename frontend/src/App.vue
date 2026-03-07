@@ -130,7 +130,7 @@
           <button
             class="filter-toggle"
             :class="{ active: filterPhotosOnly }"
-            @click="filterPhotosOnly = !filterPhotosOnly"
+            @click="togglePhotoFilter"
           >
             <i class="bi bi-image"></i>
             <span>{{ uiLanguage === 'ar' ? 'بصور فقط' : 'Photos only' }}</span>
@@ -262,6 +262,7 @@ import AppFooter from './components/AppFooter.vue'
 import PolicyModal from './components/PolicyModal.vue'
 import ArticleDetailModal from './components/ArticleDetailModal.vue'
 import AdUnit from './components/AdUnit.vue'
+import { trackEvent, trackPageView } from './analytics.js'
 
 export default {
   name: 'App',
@@ -300,8 +301,9 @@ export default {
 
     const handleOpenDetail = (article) => {
       activeDetailArticle.value = article
+      trackEvent('view_article', { article_title: article.title, source: article.source })
     }
-    const isDarkMode = ref(true) // Default to dark mode
+    const isDarkMode = ref(false) // Default to light mode
     const isLoading = ref(false)
     const error = ref(null)
     const lastUpdate = ref(null)
@@ -350,6 +352,7 @@ export default {
     const setCategory = (key) => {
       searchTopic.value = key
       selectedMapLocations.value = []
+      trackEvent('select_category', { category: key || 'all' })
       fetchNews(true)
       if (key) fetchSummary(null, key, key)
       else summaryData.value = null
@@ -358,6 +361,7 @@ export default {
     const toggleUILanguage = () => {
       uiLanguage.value = uiLanguage.value === 'en' ? 'ar' : 'en'
       localStorage.setItem('locale', uiLanguage.value)
+      trackEvent('toggle_language', { language: uiLanguage.value })
       document.documentElement.dir = uiLanguage.value === 'ar' ? 'rtl' : 'ltr'
       document.documentElement.lang = uiLanguage.value
       selectedLanguage.value = uiLanguage.value
@@ -371,11 +375,13 @@ export default {
       isDarkMode.value = !isDarkMode.value
       localStorage.setItem('darkMode', isDarkMode.value)
       document.documentElement.classList.toggle('dark', isDarkMode.value)
+      trackEvent('toggle_dark_mode', { enabled: isDarkMode.value })
     }
 
     const handleLocationsChanged = (locations) => {
       selectedMapLocations.value = locations
       if (locations.length > 0) {
+        trackEvent('filter_by_location', { locations: locations.map(l => l.name).join(', ') })
         const names = locations.map(loc => loc.name).join(' ')
         searchTopic.value = names
         // Switch to both languages — map click means "news about X country"
@@ -471,6 +477,10 @@ export default {
     )
 
     const filterPhotosOnly = ref(false)
+    const togglePhotoFilter = () => {
+      filterPhotosOnly.value = !filterPhotosOnly.value
+      trackEvent('toggle_photo_filter', { enabled: filterPhotosOnly.value })
+    }
 
     const visibleFeed = computed(() => {
       if (!filterPhotosOnly.value) return combinedFeed.value
@@ -625,6 +635,7 @@ export default {
     const handleTrendingTopicSelected = (topic) => {
       searchTopic.value = topic
       selectedMapLocations.value = [] // Clear map country chips
+      trackEvent('select_trending_topic', { topic })
       fetchNews(true) // Reset to page 1
       fetchSummary(null, topic, topic)
     }
@@ -638,6 +649,7 @@ export default {
     }
 
     const refreshNow = () => {
+      trackEvent('manual_refresh')
       fetchNews(true) // Reset to page 1 on refresh
       fetchTrending()
       fetchTrendingLocations() // NEW: Refresh trending locations
@@ -680,6 +692,7 @@ export default {
         }
       }
 
+      trackPageView('Newsly Home')
       fetchNews()
       fetchTrending()
       // Show a global briefing card immediately on load
@@ -732,6 +745,7 @@ export default {
       onFeedScroll,
       scrollToSwipeCard,
       filterPhotosOnly,
+      togglePhotoFilter,
       visibleFeed,
       articleDetailUrl,
       articleDetailSlug,
@@ -755,23 +769,20 @@ export default {
   overflow-x: hidden;
 }
 
-/* Gradient Background (simplified for mobile) - Professional Blue/Slate */
+/* Gradient Background (simplified for mobile) - Lapis Night */
 .gradient-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #1e3a8a 0%, #0f172a 50%, #0f1419 100%);
+  background: linear-gradient(180deg, #ede8de 0%, #fdfcf7 40%, #f5f3ee 100%);
   z-index: -1;
 }
 
-/* Desktop: Enhanced animated gradient */
 @media (min-width: 1024px) {
   .gradient-bg {
-    background: linear-gradient(135deg, #1e40af 0%, #0e7490 50%, #0f172a 100%);
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
+    background: linear-gradient(135deg, #e8e0d0 0%, #fdfcf7 50%, #edeae3 100%);
   }
 }
 
@@ -784,9 +795,9 @@ export default {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(10, 10, 15, 0.7);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px) saturate(150%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid #1e3a5f;
   padding-top: max(12px, env(safe-area-inset-top));
   padding-left: max(16px, env(safe-area-inset-left));
   padding-right: max(16px, env(safe-area-inset-right));
@@ -808,7 +819,7 @@ export default {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #1e3a5f 0%, #d97706 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -818,7 +829,7 @@ export default {
   display: inline-block;
   width: 6px;
   height: 6px;
-  background: #06b6d4;
+  background: #d97706;
   border-radius: 50%;
   animation: pulse 2s ease-in-out infinite;
   margin-left: 6px;
@@ -836,8 +847,8 @@ export default {
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30,58,95,0.06);
+  border: 1px solid rgba(30,58,95,0.15);
   border-radius: 4px;
   padding: 0 10px;
   height: 36px;
@@ -845,14 +856,14 @@ export default {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(30,58,95,0.45);
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s;
   user-select: none;
 }
-.lang-toggle:active { background: rgba(255, 255, 255, 0.12); }
-.lang-toggle .active { color: #60a5fa; }
-.lang-sep { color: rgba(255, 255, 255, 0.15); font-size: 0.6rem; }
+.lang-toggle:active { background: rgba(30,58,95,0.1); }
+.lang-toggle .active { color: #1e3a5f; }
+.lang-sep { color: rgba(30,58,95,0.2); font-size: 0.6rem; }
 
 /* Category strip */
 .header-categories {
@@ -872,9 +883,9 @@ export default {
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(30,58,95,0.15);
+  background: rgba(30,58,95,0.04);
+  color: rgba(30,58,95,0.5);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: all 0.2s;
@@ -882,9 +893,9 @@ export default {
 }
 .cat-pill:active { transform: scale(0.95); }
 .cat-pill.active {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(59, 130, 246, 0.45);
-  color: #60a5fa;
+  background: rgba(30,58,95,0.1);
+  border-color: rgba(30,58,95,0.35);
+  color: #1e3a5f;
 }
 
 /* Touch-optimized icon buttons — match lang toggle height */
@@ -894,10 +905,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30,58,95,0.06);
+  border: 1px solid rgba(30,58,95,0.15);
   border-radius: 4px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #1e3a5f;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -905,7 +916,7 @@ export default {
 }
 
 .icon-button:active {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(30,58,95,0.1);
 }
 
 /* Tablet/Desktop: Enhanced header */
@@ -934,13 +945,13 @@ export default {
   }
 
   .icon-button:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(30,58,95,0.1);
     transform: translateY(-2px);
   }
 
   .cat-pill:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.75);
+    background: rgba(30,58,95,0.07);
+    color: rgba(30,58,95,0.75);
   }
 
   .icon-button:active {
@@ -979,11 +990,11 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(245, 117, 108, 0.15);
-  border: 1px solid rgba(245, 117, 108, 0.3);
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 4px;
   padding: 12px 16px;
-  color: #fca5a5;
+  color: #dc2626;
 }
 
 .error-content i:first-child {
@@ -1029,8 +1040,8 @@ export default {
 .loading-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #667eea;
+  border: 4px solid rgba(30,58,95,0.1);
+  border-top-color: #1e3a5f;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -1055,7 +1066,7 @@ export default {
 
 .empty-state i {
   font-size: 3rem;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(30,58,95,0.2);
   margin-bottom: 16px;
 }
 
@@ -1085,14 +1096,14 @@ export default {
 .search-overlay :deep(.search-container) {
   margin-bottom: 0;
   border-radius: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(30,58,95,0.12);
   border-left: none;
   border-right: none;
   border-bottom: none;
   padding: 10px 12px 8px;
-  background: rgba(8, 12, 22, 0.88);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
-  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 -6px 24px rgba(30,58,95,0.1);
 }
 
 /* Compact inputs */
@@ -1155,9 +1166,9 @@ export default {
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(30,58,95,0.15);
+  background: rgba(30,58,95,0.04);
+  color: rgba(30,58,95,0.5);
   cursor: pointer;
   transition: all 0.18s;
   -webkit-tap-highlight-color: transparent;
@@ -1169,9 +1180,9 @@ export default {
 .filter-toggle:active { transform: scale(0.95); }
 
 .filter-toggle.active {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(59, 130, 246, 0.45);
-  color: #60a5fa;
+  background: rgba(30,58,95,0.1);
+  border-color: rgba(30,58,95,0.35);
+  color: #1e3a5f;
 }
 
 /* ── Swipe wrapper (relative, so arrows can be absolute) ── */
@@ -1196,16 +1207,15 @@ export default {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: rgba(10, 16, 36, 0.78);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(14px) saturate(160%);
-    border: 1.5px solid rgba(255, 255, 255, 0.22);
-    color: #fff;
+    border: 1.5px solid rgba(30,58,95,0.2);
+    color: #1e3a5f;
     font-size: 1.6rem;
     cursor: pointer;
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.55),
-      0 2px 8px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 8px 32px rgba(30,58,95,0.15),
+      0 2px 8px rgba(30,58,95,0.1);
     transition: opacity 0.2s, background 0.15s, border-color 0.15s, transform 0.15s;
     -webkit-tap-highlight-color: transparent;
   }
@@ -1215,8 +1225,8 @@ export default {
 
   .swipe-arrow:active {
     transform: translateY(-50%) scale(0.88);
-    background: rgba(59, 130, 246, 0.4);
-    border-color: rgba(59, 130, 246, 0.6);
+    background: rgba(30,58,95,0.12);
+    border-color: rgba(30,58,95,0.4);
   }
 
   .swipe-arrow.hidden {
@@ -1269,16 +1279,16 @@ export default {
   font-size: 0.72rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(30,58,95,0.35);
 }
 
-.swipe-sep { color: rgba(255, 255, 255, 0.13); margin: 0 1px; }
+.swipe-sep { color: rgba(30,58,95,0.18); margin: 0 1px; }
 
 .swipe-loading-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: #d97706;
   margin-left: 6px;
   animation: pulse 1s ease-in-out infinite;
 }
@@ -1336,9 +1346,9 @@ export default {
   left: 0;
   right: 0;
   display: flex;
-  background: rgba(10, 10, 15, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(30,58,95,0.1);
   padding-bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 1000;
 }
@@ -1352,7 +1362,7 @@ export default {
   padding: 8px 12px;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(30,58,95,0.4);
   font-size: 0.75rem;
   cursor: pointer;
   transition: color 0.2s ease;
@@ -1365,11 +1375,11 @@ export default {
 }
 
 .nav-item.active {
-  color: #06b6d4;
+  color: #1e3a5f;
 }
 
 .nav-item:active {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(30,58,95,0.06);
 }
 
 /* Hide bottom nav on tablet/desktop */
