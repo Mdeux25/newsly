@@ -278,7 +278,18 @@ async function fetchFromRSSSources() {
 
   for (const language of ['en', 'ar']) {
     try {
-      const articles = await fetchFromAJRSS(language, 30);
+      let articles = await fetchFromAJRSS(language, 30);
+      if (!articles.length) continue;
+
+      // English: skip photoless articles (placeholder cards look bad in the grid)
+      // Arabic: keep all — Arabic content is scarce and placeholders are acceptable
+      if (language === 'en') {
+        const before = articles.length;
+        articles = articles.filter(a => a.image);
+        if (before !== articles.length)
+          console.log(`🖼️  [AlJazeeraRSS] Dropped ${before - articles.length} English articles with no image`);
+      }
+
       if (!articles.length) continue;
 
       const articlesWithMetadata = articles.map(article => ({

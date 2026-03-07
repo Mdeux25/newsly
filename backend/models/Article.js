@@ -68,6 +68,10 @@ class Article {
           const result = await this.create(article);
           if (result) {
             inserted++;
+            // Generate embedding asynchronously — never blocks ingestion
+            const llm = require('../services/llm');
+            llm.embedArticle(result.id, article.title, article.description)
+              .catch(e => console.warn(`⚠️  Embedding failed for ${result.id}:`, e.message));
           } else {
             skipped++; // Duplicate URL
           }
@@ -102,24 +106,19 @@ class Article {
     const { language, minDate } = filters;
     const vectorStr = `[${queryVector.join(',')}]`;
 
-    let conditions = 'embedding IS NOT NULL';
-    const params = [vectorStr];
+    const conditions = ['embedding IS NOT NULL'];
+    const filterParams = [];
 
-    if (language) {
-      conditions += ' AND language = ?';
-      params.push(language);
-    }
-    if (minDate) {
-      conditions += ' AND published_at >= ?';
-      params.push(minDate);
-    }
+    if (language) { conditions.push('language = ?'); filterParams.push(language); }
+    if (minDate)   { conditions.push('published_at >= ?'); filterParams.push(minDate); }
 
-    params.push(limit, offset);
+    // Param order: vectorStr (for SELECT distance), filter params, limit, offset
+    const params = [vectorStr, ...filterParams, limit, offset];
 
     const [rows] = await db.query(
       `SELECT *, (embedding <=> ?) AS distance
        FROM articles
-       WHERE ${conditions}
+       WHERE ${conditions.join(' AND ')}
        ORDER BY distance ASC
        LIMIT ? OFFSET ?`,
       params
@@ -131,25 +130,20 @@ class Article {
     const { language, minDate } = filters;
     const vectorStr = `[${queryVector.join(',')}]`;
 
-    let conditions = 'embedding IS NOT NULL';
-    const params = [vectorStr];
+    const conditions = ['embedding IS NOT NULL'];
+    const filterParams = [];
 
-    if (language) {
-      conditions += ' AND language = ?';
-      params.push(language);
-    }
-    if (minDate) {
-      conditions += ' AND published_at >= ?';
-      params.push(minDate);
-    }
+    if (language) { conditions.push('language = ?'); filterParams.push(language); }
+    if (minDate)   { conditions.push('published_at >= ?'); filterParams.push(minDate); }
 
-    params.push(0.6); // max distance threshold for relevance
+    // Param order: filter params, vectorStr (for WHERE distance), threshold
+    const params = [...filterParams, vectorStr, 0.6];
 
     const [rows] = await db.query(
       `SELECT COUNT(*)::int AS total
        FROM articles
-       WHERE ${conditions} AND (embedding <=> ?) < ?`,
-      [...params.slice(0, -1), params[params.length - 1]]
+       WHERE ${conditions.join(' AND ')} AND (embedding <=> ?) < ?`,
+      params
     );
     return rows[0]?.total || 0;
   }

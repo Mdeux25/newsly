@@ -574,8 +574,9 @@ async function embedText(text) {
   if (cached) return cached;
 
   const result = await ai.models.embedContent({
-    model: 'text-embedding-004',
-    contents: text.slice(0, 2000)  // API limit
+    model: 'gemini-embedding-001',
+    contents: text.slice(0, 2000),
+    config: { outputDimensionality: 1536 }
   });
   const vector = result.embeddings[0].values;
   memoryCache.set(key, vector, 86400);  // 24h cache
