@@ -13,7 +13,7 @@
 
         <div class="header-actions">
           <!-- Language Toggle -->
-          <div class="lang-toggle" @click="toggleUILanguage" role="button" aria-label="Toggle language">
+          <div class="lang-toggle" @click="toggleUILanguage" role="button" aria-label="Toggle language" dir="ltr">
             <span :class="{ active: uiLanguage !== 'ar' }">EN</span>
             <span class="lang-sep">|</span>
             <span :class="{ active: uiLanguage === 'ar' }">عربي</span>
@@ -35,7 +35,7 @@
       </div>
 
       <!-- Category Strip -->
-      <div class="header-categories">
+      <div class="header-categories" dir="ltr">
         <button
           v-for="cat in categories"
           :key="cat.key"
@@ -191,7 +191,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { translations } from './i18n'
 import axios from 'axios'
 import NewsCard from './components/NewsCard.vue'
@@ -295,13 +295,14 @@ export default {
 
     const toggleUILanguage = () => {
       uiLanguage.value = uiLanguage.value === 'en' ? 'ar' : 'en'
-      getCurrentInstance().appContext.config.globalProperties.$i18n.setLocale(uiLanguage.value)
+      localStorage.setItem('locale', uiLanguage.value)
       document.documentElement.dir = uiLanguage.value === 'ar' ? 'rtl' : 'ltr'
       document.documentElement.lang = uiLanguage.value
-      // Update briefing label if it's still the default one
+      selectedLanguage.value = uiLanguage.value
       if (!selectedMapLocations.value.length && !searchTopic.value) {
         summaryTrigger.value = uiLanguage.value === 'ar' ? 'نشرة اليوم' : "Today's Briefing"
       }
+      fetchNews(true)
     }
 
     const toggleDarkMode = () => {

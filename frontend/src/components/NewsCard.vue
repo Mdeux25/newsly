@@ -29,12 +29,12 @@
     <!-- Card Content -->
     <div class="card-content">
       <!-- Title -->
-      <h3 class="card-title" :class="{ 'rtl-text': isTranslated }">
+      <h3 class="card-title" :class="{ 'rtl-text': isTranslated || uiLanguage === 'ar' }">
         {{ displayTitle }}
       </h3>
 
       <!-- Description -->
-      <p class="card-description" :class="{ 'rtl-text': isTranslated }">
+      <p class="card-description" :class="{ 'rtl-text': isTranslated || uiLanguage === 'ar' }">
         {{ truncateDescription(displayDescription) }}
       </p>
 
@@ -212,10 +212,12 @@ export default {
     }
 
     const displayTitle = computed(() => {
+      if (props.uiLanguage === 'ar' && props.article.title_ar) return props.article.title_ar
       return isTranslated.value ? translatedTitle.value : props.article.title
     })
 
     const displayDescription = computed(() => {
+      if (props.uiLanguage === 'ar' && props.article.description_ar) return props.article.description_ar
       return isTranslated.value ? translatedDescription.value : props.article.description
     })
 
