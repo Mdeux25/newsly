@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -149,7 +149,7 @@ export default {
     }
 
     const initMap = () => {
-      if (!mapContainer.value) return
+      if (!mapContainer.value || map.value) return
 
       map.value = L.map(mapContainer.value, {
         center: [20, 15],
@@ -196,6 +196,13 @@ export default {
     }, { deep: true })
 
     onMounted(() => { initMap() })
+
+    onUnmounted(() => {
+      if (map.value) {
+        map.value.remove()
+        map.value = null
+      }
+    })
 
     return { mapContainer, selectedLocations, mapHeight, removeLocation, clearSelections }
   }
