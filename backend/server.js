@@ -61,10 +61,10 @@ if (process.env.NODE_ENV === 'production') {
           image: article.image_url ? [article.image_url] : [],
           datePublished: article.published_at,
           author: { '@type': 'Organization', name: article.source },
-          publisher: { '@type': 'Organization', name: 'Newzly', url: BASE_URL },
+          publisher: { '@type': 'Organization', name: 'Newsly', url: BASE_URL },
           url,
           inLanguage: article.language || 'en',
-          isPartOf: { '@type': 'Periodical', name: 'Newzly' }
+          isPartOf: { '@type': 'Periodical', name: 'Newsly' }
         })
 
         const seoHead = `
@@ -97,10 +97,11 @@ if (process.env.NODE_ENV === 'production') {
     }
     try {
       const articles = await Article.findRecent({}, 500)
-      const urls = articles.map(a => {
+      const urls = articles.flatMap(a => {
         const slug = buildSlug(a.title)
+        if (!slug || slug.length < 5) return []
         const date = new Date(a.published_at).toISOString().split('T')[0]
-        return `  <url><loc>${BASE_URL}/article/${slug}</loc><lastmod>${date}</lastmod><changefreq>never</changefreq><priority>0.7</priority></url>`
+        return [`  <url><loc>${BASE_URL}/article/${slug}</loc><lastmod>${date}</lastmod><changefreq>never</changefreq><priority>0.7</priority></url>`]
       }).join('\n')
       sitemapCache = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${BASE_URL}/</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>\n${urls}\n</urlset>`
       sitemapTime = Date.now()

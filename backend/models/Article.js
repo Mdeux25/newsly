@@ -151,7 +151,7 @@ class Article {
   static async findBySlug(slug) {
     const terms = slug.split('-').filter(w => w.length > 2);
     if (terms.length === 0) return null;
-    const conditions = terms.map(() => 'title LIKE ?').join(' AND ');
+    const conditions = terms.map(() => 'title ILIKE ?').join(' AND ');
     const params = terms.map(t => `%${t}%`);
     const [rows] = await db.query(
       `SELECT * FROM articles WHERE ${conditions} ORDER BY published_at DESC LIMIT 1`,
@@ -587,6 +587,29 @@ class Article {
       'UPDATE articles SET title_ar = ?, description_ar = ? WHERE url = ?',
       [titleAr || null, descriptionAr || null, url]
     );
+  }
+
+  static async markAsPosted(id) {
+    await db.query('UPDATE articles SET fb_posted_at = NOW() WHERE id = ?', [id]);
+  }
+
+  static async selectForFacebook(limit = 3) {
+    const [rows] = await db.query(
+      `SELECT a.*,
+         CASE WHEN tl.country_code IS NOT NULL THEN 1 ELSE 0 END AS is_trending
+       FROM articles a
+       LEFT JOIN trending_locations tl
+         ON tl.country_code = a.country
+         AND tl.last_updated >= NOW() - INTERVAL '1 hour'
+       WHERE a.fb_posted_at IS NULL
+         AND a.image_url IS NOT NULL
+         AND a.published_at > NOW() - INTERVAL '24 hours'
+         AND a.language IN ('en', 'ar')
+       ORDER BY is_trending DESC, a.published_at DESC
+       LIMIT ?`,
+      [limit]
+    );
+    return rows;
   }
 
   /**
