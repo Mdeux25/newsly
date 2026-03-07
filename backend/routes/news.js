@@ -601,4 +601,24 @@ router.get('/article', async (req, res) => {
   }
 });
 
+// Admin: list recently Facebook-posted articles
+router.get('/admin/fb-posts', async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const db = require('../config/database');
+    const [rows] = await db.query(
+      `SELECT title, source, fb_posted_at
+       FROM articles
+       WHERE fb_posted_at IS NOT NULL
+       ORDER BY fb_posted_at DESC
+       LIMIT ?`,
+      [parseInt(limit)]
+    );
+    res.json({ success: true, count: rows.length, posts: rows });
+  } catch (error) {
+    console.error('Error fetching FB posts:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch FB post history' });
+  }
+});
+
 module.exports = router;

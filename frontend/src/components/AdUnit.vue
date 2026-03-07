@@ -63,7 +63,7 @@ export default {
   border: 1px solid rgba(30,58,95,0.1);
   border-radius: 6px;
   overflow: hidden;
-  min-height: 250px;
+  min-height: 83px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,14 +72,14 @@ export default {
 
 .ad-sponsored-label {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 4px;
+  left: 6px;
   background: rgba(30,58,95,0.06);
   border: 1px solid rgba(30,58,95,0.12);
   color: #a8a29e;
-  padding: 3px 8px;
+  padding: 2px 5px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -91,8 +91,8 @@ export default {
   border-radius: 0;
   border-left: none;
   border-right: none;
-  min-height: 90px;
-  margin: 8px 0;
+  min-height: 30px;
+  margin: 3px 0;
   background: rgba(30,58,95,0.02);
   border-top: 1px solid rgba(30,58,95,0.07);
   border-bottom: 1px solid rgba(30,58,95,0.07);
@@ -100,16 +100,16 @@ export default {
 }
 
 .ad-card--banner .ad-sponsored-label {
-  font-size: 0.6rem;
-  top: 4px;
-  left: 8px;
+  font-size: 0.5rem;
+  top: 2px;
+  left: 5px;
 }
 
 .ad-card .adsbygoogle { width: 100%; }
 
 @media (max-width: 640px) {
   .ad-card {
-    min-height: 90px;
+    min-height: 30px;
   }
 }
 </style>

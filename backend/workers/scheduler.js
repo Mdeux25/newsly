@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { fetchAllNews, cleanupOldArticles, cleanupOldLogs } = require('./news-fetcher');
+const { runPosting } = require('./fb-poster');
 const ApiQuota = require('../models/ApiQuota');
 const Article = require('../models/Article');
 const db = require('../config/database');
@@ -168,6 +169,21 @@ function startScheduler() {
   });
 
   console.log('✅ Scheduled: LLM cache cleanup (daily at 3 AM)');
+
+  // Job 7: Facebook auto-poster — every N hours (default: 3)
+  const fbIntervalHours = parseInt(process.env.FB_POST_INTERVAL_HOURS || '3');
+  cron.schedule(`0 */${fbIntervalHours} * * *`, async () => {
+    if (process.env.FB_POST_ENABLED !== 'true') return;
+    console.log('\n⏰ Cron: Facebook auto-poster triggered');
+    try {
+      const result = await runPosting();
+      console.log(`✅ Facebook posting done: ${result.posted} posted, ${result.skipped} skipped`);
+    } catch (error) {
+      console.error('❌ Facebook posting failed:', error.message);
+    }
+  });
+
+  console.log(`✅ Scheduled: Facebook auto-poster (every ${fbIntervalHours} hours)`);
 
   // Run initial fetch after 10 seconds (give server time to fully start)
   setTimeout(async () => {
