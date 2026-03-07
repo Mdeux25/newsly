@@ -828,7 +828,7 @@ export default {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Language toggle pill */
@@ -839,20 +839,20 @@ export default {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  padding: 0 12px;
+  padding: 0 10px;
   height: 36px;
   cursor: pointer;
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.4);
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s;
   user-select: none;
 }
-.lang-toggle:hover { background: rgba(255, 255, 255, 0.12); }
-.lang-toggle .active { color: #3b82f6; }
-.lang-sep { color: rgba(255, 255, 255, 0.2); font-size: 0.6rem; }
+.lang-toggle:active { background: rgba(255, 255, 255, 0.12); }
+.lang-toggle .active { color: #60a5fa; }
+.lang-sep { color: rgba(255, 255, 255, 0.15); font-size: 0.6rem; }
 
 /* Category strip */
 .header-categories {
@@ -887,25 +887,24 @@ export default {
   color: #60a5fa;
 }
 
-/* Touch-optimized icon buttons */
+/* Touch-optimized icon buttons — match lang toggle height */
 .icon-button {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  color: white;
-  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition: background 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .icon-button:active {
-  transform: scale(0.95);
   background: rgba(255, 255, 255, 0.12);
 }
 
