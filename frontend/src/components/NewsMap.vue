@@ -40,7 +40,7 @@ export default {
     const map = ref(null)
     const tileLayer = ref(null)
     const selectedLocations = ref([])
-    const mapHeight = ref('340px')
+    const mapHeight = ref('420px')
 
     const regions = [
       { code: 'us', name: 'United States',  lat: 37.09,  lng: -95.71 },
