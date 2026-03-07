@@ -170,7 +170,7 @@ class Article {
   static async findRecent(filters = {}, limit = 50, offset = 0) {
     const { country, language, region, category, topic, minDate } = filters;
 
-    let query = 'SELECT * FROM articles WHERE 1=1';
+    let query = "SELECT * FROM articles WHERE NOT (source = 'Al Jazeera' AND language = 'en' AND (image_url IS NULL OR image_url = ''))";
     const params = [];
 
     if (country) {
