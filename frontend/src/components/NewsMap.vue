@@ -1,5 +1,5 @@
 <template>
-  <div class="map-container" :class="{ 'no-bell-anim': isChrome }">
+  <div class="map-container">
     <div class="map-header">
       <h5>
         <i class="bi bi-geo-alt-fill"></i>
@@ -41,7 +41,6 @@ export default {
     const tileLayer = ref(null)
     const selectedLocations = ref([])
     const mapHeight = ref('420px')
-    const isChrome = typeof window !== 'undefined' && !!window.chrome
 
     const regions = [
       { code: 'us', name: 'United States',  lat: 37.09,  lng: -95.71 },
@@ -205,7 +204,7 @@ export default {
       }
     })
 
-    return { mapContainer, selectedLocations, mapHeight, isChrome, removeLocation, clearSelections }
+    return { mapContainer, selectedLocations, mapHeight, removeLocation, clearSelections }
   }
 }
 </script>
@@ -360,10 +359,6 @@ export default {
   25%, 35%       { transform: rotate(-10deg) scale(1.05);}
   30%, 40%       { transform: rotate(10deg) scale(1.05); }
   50%            { transform: rotate(0deg) scale(1.15);  filter: drop-shadow(0 0 18px rgba(255,68,68,1));   }
-}
-
-.no-bell-anim :deep(.alarm-bell) {
-  animation: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
