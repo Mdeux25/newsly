@@ -273,7 +273,7 @@ function deduplicateArticles(articles) {
 
     // Check if very similar title exists
     const isDuplicate = Array.from(seen).some(title => {
-      return similarity(title, normalizedTitle) > 0.8;
+      return similarity(title, normalizedTitle) >= 0.8;
     });
 
     if (!isDuplicate) {

@@ -288,7 +288,7 @@ export default {
     const swipeIndex = ref(0)
     const trending = ref([])
     const searchTopic = ref('')
-    const selectedLanguage = ref('both')
+    const selectedLanguage = ref('ar')
     const selectedHours = ref('168') // Default: last 7 days
     const smartSearchEnabled = ref(true) // NEW: Enable smart search by default
     const trendingLocations = ref([]) // NEW: For map visualization
