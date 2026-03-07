@@ -1201,28 +1201,26 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: fixed;
-    top: 50dvh;
+    position: absolute;
+    top: 50%;
     transform: translateY(-50%);
-    z-index: 200;
-    width: 56px;
-    height: 56px;
+    z-index: 10;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(14px) saturate(160%);
     border: 1.5px solid rgba(30,58,95,0.2);
     color: #1e3a5f;
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     cursor: pointer;
-    box-shadow:
-      0 8px 32px rgba(30,58,95,0.15),
-      0 2px 8px rgba(30,58,95,0.1);
+    box-shadow: 0 4px 16px rgba(30,58,95,0.15);
     transition: opacity 0.2s, background 0.15s, border-color 0.15s, transform 0.15s;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .swipe-arrow--prev { left: 12px; }
-  .swipe-arrow--next { right: 12px; }
+  .swipe-arrow--prev { left: 8px; }
+  .swipe-arrow--next { right: 8px; }
 
   .swipe-arrow:active {
     transform: translateY(-50%) scale(0.88);
@@ -1739,6 +1737,18 @@ export default {
 .dark-mode :deep(.rss-section) { border-top-color: rgba(255, 255, 255, 0.06); }
 .dark-mode :deep(.rss-headline) { color: rgba(255, 255, 255, 0.8); }
 .dark-mode :deep(.rss-source) { color: rgba(255, 255, 255, 0.4); }
+
+/* ── Swipe arrows ── */
+.dark-mode .swipe-arrow {
+  background: rgba(25, 32, 49, 0.9);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.dark-mode .swipe-arrow:active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
 
 /* ── ArticleDetailModal ── */
 .dark-mode :deep(.modal-overlay) { background: rgba(0, 0, 0, 0.78); }
