@@ -293,13 +293,16 @@ export default {
 
 :deep(.alarm-bell) {
   color: #ff4444;
-  animation: shake 2.5s ease-in-out infinite;
-  font-size: 1.4rem;
-  filter: drop-shadow(0 2px 8px rgba(255,68,68,0.7));
+  font-size: 1.6rem;
+  display: inline-block;
+  transform-origin: top center;
+  animation: bell-ring 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 68, 68, 0.9));
 }
 
 :deep(.marker-pin.trending.selected .alarm-bell) {
-  color: #3b82f6;
+  color: #60a5fa;
+  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.9));
 }
 
 :deep(.trending-count) {
@@ -327,10 +330,13 @@ export default {
   font-weight: 700;
 }
 
-@keyframes shake {
-  0%, 100% { transform: rotate(0deg); }
-  10%, 30%, 50%, 70%, 90% { transform: rotate(-8deg); }
-  20%, 40%, 60%, 80% { transform: rotate(8deg); }
+@keyframes bell-ring {
+  0%,  55%, 100% { transform: rotate(0deg) scale(1);    filter: drop-shadow(0 0 6px rgba(255,68,68,0.6));  }
+  5%,  15%       { transform: rotate(-18deg) scale(1.1); filter: drop-shadow(0 0 14px rgba(255,68,68,1));   }
+  10%, 20%       { transform: rotate(18deg) scale(1.1);  filter: drop-shadow(0 0 14px rgba(255,68,68,1));   }
+  25%, 35%       { transform: rotate(-10deg) scale(1.05);}
+  30%, 40%       { transform: rotate(10deg) scale(1.05); }
+  50%            { transform: rotate(0deg) scale(1.15);  filter: drop-shadow(0 0 18px rgba(255,68,68,1));   }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a"/>
+      <stop offset="50%" style="stop-color:#0e7490"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <line x1="0" y1="210" x2="1200" y2="210" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="630" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="630" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+  <!-- Glow orb top-left -->
+  <circle cx="160" cy="160" r="200" fill="rgba(59,130,246,0.12)"/>
+  <!-- Glow orb bottom-right -->
+  <circle cx="1060" cy="500" r="220" fill="rgba(6,182,212,0.1)"/>
+
+  <!-- Pulse dot -->
+  <circle cx="682" cy="248" r="10" fill="#06b6d4" opacity="0.9"/>
+
+  <!-- Logo: Newsly -->
+  <text x="600" y="260" font-family="Georgia, serif" font-size="108" font-weight="700"
+        text-anchor="middle" fill="url(#textGrad)" filter="url(#glow)">Newsly</text>
+
+  <!-- Arabic name -->
+  <text x="600" y="330" font-family="Arial, Tahoma, sans-serif" font-size="42" font-weight="600"
+        text-anchor="middle" fill="rgba(255,255,255,0.5)">نيوزلي</text>
+
+  <!-- Divider -->
+  <line x1="440" y1="365" x2="760" y2="365" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+  <!-- Tagline EN -->
+  <text x="600" y="415" font-family="Arial, sans-serif" font-size="28" font-weight="400"
+        text-anchor="middle" fill="rgba(255,255,255,0.65)">Smart Bilingual News · Middle East &amp; World</text>
+
+  <!-- Tagline AR -->
+  <text x="600" y="460" font-family="Arial, Tahoma, sans-serif" font-size="24" font-weight="400"
+        text-anchor="middle" fill="rgba(255,255,255,0.4)">أخبار ذكية بالعربية والإنجليزية · الشرق الأوسط والعالم</text>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="570" width="1200" height="60" fill="rgba(0,0,0,0.3)"/>
+  <text x="600" y="607" font-family="Arial, sans-serif" font-size="20" font-weight="600"
+        text-anchor="middle" fill="rgba(255,255,255,0.35)" letter-spacing="3">newsly-jeur.onrender.com</text>
+</svg>
