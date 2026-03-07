@@ -400,7 +400,8 @@ class Article {
     try {
       // Get translations from LLM service
       const llm = require('../services/llm');
-      const { translations, variations } = await llm.translateQuery(query, ['en', 'ar']);
+      const { translations, variations: rawVariations } = await llm.translateQuery(query, ['en', 'ar']);
+      const variations = Array.isArray(rawVariations) ? rawVariations : [];
 
       // Build search terms for each language
       const enTerms = [translations.en, ...variations.filter(v => this._isEnglish(v))].filter(Boolean);
@@ -506,7 +507,8 @@ class Article {
 
     try {
       const llm = require('../services/llm');
-      const { translations, variations } = await llm.translateQuery(query, ['en', 'ar']);
+      const { translations, variations: rawVariations } = await llm.translateQuery(query, ['en', 'ar']);
+      const variations = Array.isArray(rawVariations) ? rawVariations : [];
 
       const enTerms = [translations.en, ...variations.filter(v => this._isEnglish(v))].filter(Boolean);
       const arTerms = [translations.ar, ...variations.filter(v => !this._isEnglish(v))].filter(Boolean);
