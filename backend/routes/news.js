@@ -567,7 +567,7 @@ router.get('/rss', async (req, res) => {
   }
 });
 
-// Fetch a single article by its original URL or title slug (used for Newsly share-link detail pages)
+// Fetch a single article by its original URL or title slug (used for Newzly share-link detail pages)
 router.get('/article', async (req, res) => {
   try {
     const { url, slug } = req.query;

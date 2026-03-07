@@ -7,7 +7,7 @@
     <header class="mobile-header">
       <div class="header-content">
         <h1 class="logo">
-          <span class="gradient-text">{{ uiLanguage === 'ar' ? 'نيوزلي' : 'Newsly' }}</span>
+          <span class="gradient-text">{{ uiLanguage === 'ar' ? 'نيوزلي' : 'Newzly' }}</span>
           <span class="pulse-dot"></span>
         </h1>
 
@@ -207,7 +207,7 @@
       @close="closeArticleDetail"
     />
 
-    <!-- Article Detail Modal: opened via shared Newsly link (#article=slug) -->
+    <!-- Article Detail Modal: opened via shared Newzly link (#article=slug) -->
     <ArticleDetailModal
       v-else-if="articleDetailSlug"
       :articleSlug="articleDetailSlug"
@@ -215,7 +215,7 @@
       @close="closeArticleDetail"
     />
 
-    <!-- Article Detail Modal: opened via shared Newsly link (#article=BASE64) -->
+    <!-- Article Detail Modal: opened via shared Newzly link (#article=BASE64) -->
     <ArticleDetailModal
       v-else-if="articleDetailUrl"
       :articleUrl="articleDetailUrl"
@@ -708,7 +708,7 @@ export default {
         }
       }
 
-      trackPageView('Newsly Home')
+      trackPageView('Newzly Home')
       fetchNews()
       fetchTrending()
       // Show a global briefing card immediately on load

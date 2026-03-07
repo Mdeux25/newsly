@@ -1,7 +1,7 @@
 {
-  "name": "newsly-frontend",
+  "name": "newzly-frontend",
   "version": "1.0.0",
-  "description": "Newsly - Smart cross-language news aggregator",
+  "description": "Newzly - Smart cross-language news aggregator",
   "type": "module",
   "scripts": {
     "dev": "vite",

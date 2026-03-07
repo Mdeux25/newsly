@@ -21,7 +21,7 @@
             <span class="sp-card-source">{{ article.source || 'News' }}</span>
             <p class="sp-card-title">{{ article.title }}</p>
             <div class="sp-card-footer">
-              <span class="sp-newsly-badge">Newsly</span>
+              <span class="sp-newzly-badge">Newsly</span>
               <span class="sp-card-date">{{ formattedDate }}</span>
             </div>
           </div>
@@ -102,19 +102,19 @@ export default {
       return url.length > 65 ? url.slice(0, 62) + '...' : url
     })
 
-    // Unique Newsly article page URL — shared instead of the raw article URL
-    const newslyUrl = computed(() =>
+    // Unique Newzly article page URL — shared instead of the raw article URL
+    const newzlyUrl = computed(() =>
       `${window.location.origin}/#article=${btoa(encodeURIComponent(props.article.url || ''))}`
     )
 
     const xUrl = computed(() => {
-      const text = encodeURIComponent(`"${props.article.title}" via ${props.article.source || 'Newsly'}`)
-      const url = encodeURIComponent(newslyUrl.value)
+      const text = encodeURIComponent(`"${props.article.title}" via ${props.article.source || 'Newzly'}`)
+      const url = encodeURIComponent(newzlyUrl.value)
       return `https://twitter.com/intent/tweet?text=${text}&url=${url}`
     })
 
     const waUrl = computed(() => {
-      const text = encodeURIComponent(`${props.article.title}\n${newslyUrl.value}`)
+      const text = encodeURIComponent(`${props.article.title}\n${newzlyUrl.value}`)
       return `https://wa.me/?text=${text}`
     })
 
@@ -122,8 +122,8 @@ export default {
       try {
         await navigator.share({
           title: props.article.title,
-          text: `${props.article.title} — via ${props.article.source || 'Newsly'}`,
-          url: newslyUrl.value
+          text: `${props.article.title} — via ${props.article.source || 'Newzly'}`,
+          url: newzlyUrl.value
         })
       } catch (e) {
         if (e.name !== 'AbortError') console.warn('Share failed:', e)
@@ -132,14 +132,14 @@ export default {
 
     const copyLink = async () => {
       try {
-        await navigator.clipboard.writeText(newslyUrl.value)
+        await navigator.clipboard.writeText(newzlyUrl.value)
         linkCopied.value = true
         setTimeout(() => { linkCopied.value = false }, 2000)
       } catch (e) { console.warn('Copy failed:', e) }
     }
 
     const copyText = async () => {
-      const text = `"${props.article.title}" — ${props.article.source || ''}\n${newslyUrl.value}`
+      const text = `"${props.article.title}" — ${props.article.source || ''}\n${newzlyUrl.value}`
       try {
         await navigator.clipboard.writeText(text)
         textCopied.value = true
@@ -150,7 +150,7 @@ export default {
     return {
       canShare, accentColor, formattedDate,
       truncatedUrl: computed(() => {
-        const u = newslyUrl.value
+        const u = newzlyUrl.value
         return u.length > 65 ? u.slice(0, 62) + '...' : u
       }),
       xUrl, waUrl, linkCopied, textCopied,
@@ -268,7 +268,7 @@ export default {
   justify-content: space-between;
 }
 
-.sp-newsly-badge {
+.sp-newzly-badge {
   font-size: 0.65rem;
   font-weight: 700;
   color: #a8a29e;

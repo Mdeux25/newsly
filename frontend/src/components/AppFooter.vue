@@ -5,7 +5,7 @@
       <!-- Brand + Tagline -->
       <div class="footer-brand">
         <div class="footer-logo">
-          <span class="footer-logo-text">{{ uiLanguage === 'ar' ? 'نيوزلي' : 'Newsly' }}</span>
+          <span class="footer-logo-text">{{ uiLanguage === 'ar' ? 'نيوزلي' : 'Newzly' }}</span>
           <span class="footer-dot"></span>
         </div>
         <p class="footer-tagline">
@@ -103,7 +103,7 @@
       <!-- Bottom bar -->
       <div class="footer-bottom">
         <span class="footer-copyright">
-          © {{ currentYear }} Newsly &mdash;
+          © {{ currentYear }} Newzly &mdash;
           {{ uiLanguage === 'ar' ? 'بُني بواسطة DU Soft، القاهرة' : 'Built by DU Soft, Cairo' }}
         </span>
         <div class="footer-socials">

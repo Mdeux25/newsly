@@ -61,10 +61,10 @@ if (process.env.NODE_ENV === 'production') {
           image: article.image_url ? [article.image_url] : [],
           datePublished: article.published_at,
           author: { '@type': 'Organization', name: article.source },
-          publisher: { '@type': 'Organization', name: 'Newsly', url: BASE_URL },
+          publisher: { '@type': 'Organization', name: 'Newzly', url: BASE_URL },
           url,
           inLanguage: article.language || 'en',
-          isPartOf: { '@type': 'Periodical', name: 'Newsly' }
+          isPartOf: { '@type': 'Periodical', name: 'Newzly' }
         })
 
         const seoHead = `

@@ -54,8 +54,8 @@ const POLICIES = {
         {
           heading: 'Overview',
           paragraphs: [
-            'Newsly is a free news aggregation service operated by DU Soft, Cairo, Egypt. We take your privacy seriously. This policy explains what data we collect, why, and how we protect it.',
-            'Newsly does not require account registration. You can use the full service without providing any personal information.'
+            'Newzly is a free news aggregation service operated by DU Soft, Cairo, Egypt. We take your privacy seriously. This policy explains what data we collect, why, and how we protect it.',
+            'Newzly does not require account registration. You can use the full service without providing any personal information.'
           ]
         },
         {
@@ -76,7 +76,7 @@ const POLICIES = {
         },
         {
           heading: 'Third-Party Services',
-          paragraphs: ['Newsly aggregates headlines from third-party news APIs. When you click an article, you leave Newsly and enter the publisher\'s website — their privacy policy applies. We are not responsible for third-party data practices.'],
+          paragraphs: ['Newzly aggregates headlines from third-party news APIs. When you click an article, you leave Newzly and enter the publisher\'s website — their privacy policy applies. We are not responsible for third-party data practices.'],
           bullets: [
             'News content: NewsAPI, GNews — their respective terms apply.',
             'AI summaries: OpenAI API — prompts contain only article headlines, no user data.'
@@ -91,7 +91,7 @@ const POLICIES = {
         },
         {
           heading: 'Changes to This Policy',
-          paragraphs: ['We may update this policy. The "last updated" date above will reflect any changes. Continued use of Newsly after changes constitutes acceptance of the updated policy.']
+          paragraphs: ['We may update this policy. The "last updated" date above will reflect any changes. Continued use of Newzly after changes constitutes acceptance of the updated policy.']
         }
       ]
     },
@@ -152,22 +152,22 @@ const POLICIES = {
         {
           heading: 'Acceptance of Terms',
           paragraphs: [
-            'By using Newsly ("the Service"), you agree to these Terms of Service. If you do not agree, please do not use the Service. These terms are governed by the laws of Egypt.',
-            'Newsly is operated by DU Soft, Cairo, Egypt. We reserve the right to modify these terms at any time.'
+            'By using Newzly ("the Service"), you agree to these Terms of Service. If you do not agree, please do not use the Service. These terms are governed by the laws of Egypt.',
+            'Newzly is operated by DU Soft, Cairo, Egypt. We reserve the right to modify these terms at any time.'
           ]
         },
         {
           heading: 'Description of Service',
           paragraphs: [
-            'Newsly is a news aggregation platform. We display headlines, summaries, and metadata sourced from publicly available news APIs. We do not produce original journalism.',
-            'Article content belongs to the original publishers. Newsly displays excerpts and links to source articles. Full articles are accessed on the publisher\'s website.'
+            'Newzly is a news aggregation platform. We display headlines, summaries, and metadata sourced from publicly available news APIs. We do not produce original journalism.',
+            'Article content belongs to the original publishers. Newzly displays excerpts and links to source articles. Full articles are accessed on the publisher\'s website.'
           ]
         },
         {
           heading: 'Acceptable Use',
           paragraphs: ['You agree not to:'],
           bullets: [
-            'Scrape, crawl, or systematically extract data from Newsly.',
+            'Scrape, crawl, or systematically extract data from Newzly.',
             'Use the Service to republish aggregated content commercially without permission.',
             'Attempt to reverse-engineer, disrupt, or overwhelm our servers.',
             'Use automated tools to interact with the Service without written consent from DU Soft.'
@@ -176,7 +176,7 @@ const POLICIES = {
         {
           heading: 'Intellectual Property',
           paragraphs: [
-            'The Newsly name, logo, and UI design are property of DU Soft. All rights reserved.',
+            'The Newzly name, logo, and UI design are property of DU Soft. All rights reserved.',
             'News article titles, descriptions, and images are property of their respective publishers. We display them under fair use for news aggregation purposes.'
           ]
         },
@@ -184,7 +184,7 @@ const POLICIES = {
           heading: 'Disclaimer of Warranties',
           paragraphs: [
             'The Service is provided "as is" without warranties of any kind. We do not guarantee the accuracy, completeness, or timeliness of aggregated news content.',
-            'We are not responsible for the content of linked third-party articles, opinions expressed therein, or any decisions made based on information found through Newsly.'
+            'We are not responsible for the content of linked third-party articles, opinions expressed therein, or any decisions made based on information found through Newzly.'
           ]
         },
         {
@@ -263,8 +263,8 @@ const POLICIES = {
           heading: 'Cookies We Use',
           paragraphs: ['Newsly uses only essential cookies — no advertising or tracking cookies:'],
           bullets: [
-            'newsly_lang — Stores your language preference (en/ar). Expires after 1 year.',
-            'newsly_hours — Stores your preferred time filter. Expires after 1 year.',
+            'newzly_lang — Stores your language preference (en/ar). Expires after 1 year.',
+            'newzly_hours — Stores your preferred time filter. Expires after 1 year.',
             'No session tracking cookies. No fingerprinting. No cross-site tracking.'
           ]
         },
@@ -306,8 +306,8 @@ const POLICIES = {
           heading: 'الملفات التي نستخدمها',
           paragraphs: ['تستخدم نيوزلي الملفات الأساسية فقط — لا ملفات إعلانية أو تتبعية:'],
           bullets: [
-            'newsly_lang — يحفظ تفضيل اللغة (en/ar). تنتهي صلاحيته بعد عام.',
-            'newsly_hours — يحفظ مرشح الوقت المفضّل. تنتهي صلاحيته بعد عام.',
+            'newzly_lang — يحفظ تفضيل اللغة (en/ar). تنتهي صلاحيته بعد عام.',
+            'newzly_hours — يحفظ مرشح الوقت المفضّل. تنتهي صلاحيته بعد عام.',
             'لا ملفات تتبع جلسة. لا بصمة رقمية. لا تتبع عبر المواقع.'
           ]
         },
@@ -342,25 +342,25 @@ const POLICIES = {
       updated: 'March 2026',
       sections: [
         {
-          heading: 'Nature of Newsly',
+          heading: 'Nature of Newzly',
           paragraphs: [
-            'Newsly is a news aggregation service. We display article titles, brief descriptions (excerpts), publication dates, and source attribution — all of which constitute fair use under applicable law for the purpose of news indexing and commentary.',
+            'Newzly is a news aggregation service. We display article titles, brief descriptions (excerpts), publication dates, and source attribution — all of which constitute fair use under applicable law for the purpose of news indexing and commentary.',
             'We do not reproduce full article bodies. All articles link directly to the original publisher.'
           ]
         },
         {
           heading: 'Copyright Ownership',
-          paragraphs: ['All news article content (titles, images, descriptions) remains the intellectual property of the original publisher. Newsly claims no ownership over aggregated content.']
+          paragraphs: ['All news article content (titles, images, descriptions) remains the intellectual property of the original publisher. Newzly claims no ownership over aggregated content.']
         },
         {
           heading: 'DMCA Takedown Requests',
           paragraphs: [
-            'If you are a copyright holder and believe Newsly displays your content in a manner that infringes your rights, please contact us at legal@dusoft.org with:',
+            'If you are a copyright holder and believe Newzly displays your content in a manner that infringes your rights, please contact us at legal@dusoft.org with:',
           ],
           bullets: [
             'Your name and contact information.',
             'A description of the copyrighted work you believe is infringed.',
-            'The specific URL on Newsly where the content appears.',
+            'The specific URL on Newzly where the content appears.',
             'A statement that you have a good-faith belief the use is not authorized.',
             'Your physical or electronic signature.'
           ]
@@ -371,7 +371,7 @@ const POLICIES = {
         },
         {
           heading: 'News API Sources',
-          paragraphs: ['Newsly sources content via licensed news APIs (NewsAPI, GNews). These providers have their own agreements with publishers. Our display of their data is within the scope of those licenses.']
+          paragraphs: ['Newzly sources content via licensed news APIs (NewsAPI, GNews). These providers have their own agreements with publishers. Our display of their data is within the scope of those licenses.']
         }
       ]
     },

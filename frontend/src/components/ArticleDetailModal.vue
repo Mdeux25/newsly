@@ -157,7 +157,7 @@ export default {
         .join('-')
     }
 
-    const newslyShareUrl = computed(() => {
+    const newzlyShareUrl = computed(() => {
       if (!article.value?.url) return window.location.href
       const slug = generateSlug(article.value.title)
       if (slug) return `${window.location.origin}/#article=${slug}`
@@ -166,7 +166,7 @@ export default {
 
     const copyShareLink = async () => {
       try {
-        await navigator.clipboard.writeText(newslyShareUrl.value)
+        await navigator.clipboard.writeText(newzlyShareUrl.value)
         copied.value = true
         setTimeout(() => { copied.value = false }, 2000)
       } catch (e) { console.warn('Copy failed', e) }

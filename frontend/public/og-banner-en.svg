@@ -73,7 +73,7 @@
     text-anchor="middle"
     fill="url(#nameGrad)"
     filter="url(#nameGlow)"
-    letter-spacing="-4">Newsly</text>
+    letter-spacing="-4">Newzly</text>
 
   <!-- ".ai" suffix -->
   <text
@@ -120,7 +120,7 @@
     font-size="15"
     font-weight="600"
     fill="rgba(255,255,255,0.28)"
-    letter-spacing="2">NEWSLY.AI</text>
+    letter-spacing="2">NEWZLY.AI</text>
 
   <!-- Center: URL -->
   <text x="600" y="607"
