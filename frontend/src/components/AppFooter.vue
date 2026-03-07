@@ -136,20 +136,14 @@ export default {
 <style scoped>
 .app-footer {
   background: #f5f3ee;
-  border-top: 2px solid rgba(30, 58, 95, 0.12);
+  border-top: 1px solid rgba(30,58,95,0.1);
   padding: 48px 24px 32px;
   margin-top: 48px;
 }
 
-.footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+.footer-inner { max-width: 1200px; margin: 0 auto; }
 
-/* ── Brand ───────────────────────── */
-.footer-brand {
-  margin-bottom: 28px;
-}
+.footer-brand { margin-bottom: 28px; }
 
 .footer-logo {
   display: flex;
@@ -182,14 +176,12 @@ export default {
   max-width: 440px;
 }
 
-/* ── Divider ─────────────────────── */
 .footer-divider {
   height: 1px;
-  background: rgba(30, 58, 95, 0.1);
+  background: rgba(30,58,95,0.08);
   margin: 28px 0;
 }
 
-/* ── Columns ─────────────────────── */
 .footer-columns {
   display: grid;
   grid-template-columns: 1fr;
@@ -197,17 +189,11 @@ export default {
 }
 
 @media (min-width: 640px) {
-  .footer-columns {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 32px 40px;
-  }
+  .footer-columns { grid-template-columns: repeat(2, 1fr); gap: 32px 40px; }
 }
 
 @media (min-width: 1024px) {
-  .footer-columns {
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 48px;
-  }
+  .footer-columns { grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
 }
 
 .footer-col-title {
@@ -219,7 +205,6 @@ export default {
   margin: 0 0 14px;
 }
 
-/* ── About col ───────────────────── */
 .footer-about-text {
   margin: 0 0 12px;
   font-size: 0.8125rem;
@@ -232,13 +217,11 @@ export default {
   align-items: center;
   gap: 6px;
   font-size: 0.8rem;
-  color: #78716c;
+  color: #a8a29e;
   margin-bottom: 12px;
 }
 
-.footer-location i {
-  color: #1e3a5f;
-}
+.footer-location i { color: #d97706; }
 
 .footer-dusoft-link {
   display: inline-flex;
@@ -250,15 +233,9 @@ export default {
   transition: color 0.2s;
 }
 
-.footer-dusoft-link:hover {
-  color: #2d5f8a;
-}
+.footer-dusoft-link:hover { color: #2d5f8a; }
+.footer-dusoft-link i { font-size: 0.75rem; }
 
-.footer-dusoft-link i {
-  font-size: 0.75rem;
-}
-
-/* ── Links ───────────────────────── */
 .footer-links {
   list-style: none;
   margin: 0;
@@ -278,11 +255,8 @@ export default {
   gap: 6px;
 }
 
-.footer-link:hover {
-  color: #1e3a5f;
-}
+.footer-link:hover { color: #1e3a5f; }
 
-/* Policy links are buttons (no href) */
 .footer-link-btn {
   background: none;
   border: none;
@@ -291,27 +265,20 @@ export default {
   text-align: start;
 }
 
-.footer-link-soon {
-  cursor: default;
-  opacity: 0.6;
-}
-
-.footer-link-soon:hover {
-  color: #78716c;
-}
+.footer-link-soon { cursor: default; opacity: 0.6; }
+.footer-link-soon:hover { color: #78716c; }
 
 .soon-badge {
   font-size: 0.65rem;
   font-weight: 600;
   padding: 2px 6px;
-  background: rgba(30, 58, 95, 0.06);
-  border: 1px solid rgba(30, 58, 95, 0.15);
+  background: rgba(30,58,95,0.07);
+  border: 1px solid rgba(30,58,95,0.15);
   color: #44403c;
   border-radius: 6px;
   letter-spacing: 0.02em;
 }
 
-/* ── Bottom bar ──────────────────── */
 .footer-bottom {
   display: flex;
   align-items: center;
@@ -320,15 +287,9 @@ export default {
   gap: 12px;
 }
 
-.footer-copyright {
-  font-size: 0.75rem;
-  color: #a8a29e;
-}
+.footer-copyright { font-size: 0.75rem; color: #a8a29e; }
 
-.footer-socials {
-  display: flex;
-  gap: 10px;
-}
+.footer-socials { display: flex; gap: 10px; }
 
 .social-icon {
   width: 34px;
@@ -336,8 +297,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(30, 58, 95, 0.05);
-  border: 1px solid rgba(30, 58, 95, 0.12);
+  background: rgba(30,58,95,0.05);
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 9px;
   color: #78716c;
   font-size: 0.875rem;
@@ -346,27 +307,13 @@ export default {
 }
 
 .social-icon:hover {
-  background: rgba(30, 58, 95, 0.1);
+  background: rgba(30,58,95,0.1);
   color: #1e3a5f;
-  border-color: rgba(30, 58, 95, 0.25);
+  border-color: rgba(30,58,95,0.2);
 }
 
-/* ── RTL ─────────────────────────── */
-.rtl {
-  direction: rtl;
-}
-
-.rtl .footer-tagline,
-.rtl .footer-about-text {
-  text-align: right;
-}
-
-.rtl .footer-link-btn {
-  text-align: end;
-}
-
-.rtl .footer-location,
-.rtl .footer-dusoft-link {
-  flex-direction: row-reverse;
-}
+.rtl { direction: rtl; }
+.rtl .footer-tagline, .rtl .footer-about-text { text-align: right; }
+.rtl .footer-link-btn { text-align: end; }
+.rtl .footer-location, .rtl .footer-dusoft-link { flex-direction: row-reverse; }
 </style>
