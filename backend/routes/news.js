@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const newsapi = require('../services/newsapi');
 const gnews = require('../services/gnews');
-const translator = require('../services/translator');
+const llmTranslator = require('../services/llm');
 const twitter = require('../services/twitter');
 const Article = require('../models/Article');
 const ApiQuota = require('../models/ApiQuota');
@@ -112,10 +112,17 @@ router.get('/news', async (req, res) => {
         // Fetch English news
         const englishArticles = await newsapi.fetchNews(topic, 'all', Math.floor(limit / 2), 'en', null);
 
-        // Auto-translate English articles to Arabic
-        console.log(`Auto-translating ${englishArticles.length} English articles to Arabic...`);
+        // Auto-translate English articles to Arabic via Gemini
+        console.log(`Auto-translating ${englishArticles.length} English articles to Arabic via Gemini...`);
         const translatedArticles = await Promise.all(
-          englishArticles.map(article => translator.translateArticle(article, 'ar'))
+          englishArticles.map(async article => {
+            try {
+              const translated = await llmTranslator.translateArticle(article.title, article.description, article.url);
+              return { ...article, title: translated.title, description: translated.description, translated: true };
+            } catch (e) {
+              return article;
+            }
+          })
         );
 
         // Combine both

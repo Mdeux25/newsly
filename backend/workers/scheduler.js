@@ -73,10 +73,10 @@ function startScheduler() {
 
   console.log('🚀 Starting news aggregator scheduler...\n');
 
-  // Job 1: Fetch news every 15 minutes
-  // Cron: */15 * * * * (every 15 minutes)
-  cron.schedule('*/15 * * * *', async () => {
-    console.log('\n⏰ Cron: News fetch triggered (every 15 minutes)');
+  // Job 1: Fetch news every 2 hours
+  // Cron: 0 */2 * * * (every 2 hours)
+  cron.schedule('0 */2 * * *', async () => {
+    console.log('\n⏰ Cron: News fetch triggered (every 2 hours)');
     try {
       await fetchAllNews();
     } catch (error) {
@@ -142,10 +142,10 @@ function startScheduler() {
 
   console.log('✅ Scheduled: Status report (every hour)');
 
-  // Job 5: Update trending locations every 15 minutes
-  // Cron: */15 * * * * (every 15 minutes)
-  cron.schedule('*/15 * * * *', async () => {
-    console.log('\n⏰ Cron: Trending locations update triggered (every 15 minutes)');
+  // Job 5: Update trending locations every 2 hours (aligned with news fetch)
+  // Cron: 30 */2 * * * (every 2 hours, offset by 30 min so it runs after fetch completes)
+  cron.schedule('30 */2 * * *', async () => {
+    console.log('\n⏰ Cron: Trending locations update triggered (every 2 hours)');
     try {
       await updateTrendingLocations();
     } catch (error) {
