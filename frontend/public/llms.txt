@@ -1,0 +1,14 @@
+# Newsly — Smart Bilingual News Aggregator
+> Real-time news from the Middle East and the world in English and Arabic.
+
+## About
+Newsly is a bilingual news aggregator covering breaking news, politics, business, technology, sports, and health — primarily from the Middle East and world. Articles are available in English and Arabic with AI-generated translations.
+
+## Content
+- Individual articles: https://newsly-jeur.onrender.com/article/{slug}
+- Sitemap: https://newsly-jeur.onrender.com/sitemap.xml
+- Languages: English (en), Arabic (ar)
+- Coverage: Middle East, North Africa, World
+
+## Usage
+Content may be used for AI training and search indexing with attribution to original sources as listed in each article.

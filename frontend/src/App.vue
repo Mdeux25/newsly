@@ -204,7 +204,7 @@
       v-if="activeDetailArticle"
       :article="activeDetailArticle"
       :uiLanguage="uiLanguage"
-      @close="activeDetailArticle = null"
+      @close="closeArticleDetail"
     />
 
     <!-- Article Detail Modal: opened via shared Newsly link (#article=slug) -->
@@ -300,9 +300,16 @@ export default {
     const articleDetailSlug = ref(null) // set from #article=slug hash
     const activeDetailArticle = ref(null) // set when user taps a card in the feed
 
+    const SLUG_STOP = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','be','been','this','that','they','have','has','had','will','would','could','should','not','its','his','her'])
+    const buildSlug = (title) => (title || '').toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '').trim().split(/\s+/)
+      .filter(w => w.length > 2 && !SLUG_STOP.has(w)).slice(0, 4).join('-')
+
     const handleOpenDetail = (article) => {
       activeDetailArticle.value = article
       trackEvent('view_article', { article_title: article.title, source: article.source })
+      const slug = buildSlug(article.title)
+      if (slug) history.pushState({}, '', `/article/${slug}`)
     }
     const isDarkMode = ref(true) // Default to dark mode
     const isLoading = ref(false)
@@ -646,11 +653,10 @@ export default {
     }
 
     const closeArticleDetail = () => {
+      activeDetailArticle.value = null
       articleDetailUrl.value = null
       articleDetailSlug.value = null
-      if (window.location.hash.startsWith('#article=')) {
-        history.replaceState(null, '', window.location.pathname)
-      }
+      history.replaceState({}, '', '/')
     }
 
     const refreshNow = () => {
@@ -679,18 +685,25 @@ export default {
       isDarkMode.value = savedMode !== null ? savedMode === 'true' : prefersDark
       document.documentElement.classList.toggle('dark', isDarkMode.value)
 
-      // Detect shared article link: /#article=slug or /#article=BASE64_URL
-      const hash = window.location.hash
-      if (hash.startsWith('#article=')) {
-        const identifier = hash.slice(9)
-        if (/^[a-z0-9][a-z0-9-]{2,79}$/.test(identifier)) {
-          // New slug format — pass via separate ref
-          articleDetailSlug.value = identifier
-        } else {
-          try {
-            articleDetailUrl.value = decodeURIComponent(atob(identifier))
-          } catch (e) {
-            console.warn('Invalid article hash', e)
+      // Path-based: /article/slug (crawlable, SEO-friendly)
+      const pathMatch = window.location.pathname.match(/^\/article\/(.+)$/)
+      if (pathMatch) {
+        articleDetailSlug.value = pathMatch[1]
+      }
+      // Hash fallback (backward compat): /#article=slug or /#article=BASE64_URL
+      else {
+        const hash = window.location.hash
+        if (hash.startsWith('#article=')) {
+          const identifier = hash.slice(9)
+          if (/^[a-z0-9][a-z0-9-]{2,79}$/.test(identifier)) {
+            // New slug format — pass via separate ref
+            articleDetailSlug.value = identifier
+          } else {
+            try {
+              articleDetailUrl.value = decodeURIComponent(atob(identifier))
+            } catch (e) {
+              console.warn('Invalid article hash', e)
+            }
           }
         }
       }
