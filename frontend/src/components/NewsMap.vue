@@ -160,8 +160,8 @@ export default {
 
       L.control.zoom({ position: 'bottomright' }).addTo(map.value)
 
-      // Dark CartoDB tiles
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      // Light CartoDB tiles
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 19
@@ -189,9 +189,9 @@ export default {
 
 <style scoped>
 .map-container {
-  background: rgba(10, 14, 26, 0.8);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(30, 58, 95, 0.1);
   border-radius: 6px;
   padding: 12px 14px 0;
   margin-bottom: 0;
@@ -208,13 +208,13 @@ export default {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #1c1917;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
-.map-header i { color: #06b6d4; }
+.map-header i { color: #1e3a5f; }
 
 .map-legend-row {
   display: flex;
@@ -223,7 +223,7 @@ export default {
 }
 
 .legend-item {
-  color: rgba(255, 255, 255, 0.4);
+  color: #44403c;
   font-size: 0.7rem;
   display: flex;
   align-items: center;
@@ -245,23 +245,23 @@ export default {
   width: 30px;
   height: 42px;
   position: relative;
-  color: #f5756c;
+  color: #1e3a5f;
   font-size: 1.8rem;
   text-align: center;
   transition: all 0.25s;
   cursor: pointer;
-  filter: drop-shadow(0 2px 6px rgba(245,117,108,0.5));
+  filter: drop-shadow(0 2px 6px rgba(30,58,95,0.4));
 }
 
 :deep(.marker-pin:hover) {
   transform: scale(1.2);
-  color: #3b82f6;
+  color: #2d5f8a;
 }
 
 :deep(.marker-pin.selected) {
-  color: #3b82f6;
+  color: #2d5f8a;
   transform: scale(1.3);
-  filter: drop-shadow(0 2px 10px rgba(59,130,246,0.7));
+  filter: drop-shadow(0 2px 10px rgba(30,58,95,0.6));
 }
 
 :deep(.marker-label) {
@@ -269,7 +269,7 @@ export default {
   top: 43px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(8, 12, 22, 0.92);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(6px);
   padding: 3px 7px;
   border-radius: 3px;
@@ -277,12 +277,12 @@ export default {
   font-weight: 600;
   white-space: nowrap;
   pointer-events: none;
-  color: rgba(255,255,255,0.8);
-  border: 1px solid rgba(255,255,255,0.1);
+  color: #1c1917;
+  border: 1px solid rgba(30,58,95,0.15);
 }
 
 :deep(.marker-label.selected) {
-  background: linear-gradient(135deg, #2563eb, #0891b2);
+  background: linear-gradient(135deg, #1e3a5f, #2d5f8a);
   border-color: transparent;
   color: white;
 }

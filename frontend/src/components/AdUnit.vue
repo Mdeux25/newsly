@@ -57,27 +57,26 @@ export default {
 </script>
 
 <style scoped>
-/* ── Card style (in-feed, matches NewsCard) ── */
 .ad-card {
   position: relative;
-  background: rgba(18, 22, 36, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 6px;
   overflow: hidden;
   min-height: 250px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(30,58,95,0.05);
 }
 
-/* ── Sponsored label (top-left, mirrors source-badge) ── */
 .ad-sponsored-label {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: rgba(100, 116, 139, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.55);
+  background: rgba(30,58,95,0.06);
+  border: 1px solid rgba(30,58,95,0.12);
+  color: #a8a29e;
   padding: 3px 8px;
   border-radius: 3px;
   font-size: 0.65rem;
@@ -88,16 +87,16 @@ export default {
   pointer-events: none;
 }
 
-/* ── Banner variant (full-width strip, e.g. below NewsSummary) ── */
 .ad-card--banner {
   border-radius: 0;
   border-left: none;
   border-right: none;
   min-height: 90px;
   margin: 8px 0;
-  background: transparent;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(30,58,95,0.02);
+  border-top: 1px solid rgba(30,58,95,0.07);
+  border-bottom: 1px solid rgba(30,58,95,0.07);
+  box-shadow: none;
 }
 
 .ad-card--banner .ad-sponsored-label {
@@ -106,8 +105,5 @@ export default {
   left: 8px;
 }
 
-/* ins fills the card */
-.ad-card .adsbygoogle {
-  width: 100%;
-}
+.ad-card .adsbygoogle { width: 100%; }
 </style>

@@ -135,9 +135,8 @@ export default {
 
 <style scoped>
 .app-footer {
-  background: rgba(8, 10, 20, 0.9);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: #f5f3ee;
+  border-top: 2px solid rgba(30, 58, 95, 0.12);
   padding: 48px 24px 32px;
   margin-top: 48px;
 }
@@ -162,7 +161,7 @@ export default {
 .footer-logo-text {
   font-size: 1.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #1e3a5f 0%, #d97706 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -171,14 +170,14 @@ export default {
 .footer-dot {
   width: 6px;
   height: 6px;
-  background: #06b6d4;
+  background: #d97706;
   border-radius: 50%;
 }
 
 .footer-tagline {
   margin: 0;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: #78716c;
   line-height: 1.6;
   max-width: 440px;
 }
@@ -186,7 +185,7 @@ export default {
 /* ── Divider ─────────────────────── */
 .footer-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(30, 58, 95, 0.1);
   margin: 28px 0;
 }
 
@@ -216,7 +215,7 @@ export default {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.3);
+  color: #a8a29e;
   margin: 0 0 14px;
 }
 
@@ -224,7 +223,7 @@ export default {
 .footer-about-text {
   margin: 0 0 12px;
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: #78716c;
   line-height: 1.75;
 }
 
@@ -233,12 +232,12 @@ export default {
   align-items: center;
   gap: 6px;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: #78716c;
   margin-bottom: 12px;
 }
 
 .footer-location i {
-  color: #06b6d4;
+  color: #1e3a5f;
 }
 
 .footer-dusoft-link {
@@ -246,13 +245,13 @@ export default {
   align-items: center;
   gap: 5px;
   font-size: 0.8125rem;
-  color: #3b82f6;
+  color: #1e3a5f;
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .footer-dusoft-link:hover {
-  color: #60a5fa;
+  color: #2d5f8a;
 }
 
 .footer-dusoft-link i {
@@ -271,7 +270,7 @@ export default {
 
 .footer-link {
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.48);
+  color: #78716c;
   text-decoration: none;
   transition: color 0.2s ease;
   display: inline-flex;
@@ -280,7 +279,7 @@ export default {
 }
 
 .footer-link:hover {
-  color: #06b6d4;
+  color: #1e3a5f;
 }
 
 /* Policy links are buttons (no href) */
@@ -298,16 +297,16 @@ export default {
 }
 
 .footer-link-soon:hover {
-  color: rgba(255, 255, 255, 0.48);
+  color: #78716c;
 }
 
 .soon-badge {
   font-size: 0.65rem;
   font-weight: 600;
   padding: 2px 6px;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  color: #818cf8;
+  background: rgba(30, 58, 95, 0.06);
+  border: 1px solid rgba(30, 58, 95, 0.15);
+  color: #44403c;
   border-radius: 6px;
   letter-spacing: 0.02em;
 }
@@ -323,7 +322,7 @@ export default {
 
 .footer-copyright {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.25);
+  color: #a8a29e;
 }
 
 .footer-socials {
@@ -337,19 +336,19 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 58, 95, 0.05);
+  border: 1px solid rgba(30, 58, 95, 0.12);
   border-radius: 9px;
-  color: rgba(255, 255, 255, 0.4);
+  color: #78716c;
   font-size: 0.875rem;
   text-decoration: none;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .social-icon:hover {
-  background: rgba(6, 182, 212, 0.12);
-  color: #06b6d4;
-  border-color: rgba(6, 182, 212, 0.25);
+  background: rgba(30, 58, 95, 0.1);
+  color: #1e3a5f;
+  border-color: rgba(30, 58, 95, 0.25);
 }
 
 /* ── RTL ─────────────────────────── */

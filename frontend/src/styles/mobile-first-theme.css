@@ -8,40 +8,42 @@
    CSS VARIABLES - Mobile Base (375px)
    ============================================ */
 :root {
-  /* Dark Theme Colors - Professional Blue/Slate */
-  --bg-primary: #0f1419;
-  --bg-secondary: #1a1f2e;
-  --bg-card: rgba(255, 255, 255, 0.05);
+  /* Lapis Night — Editorial Light Theme */
+  --bg-primary: #fdfcf7;
+  --bg-secondary: #f5f3ee;
+  --bg-card: #ffffff;
 
-  /* Professional Gradients - Blue/Cyan/Slate */
-  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
-  --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-  --gradient-teal: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
-  --gradient-slate: linear-gradient(135deg, #475569 0%, #64748b 100%);
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+  --gradient-accent: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  --gradient-logo: linear-gradient(135deg, #1e3a5f 0%, #d97706 100%);
+  --gradient-teal: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+  --gradient-slate: linear-gradient(135deg, #44403c 0%, #78716c 100%);
 
   /* Text Colors */
-  --text-primary: #ffffff;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #1c1917;
+  --text-secondary: #44403c;
+  --text-muted: #78716c;
 
-  /* Accent Colors - Professional but Modern */
-  --accent-blue: #3b82f6;
-  --accent-cyan: #06b6d4;
-  --accent-teal: #14b8a6;
-  --accent-orange: #f59e0b;
+  /* Accent Colors */
+  --accent-primary: #1e3a5f;
+  --accent-blue: #1e3a5f;
+  --accent-cyan: #d97706;
+  --accent-teal: #2d5f8a;
+  --accent-orange: #d97706;
 
-  /* Typography - Mobile Base */
+  /* Typography */
   --font-primary: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
   --font-heading: -apple-system, BlinkMacSystemFont, 'Poppins', sans-serif;
 
-  /* Font Sizes - Mobile */
-  --text-xs: 0.75rem;      /* 12px */
-  --text-sm: 0.875rem;     /* 14px */
-  --text-base: 1rem;       /* 16px */
-  --text-lg: 1.125rem;     /* 18px */
-  --text-xl: 1.25rem;      /* 20px */
-  --text-2xl: 1.5rem;      /* 24px */
-  --text-3xl: 2rem;        /* 32px */
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
 
   /* Font Weights */
   --font-normal: 400;
@@ -60,7 +62,7 @@
   --tracking-normal: 0;
   --tracking-wide: 0.02em;
 
-  /* Spacing Scale - Mobile */
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -70,30 +72,30 @@
   --space-8: 32px;
   --space-10: 40px;
 
-  /* Safe Area Insets (notch, rounded corners) */
+  /* Safe Area */
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
   --safe-left: env(safe-area-inset-left);
   --safe-right: env(safe-area-inset-right);
 
-  /* Touch-Optimized Sizes */
+  /* Touch */
   --tap-target-min: 44px;
   --input-height: 48px;
   --button-height: 48px;
 
-  /* Border Radius - Mobile */
+  /* Border Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  /* Shadows - Mobile (simplified) */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  /* Shadows — light theme */
+  --shadow-sm: 0 1px 4px rgba(30,58,95,0.08);
+  --shadow-md: 0 2px 12px rgba(30,58,95,0.1);
+  --shadow-lg: 0 8px 32px rgba(30,58,95,0.12);
 
-  /* Transitions - Touch-optimized */
+  /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s ease;
   --transition-slow: 0.3s ease;
@@ -131,8 +133,8 @@
     --space-10: 56px;
 
     /* Enhanced Shadows (desktop glow effects) */
-    --shadow-lg: 0 20px 40px rgba(102, 126, 234, 0.3),
-                 0 0 60px rgba(240, 147, 251, 0.2);
+    --shadow-lg: 0 20px 40px rgba(30,58,95,0.14),
+                 0 0 60px rgba(217,119,6,0.06);
   }
 }
 
@@ -184,10 +186,11 @@ body {
 
 /* Glassmorphism - Mobile (lightweight) */
 .glass-card {
-  background: rgba(26, 26, 46, 0.6);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Desktop: Enhanced glassmorphism */
@@ -227,7 +230,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(30,58,95,0.04);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -254,7 +257,7 @@ body {
 
 /* Focus Visible (keyboard navigation) */
 :focus-visible {
-  outline: 2px solid var(--accent-cyan);
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
 

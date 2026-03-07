@@ -213,16 +213,14 @@ export default {
 </script>
 
 <style scoped>
-/* ── Overlay ──────────────────────────────────── */
 .adm-overlay {
   position: fixed;
   inset: 0;
   z-index: 9998;
 }
 
-/* ── Panel ───────────────────────────────────── */
 .adm-panel {
-  background: #0f1623;
+  background: #fdfcf7;
   width: 100%;
   height: 100%;
   max-height: 100%;
@@ -234,7 +232,7 @@ export default {
 
 @media (min-width: 600px) {
   .adm-overlay {
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(30,58,95,0.5);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -246,12 +244,12 @@ export default {
     height: auto;
     max-height: 90vh;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(30,58,95,0.12);
+    box-shadow: 0 24px 64px rgba(30,58,95,0.2);
     animation: fadeIn 0.2s ease;
   }
 }
 
-/* ── Loading / Error ─────────────────────────── */
 .adm-loading, .adm-error {
   display: flex;
   flex-direction: column;
@@ -259,29 +257,29 @@ export default {
   justify-content: center;
   gap: 12px;
   padding: 48px 24px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #78716c;
   font-size: 0.875rem;
 }
 
 .adm-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #3b82f6;
+  border: 3px solid rgba(30,58,95,0.1);
+  border-top-color: #1e3a5f;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-.adm-error i { font-size: 2rem; color: #ef4444; }
-.adm-error p { text-align: center; margin: 0; }
+.adm-error i { font-size: 2rem; color: #dc2626; }
+.adm-error p { text-align: center; margin: 0; color: #44403c; }
 
-/* ── Top bar ─────────────────────────────────── */
 .adm-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 10px;
   flex-shrink: 0;
+  border-bottom: 1px solid rgba(30,58,95,0.08);
 }
 
 .adm-source-tag {
@@ -289,7 +287,7 @@ export default {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.35);
+  color: #a8a29e;
 }
 
 .adm-close {
@@ -298,19 +296,18 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30,58,95,0.05);
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 4px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #78716c;
   cursor: pointer;
   font-size: 1.1rem;
   transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
-.adm-close:hover { background: rgba(255, 255, 255, 0.14); color: white; }
+.adm-close:hover { background: rgba(30,58,95,0.1); color: #1c1917; }
 
-/* ── Hero image ──────────────────────────────── */
 .adm-image-wrap {
   position: relative;
   width: 100%;
@@ -319,22 +316,15 @@ export default {
   flex-shrink: 0;
 }
 
-.adm-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.adm-image { width: 100%; height: 100%; object-fit: cover; }
 
 .adm-image-fade {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(to top, #0f1623 0%, transparent 100%);
+  bottom: 0; left: 0; right: 0;
+  height: 40%;
+  background: linear-gradient(to top, #fdfcf7 0%, transparent 100%);
 }
 
-/* ── Body ───────────────────────────────────── */
 .adm-body { padding: 16px 18px 12px; }
 
 .adm-meta {
@@ -349,28 +339,27 @@ export default {
   align-items: center;
   gap: 5px;
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: #78716c;
 }
 
-.adm-date i { color: #06b6d4; }
-.adm-country { font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); }
+.adm-date i { color: #d97706; }
+.adm-country { font-size: 0.75rem; color: #78716c; }
 
 .adm-title {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #1c1917;
   line-height: 1.35;
   margin: 0 0 12px;
 }
 
 .adm-desc {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.65);
+  color: #44403c;
   line-height: 1.6;
   margin: 0;
 }
 
-/* ── Translation block ───────────────────────── */
 .adm-translation { margin-top: 16px; }
 
 .adm-trans-divider {
@@ -380,12 +369,11 @@ export default {
   margin-bottom: 10px;
 }
 
-.adm-trans-divider::before,
-.adm-trans-divider::after {
+.adm-trans-divider::before, .adm-trans-divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(30,58,95,0.08);
 }
 
 .adm-trans-divider span {
@@ -393,31 +381,30 @@ export default {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.25);
+  color: #a8a29e;
   white-space: nowrap;
 }
 
 .adm-trans-title {
   font-size: 0.875rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
+  color: #78716c;
   line-height: 1.4;
   margin: 0 0 6px;
 }
 
 .adm-trans-desc {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: #a8a29e;
   line-height: 1.55;
   margin: 0;
 }
 
-/* ── Actions ─────────────────────────────────── */
 .adm-actions {
   display: flex;
   gap: 8px;
   padding: 12px 18px 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(30,58,95,0.08);
   flex-shrink: 0;
 }
 
@@ -431,30 +418,33 @@ export default {
   font-size: 0.825rem;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(30,58,95,0.12);
+  background: rgba(30,58,95,0.05);
+  color: #44403c;
   text-decoration: none;
   transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
   min-height: 40px;
 }
 
-.adm-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+.adm-btn:hover { background: rgba(30,58,95,0.09); color: #1c1917; }
 
 .adm-primary {
   flex: 1;
-  background: linear-gradient(135deg, #1d4ed8, #0891b2);
+  background: linear-gradient(135deg, #1e3a5f, #2d5f8a);
   border-color: transparent;
   color: white;
 }
 
-.adm-primary:hover { filter: brightness(1.1); }
+.adm-primary:hover { filter: brightness(1.08); }
 
 .adm-copy { flex-shrink: 0; }
-.adm-copy.done { background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.3); color: #4ade80; }
+.adm-copy.done {
+  background: rgba(21,128,61,0.08);
+  border-color: rgba(21,128,61,0.2);
+  color: #15803d;
+}
 
-/* ── Animations ──────────────────────────────── */
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
@@ -465,7 +455,5 @@ export default {
   to   { opacity: 1; transform: scale(1); }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>

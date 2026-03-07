@@ -155,16 +155,13 @@ export default {
 </script>
 
 <style scoped>
-/* ============================================
-   PAGINATION CONTAINER - Mobile-First
-   ============================================ */
 .pagination-container {
-  background: rgba(26, 26, 46, 0.6);
-  backdrop-filter: blur(8px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 4px;
   padding: 16px;
   margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(30,58,95,0.06);
 }
 
 .pagination-info {
@@ -173,14 +170,11 @@ export default {
 }
 
 .info-text {
-  color: var(--text-secondary);
+  color: #44403c;
   font-size: 0.875rem;
   font-weight: 500;
 }
 
-/* ============================================
-   PAGINATION CONTROLS - Mobile-Optimized
-   ============================================ */
 .pagination-controls {
   display: flex;
   align-items: center;
@@ -188,17 +182,16 @@ export default {
   gap: 8px;
 }
 
-/* Touch-optimized buttons (44px minimum) */
 .page-button {
   width: 44px;
   height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: rgba(30,58,95,0.06);
+  border: 1px solid rgba(30,58,95,0.15);
   border-radius: 3px;
-  color: #3b82f6;
+  color: #1e3a5f;
   font-size: 1.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -207,18 +200,17 @@ export default {
 
 .page-button:active:not(.disabled) {
   transform: scale(0.95);
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(30,58,95,0.1);
 }
 
 .page-button.disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+  color: #a8a29e;
+  background: rgba(30,58,95,0.03);
+  border-color: rgba(30,58,95,0.08);
 }
 
-/* Page Numbers Container */
 .page-numbers {
   display: flex;
   align-items: center;
@@ -231,10 +223,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30,58,95,0.04);
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 3px;
-  color: var(--text-primary);
+  color: #1c1917;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -245,88 +237,44 @@ export default {
 
 .page-number:active:not(.active) {
   transform: scale(0.95);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(30,58,95,0.08);
 }
 
 .page-number.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
   border-color: transparent;
   color: white;
   cursor: default;
 }
 
 .ellipsis {
-  color: var(--text-muted);
+  color: #a8a29e;
   font-size: 0.875rem;
   padding: 0 4px;
 }
 
-/* ============================================
-   TABLET ENHANCEMENT
-   ============================================ */
 @media (min-width: 768px) {
-  .pagination-container {
-    padding: 20px;
-  }
-
-  .pagination-controls {
-    gap: 10px;
-  }
-
-  .page-numbers {
-    gap: 6px;
-  }
-
-  .info-text {
-    font-size: 0.9375rem;
-  }
+  .pagination-container { padding: 20px; }
+  .pagination-controls { gap: 10px; }
+  .page-numbers { gap: 6px; }
+  .info-text { font-size: 0.9375rem; }
 }
 
-/* ============================================
-   DESKTOP ENHANCEMENT
-   ============================================ */
 @media (min-width: 1024px) {
-  .pagination-container {
-    backdrop-filter: blur(12px) saturate(180%);
-    border-radius: 4px;
-  }
-
-  /* Desktop hover effects */
   .page-button:hover:not(.disabled) {
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(30,58,95,0.1);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(30,58,95,0.15);
   }
-
-  .page-button:active:not(.disabled) {
-    transform: scale(0.95);
-  }
-
   .page-number:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-    border-color: rgba(59, 130, 246, 0.3);
-  }
-
-  .page-number:active:not(.active) {
-    transform: scale(0.95);
+    background: rgba(30,58,95,0.08);
+    transform: translateY(-1px);
+    border-color: rgba(30,58,95,0.2);
   }
 }
 
-/* ============================================
-   ACCESSIBILITY - Reduce Motion
-   ============================================ */
 @media (prefers-reduced-motion: reduce) {
-  .page-button,
-  .page-number {
-    transition: none;
-  }
-
-  .page-button:hover:not(.disabled),
-  .page-button:active:not(.disabled),
-  .page-number:hover:not(.active),
-  .page-number:active:not(.active) {
-    transform: none;
-  }
+  .page-button, .page-number { transition: none; }
+  .page-button:hover:not(.disabled), .page-number:hover:not(.active) { transform: none; }
 }
 </style>

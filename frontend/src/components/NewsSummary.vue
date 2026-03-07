@@ -255,13 +255,12 @@ export default {
 <style scoped>
 /* ── Wrapper ─────────────────────────────────────── */
 .summary-wrap {
-  background: rgba(10, 14, 28, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 6px;
   padding: 14px 0 10px;
   margin-bottom: 16px;
-  animation: fadeUp 0.3s ease;
-  backdrop-filter: blur(8px);
+  animation: fadeUp 0.3s ease; box-shadow: 0 2px 12px rgba(30,58,95,0.08);
   overflow: hidden;
 }
 
@@ -290,7 +289,7 @@ export default {
 .summary-title {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  color: #1c1917;
   letter-spacing: 0;
   display: flex;
   align-items: center;
@@ -301,12 +300,12 @@ export default {
 
 .trigger-chip {
   font-weight: 600;
-  color: #60a5fa;
+  color: #1e3a5f;
   text-transform: none;
   letter-spacing: 0;
   font-size: 0.75rem;
-  background: rgba(96, 165, 250, 0.1);
-  border: 1px solid rgba(96, 165, 250, 0.2);
+  background: rgba(30,58,95,0.06);
+  border: 1px solid rgba(30,58,95,0.15);
   padding: 2px 7px;
   border-radius: 3px;
   overflow: hidden;
@@ -324,12 +323,12 @@ export default {
 .counter {
   font-size: 0.8rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
+  color: #44403c;
   font-variant-numeric: tabular-nums;
 }
 
 .counter-sep {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(30,58,95,0.2);
   margin: 0 1px;
 }
 
@@ -339,10 +338,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30,58,95,0.04);
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 3px;
-  color: rgba(255, 255, 255, 0.4);
+  color: #78716c;
   cursor: pointer;
   font-size: 0.85rem;
   transition: background 0.15s;
@@ -359,7 +358,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: rgba(255, 255, 255, 0.4);
+  color: #78716c;
   font-size: 0.875rem;
   padding: 8px 14px 6px;
 }
@@ -367,8 +366,8 @@ export default {
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #3b82f6;
+  border: 2px solid rgba(30,58,95,0.1);
+  border-top-color: #1e3a5f;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   flex-shrink: 0;
@@ -456,7 +455,7 @@ export default {
 .text-primary {
   font-size: 0.9rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.93);
+  color: #1c1917;
   line-height: 1.55;
   margin: 0;
   flex: 1;
@@ -469,7 +468,7 @@ export default {
 
 .text-secondary {
   font-size: 0.775rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: #78716c;
   line-height: 1.6;
   margin: 0;
   font-family: 'Segoe UI', 'Arial', Tahoma, sans-serif;
@@ -482,7 +481,7 @@ export default {
 }
 
 .rss-section--divided {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(30,58,95,0.08);
 }
 
 .rss-label {
@@ -492,7 +491,7 @@ export default {
   padding: 0 14px 8px;
   font-size: 0.68rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.32);
+  color: #a8a29e;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -511,7 +510,7 @@ export default {
   margin-left: auto;
   font-size: 0.65rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(30,58,95,0.2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -570,7 +569,7 @@ export default {
   overflow: hidden;
   font-size: 0.82rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.82);
+  color: #1c1917;
   line-height: 1.5;
 }
 
@@ -637,10 +636,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(30,58,95,0.05);
+  border: 1px solid rgba(30,58,95,0.12);
   border-radius: 4px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #44403c;
   cursor: pointer;
   font-size: 0.75rem;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -649,9 +648,9 @@ export default {
 }
 
 .nav-arrow:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: white;
+  background: rgba(30,58,95,0.08);
+  border-color: rgba(30,58,95,0.2);
+  color: #1e3a5f;
 }
 
 .nav-arrow:disabled {
@@ -671,7 +670,7 @@ export default {
 .dot {
   height: 5px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(30,58,95,0.15);
   border: none;
   cursor: pointer;
   transition: width 0.25s ease, background 0.25s ease;

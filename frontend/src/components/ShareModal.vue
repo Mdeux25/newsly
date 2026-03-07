@@ -161,11 +161,10 @@ export default {
 </script>
 
 <style scoped>
-/* ── Overlay ───────────────────────────────────── */
 .sp-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(30,58,95,0.45);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-end;
@@ -173,29 +172,23 @@ export default {
   z-index: 9999;
 }
 
-@media (min-width: 600px) {
-  .sp-overlay { align-items: center; }
-}
+@media (min-width: 600px) { .sp-overlay { align-items: center; } }
 
-/* ── Panel ─────────────────────────────────────── */
 .sp-panel {
-  background: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #ffffff;
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 10px 10px 0 0;
   width: 100%;
   max-width: 460px;
   padding: 20px;
   animation: slideUp 0.22s ease;
+  box-shadow: 0 -8px 32px rgba(30,58,95,0.12);
 }
 
 @media (min-width: 600px) {
-  .sp-panel {
-    border-radius: 6px;
-    animation: fadeIn 0.18s ease;
-  }
+  .sp-panel { border-radius: 6px; animation: fadeIn 0.18s ease; box-shadow: 0 16px 48px rgba(30,58,95,0.18); }
 }
 
-/* ── Header ───────────────────────────────────── */
 .sp-header {
   display: flex;
   align-items: center;
@@ -206,13 +199,13 @@ export default {
 .sp-heading {
   font-size: 0.875rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  color: #1c1917;
   display: flex;
   align-items: center;
   gap: 7px;
 }
 
-.sp-heading i { color: #3b82f6; }
+.sp-heading i { color: #1e3a5f; }
 
 .sp-close {
   width: 26px;
@@ -220,32 +213,27 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30,58,95,0.05);
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 3px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #78716c;
   cursor: pointer;
   font-size: 1rem;
   transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
-.sp-close:hover { background: rgba(255, 255, 255, 0.14); color: white; }
+.sp-close:hover { background: rgba(30,58,95,0.09); color: #1c1917; }
 
-/* ── Preview card ─────────────────────────────── */
 .sp-card {
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 5px;
   overflow: hidden;
   margin-bottom: 14px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(30,58,95,0.02);
 }
 
-.sp-card-bar {
-  height: 3px;
-  background: var(--accent);
-  width: 100%;
-}
+.sp-card-bar { height: 3px; background: var(--accent); width: 100%; }
 
 .sp-card-body { padding: 11px 13px; }
 
@@ -256,7 +244,7 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--accent);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(30,58,95,0.12);
   padding: 1px 6px;
   border-radius: 2px;
   margin-bottom: 7px;
@@ -265,7 +253,7 @@ export default {
 .sp-card-title {
   font-size: 0.9rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: #1c1917;
   line-height: 1.4;
   margin: 0 0 9px;
   display: -webkit-box;
@@ -283,14 +271,13 @@ export default {
 .sp-newsly-badge {
   font-size: 0.65rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.3);
+  color: #a8a29e;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
-.sp-card-date { font-size: 0.68rem; color: rgba(255, 255, 255, 0.28); }
+.sp-card-date { font-size: 0.68rem; color: #a8a29e; }
 
-/* ── Action buttons ───────────────────────────── */
 .sp-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -308,36 +295,35 @@ export default {
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(30,58,95,0.1);
+  background: rgba(30,58,95,0.04);
+  color: #44403c;
   text-decoration: none;
   transition: background 0.15s, color 0.15s;
   -webkit-tap-highlight-color: transparent;
   min-height: 38px;
 }
 
-.sp-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+.sp-btn:hover { background: rgba(30,58,95,0.08); color: #1c1917; }
 .sp-btn:active { transform: scale(0.97); }
 
 .sp-primary {
   grid-column: span 2;
-  background: linear-gradient(135deg, #2563eb, #0891b2);
+  background: linear-gradient(135deg, #1e3a5f, #2d5f8a);
   border-color: transparent;
   color: white;
 }
 
-.sp-primary:hover { filter: brightness(1.1); }
+.sp-primary:hover { filter: brightness(1.08); }
 
-.sp-x { background: rgba(0, 0, 0, 0.25); border-color: rgba(255, 255, 255, 0.14); }
-.sp-wa { background: rgba(37, 211, 102, 0.08); border-color: rgba(37, 211, 102, 0.28); color: #25d366; }
-.sp-wa:hover { background: rgba(37, 211, 102, 0.16); }
-.sp-done { background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.28); color: #4ade80; }
+.sp-x { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: #1c1917; }
+.sp-wa { background: rgba(37,211,102,0.06); border-color: rgba(37,211,102,0.2); color: #16a34a; }
+.sp-wa:hover { background: rgba(37,211,102,0.1); }
+.sp-done { background: rgba(21,128,61,0.07); border-color: rgba(21,128,61,0.2); color: #15803d; }
 
-/* ── URL preview ───────────────────────────────── */
 .sp-url-preview {
   font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.18);
+  color: #a8a29e;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -345,7 +331,6 @@ export default {
   text-align: center;
 }
 
-/* ── Animations ───────────────────────────────── */
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }

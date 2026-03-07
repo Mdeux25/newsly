@@ -244,32 +244,28 @@ export default {
 
 <style scoped>
 /* ============================================
-   NEWS CARD - Professional Design
+   NEWS CARD - Lapis Night Light Theme
    ============================================ */
 .news-card {
-  background: rgba(18, 22, 36, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(30,58,95,0.1);
   border-radius: 6px;
   overflow: hidden;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
   width: 100%;
   -webkit-tap-highlight-color: transparent;
   animation: fadeIn 0.4s ease;
+  box-shadow: 0 2px 8px rgba(30,58,95,0.06);
 }
 
-/* Touch feedback (active state for mobile) */
 .news-card:active {
   transform: scale(0.97);
   opacity: 0.9;
 }
 
-/* ============================================
-   CARD IMAGE - Mobile-Optimized
-   ============================================ */
 .card-image-wrapper {
   position: relative;
-  /* Mobile-optimized aspect ratio (16:9) */
   aspect-ratio: 16 / 9;
   overflow: hidden;
 }
@@ -283,11 +279,11 @@ export default {
 .placeholder-image {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  background: linear-gradient(135deg, #e8e0d0 0%, #f5f3ee 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.2);
+  color: rgba(30,58,95,0.18);
   font-size: 2.5rem;
 }
 
@@ -296,12 +292,10 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60%;
-  /* Stronger gradient for mobile readability */
+  height: 50%;
   background: linear-gradient(
     to top,
-    rgba(10, 10, 15, 0.95) 0%,
-    rgba(10, 10, 15, 0.6) 50%,
+    rgba(255,255,255,0.6) 0%,
     transparent 100%
   );
 }
@@ -311,7 +305,7 @@ export default {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: rgba(37, 99, 235, 0.85);
+  background: rgba(30,58,95,0.85);
   color: white;
   padding: 3px 8px;
   border-radius: 3px;
@@ -327,9 +321,9 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(30,58,95,0.12);
+  color: #44403c;
   padding: 3px 7px;
   border-radius: 3px;
   font-size: 0.7rem;
@@ -337,22 +331,18 @@ export default {
   z-index: 2;
 }
 
-/* ============================================
-   CARD CONTENT - Mobile-Optimized
-   ============================================ */
+/* Card Content */
 .card-content {
   padding: 16px;
 }
 
 .card-title {
   font-family: var(--font-heading);
-  /* Mobile-optimized title size (readable) */
   font-size: 1.125rem;
   font-weight: 700;
   line-height: 1.3;
-  color: #ffffff;
+  color: #1c1917;
   margin: 0 0 8px 0;
-  /* Line clamp for mobile (max 2 lines) */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -360,24 +350,21 @@ export default {
 }
 
 .card-description {
-  color: #a0aec0;
+  color: #57534e;
   font-size: 0.875rem;
   line-height: 1.5;
   margin: 0 0 12px 0;
-  /* Line clamp for mobile (max 3 lines) */
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ============================================
-   CARD META - Mobile-Optimized
-   ============================================ */
+/* Card Meta */
 .card-meta {
   display: flex;
   gap: 12px;
-  color: #718096;
+  color: #78716c;
   font-size: 0.75rem;
   margin-bottom: 12px;
 }
@@ -389,13 +376,11 @@ export default {
 }
 
 .meta-item i {
-  color: #06b6d4;
+  color: #d97706;
   font-size: 0.875rem;
 }
 
-/* ============================================
-   CARD ACTIONS - Mobile-Optimized
-   ============================================ */
+/* Card Actions */
 .card-actions {
   display: flex;
   gap: 8px;
@@ -418,26 +403,27 @@ export default {
 }
 
 .action-button.secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(30,58,95,0.05);
+  border: 1px solid rgba(30,58,95,0.12);
+  color: #44403c;
 }
 
 .action-button.secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: rgba(30,58,95,0.09);
+  color: #1c1917;
 }
 
-/* ── Source tier badges ── */
+/* Source tier badges */
 .source-badge.tier-verified {
-  background: rgba(251, 191, 36, 0.22);
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  color: #fef3c7;
+  background: rgba(180,83,9,0.85);
+  border: none;
+  color: #fff;
 }
 
 .source-badge.tier-trusted {
-  background: rgba(59, 130, 246, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  background: rgba(30,58,95,0.8);
+  border: none;
+  color: #fff;
 }
 
 .tier-icon {
@@ -446,49 +432,49 @@ export default {
   margin-right: 2px;
 }
 
-/* ── Confirmed-by chip ── */
+/* Confirmed-by chip */
 .confirmed-chip {
-  color: #4ade80;
-  background: rgba(74, 222, 128, 0.08);
-  border: 1px solid rgba(74, 222, 128, 0.2);
+  color: #15803d;
+  background: rgba(21,128,61,0.07);
+  border: 1px solid rgba(21,128,61,0.18);
   border-radius: 3px;
   padding: 1px 6px;
   font-weight: 600;
 }
 
 .confirmed-chip i {
-  color: #4ade80 !important;
+  color: #15803d !important;
 }
 
-/* ── Share button ── */
+/* Share button */
 .action-button.share-action {
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  background: rgba(30,58,95,0.06);
+  border: 1px solid rgba(30,58,95,0.15);
+  color: #1e3a5f;
 }
 
-/* ── Fact-check button ── */
+/* Fact-check button */
 .action-button.fact-action {
-  background: rgba(148, 163, 184, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  color: rgba(255, 255, 255, 0.4);
+  background: rgba(120,113,108,0.06);
+  border: 1px solid rgba(120,113,108,0.14);
+  color: #78716c;
   text-decoration: none;
 }
 
 .action-button.fact-action:hover {
-  background: rgba(148, 163, 184, 0.12);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(120,113,108,0.1);
+  color: #44403c;
 }
 
-/* Pre-computed translation — amber accent */
+/* Pre-computed translation — saffron accent */
 .action-button.secondary.has-precomputed {
-  background: rgba(251, 191, 36, 0.07);
-  border-color: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
+  background: rgba(217,119,6,0.06);
+  border-color: rgba(217,119,6,0.2);
+  color: #d97706;
 }
 
 .action-button.secondary:active {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(30,58,95,0.1);
   transform: scale(0.95);
 }
 
@@ -497,121 +483,67 @@ export default {
   cursor: not-allowed;
 }
 
-/* ============================================
-   RTL TEXT
-   ============================================ */
+/* RTL Text */
 .rtl-text {
   direction: rtl;
   text-align: right;
   font-family: 'Arial', 'Tahoma', sans-serif;
 }
 
-/* ============================================
-   TABLET ENHANCEMENT (min-width: 768px)
-   ============================================ */
+/* Tablet */
 @media (min-width: 768px) {
   .card-title {
     font-size: 1.25rem;
     -webkit-line-clamp: 3;
   }
-
-  .card-content {
-    padding: 20px;
-  }
-
-  .card-meta {
-    font-size: 0.8125rem;
-  }
+  .card-content { padding: 20px; }
+  .card-meta { font-size: 0.8125rem; }
 }
 
-/* ============================================
-   DESKTOP ENHANCEMENT (min-width: 1024px)
-   ============================================ */
+/* Desktop */
 @media (min-width: 1024px) {
   .news-card {
-    backdrop-filter: blur(12px) saturate(180%);
     border-radius: 6px;
   }
 
-  /* Featured (first article) — hero layout */
-  .news-card.featured .card-image-wrapper {
-    aspect-ratio: 21 / 9;
-  }
-
+  .news-card.featured .card-image-wrapper { aspect-ratio: 21 / 9; }
   .news-card.featured .card-title {
     font-size: 1.5rem;
     -webkit-line-clamp: 3;
   }
-
   .news-card.featured .card-description {
     -webkit-line-clamp: 4;
     font-size: 0.9375rem;
   }
 
-  /* Desktop hover effects (not mobile) */
   .news-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    border: 1px solid transparent;
-    background: linear-gradient(rgba(26, 26, 46, 0.6), rgba(26, 26, 46, 0.6))
-        padding-box,
-      linear-gradient(135deg, #2563eb 0%, #06b6d4 100%) border-box;
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.3),
-      0 0 60px rgba(6, 182, 212, 0.2);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(30,58,95,0.14),
+                0 4px 12px rgba(30,58,95,0.08);
+    border-color: rgba(30,58,95,0.2);
   }
 
-  /* Image zoom on desktop hover */
-  .news-card:hover .card-image {
-    transform: scale(1.1);
-  }
+  .news-card:hover .card-image { transform: scale(1.05); }
+  .card-image { transition: transform 0.5s ease; }
 
-  .card-image {
-    transition: transform 0.5s ease;
-  }
-
-  /* Remove active state on desktop (use hover instead) */
   .news-card:active {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-6px);
     opacity: 1;
   }
 
-  /* Desktop hover effects for buttons */
   .action-button.secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-  }
-
-  .action-button.secondary:active {
-    transform: scale(0.95);
+    background: rgba(30,58,95,0.09);
+    transform: translateY(-1px);
   }
 }
 
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
 @media (prefers-reduced-motion: reduce) {
-  .news-card,
-  .card-image {
-    transition: none;
-    animation: none;
-  }
-
-  .news-card:hover,
-  .news-card:active {
-    transform: none;
-  }
+  .news-card, .card-image { transition: none; animation: none; }
+  .news-card:hover, .news-card:active { transform: none; }
 }
 
-/* ============================================
-   ANIMATIONS
-   ============================================ */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 </style>

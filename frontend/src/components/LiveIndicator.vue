@@ -68,28 +68,29 @@ export default {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.55);
+  background: rgba(30,58,95,0.06);
+  border: 1px solid rgba(30,58,95,0.15);
+  color: rgba(30,58,95,0.6);
   white-space: nowrap;
 }
 
 .live-chip--error {
-  border-color: rgba(245, 117, 108, 0.3);
-  color: #fca5a5;
+  border-color: rgba(220,38,38,0.2);
+  color: #dc2626;
+  background: rgba(220,38,38,0.04);
 }
 
 .pulse-dot {
   width: 6px;
   height: 6px;
-  background: #4ade80;
+  background: #16a34a;
   border-radius: 50%;
   flex-shrink: 0;
   animation: pulse 2s infinite;
 }
 
 .pulse-dot.loading {
-  background: #60a5fa;
+  background: #d97706;
   animation: pulse 0.8s infinite;
 }
 
