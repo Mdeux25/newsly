@@ -111,31 +111,78 @@
 
       <!-- Combined Feed: News + Tweets -->
       <div v-else>
-        <!-- Top Pagination -->
-        <Pagination
-          :currentPage="currentPage"
-          :itemsPerPage="itemsPerPage"
-          :totalItems="totalArticles"
-          :uiLanguage="uiLanguage"
-          @page-change="handlePageChange"
-        />
-
-        <!-- Feed Grid -->
-        <div class="feed-grid">
-          <template v-for="(item, index) in combinedFeed" :key="item.type === 'article' ? item.url : item.id">
-            <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" :featured="index === firstArticleIndex" @open-detail="handleOpenDetail" />
-            <TweetCard v-else-if="item.type === 'tweet'" :tweet="item" />
-          </template>
+        <!-- Pagination: desktop only -->
+        <div class="pagination-desktop">
+          <Pagination
+            :currentPage="currentPage"
+            :itemsPerPage="itemsPerPage"
+            :totalItems="totalArticles"
+            :uiLanguage="uiLanguage"
+            @page-change="handlePageChange"
+          />
         </div>
 
-        <!-- Bottom Pagination -->
-        <Pagination
-          :currentPage="currentPage"
-          :itemsPerPage="itemsPerPage"
-          :totalItems="totalArticles"
-          :uiLanguage="uiLanguage"
-          @page-change="handlePageChange"
-        />
+        <!-- Feed filter bar -->
+        <div class="feed-filter-bar">
+          <button
+            class="filter-toggle"
+            :class="{ active: filterPhotosOnly }"
+            @click="filterPhotosOnly = !filterPhotosOnly"
+          >
+            <i class="bi bi-image"></i>
+            <span>{{ uiLanguage === 'ar' ? 'بصور فقط' : 'Photos only' }}</span>
+          </button>
+        </div>
+
+        <!-- Feed: swipe deck on mobile, grid on desktop -->
+        <div class="feed-wrap">
+          <!-- Prev arrow -->
+          <button
+            class="swipe-arrow swipe-arrow--prev"
+            :class="{ hidden: swipeIndex === 0 }"
+            @click.stop="scrollToSwipeCard(swipeIndex - 1)"
+            aria-label="Previous article"
+          >
+            <i class="bi bi-chevron-left"></i>
+          </button>
+
+          <div class="feed-grid" ref="feedSwipeRef" @scroll.passive="onFeedScroll">
+            <template v-for="(item, index) in visibleFeed" :key="item.type === 'article' ? item.url : item.id">
+              <NewsCard v-if="item.type === 'article'" :article="item" :uiLanguage="uiLanguage" :featured="index === firstArticleIndex" @open-detail="handleOpenDetail" />
+              <TweetCard v-else-if="item.type === 'tweet'" :tweet="item" />
+            </template>
+            <div class="swipe-sentinel" ref="swipeSentinelRef"></div>
+          </div>
+
+          <!-- Next arrow -->
+          <button
+            class="swipe-arrow swipe-arrow--next"
+            :class="{ hidden: swipeIndex >= visibleFeed.length - 1 }"
+            @click.stop="scrollToSwipeCard(swipeIndex + 1)"
+            aria-label="Next article"
+          >
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Mobile swipe counter + load indicator -->
+        <div class="swipe-counter" dir="ltr">
+          <span class="swipe-pos">{{ swipeIndex + 1 }}</span>
+          <span class="swipe-sep">/</span>
+          <span class="swipe-total">{{ visibleFeed.length }}</span>
+          <span v-if="isLoading" class="swipe-loading-dot"></span>
+        </div>
+
+        <!-- Pagination: desktop only -->
+        <div class="pagination-desktop">
+          <Pagination
+            :currentPage="currentPage"
+            :itemsPerPage="itemsPerPage"
+            :totalItems="totalArticles"
+            :uiLanguage="uiLanguage"
+            @page-change="handlePageChange"
+          />
+        </div>
       </div>
       <!-- Footer -->
       <AppFooter :uiLanguage="uiLanguage" @open-policy="activePolicy = $event" />
@@ -222,6 +269,9 @@ export default {
   setup() {
     const articles = ref([])
     const tweets = ref([])
+    const feedSwipeRef = ref(null)
+    const swipeSentinelRef = ref(null)
+    const swipeIndex = ref(0)
     const trending = ref([])
     const searchTopic = ref('')
     const selectedLanguage = ref('both')
@@ -340,8 +390,41 @@ export default {
     const handlePageChange = (page) => {
       currentPage.value = page
       fetchNews()
-      // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    const scrollToSwipeCard = (index) => {
+      if (!feedSwipeRef.value) return
+      const el = feedSwipeRef.value
+      const cards = el.querySelectorAll('.news-card, .tweet-card')
+      const clamped = Math.max(0, Math.min(index, cards.length - 1))
+      if (!cards[clamped]) return
+      // RTL: scrollLeft is negative in RTL scroll containers
+      const isRTL = uiLanguage.value === 'ar'
+      if (isRTL) {
+        el.scrollTo({ left: -(cards.length - 1 - clamped) * window.innerWidth, behavior: 'smooth' })
+      } else {
+        el.scrollTo({ left: cards[clamped].offsetLeft, behavior: 'smooth' })
+      }
+    }
+
+    const onFeedScroll = () => {
+      if (!feedSwipeRef.value) return
+      const el = feedSwipeRef.value
+      const isRTL = uiLanguage.value === 'ar'
+      const rawIdx = Math.round(Math.abs(el.scrollLeft) / window.innerWidth)
+      const idx = isRTL ? (visibleFeed.value.length - 1 - rawIdx) : rawIdx
+      swipeIndex.value = Math.max(0, Math.min(idx, visibleFeed.value.length - 1))
+
+      // Auto-load next batch when 4 cards from the end
+      if (
+        swipeIndex.value >= visibleFeed.value.length - 4 &&
+        !isLoading.value &&
+        articles.value.length < totalArticles.value
+      ) {
+        currentPage.value += 1
+        fetchNews(false)
+      }
     }
 
     const filteredArticles = computed(() => {
@@ -375,8 +458,17 @@ export default {
       })
     )
 
+    const filterPhotosOnly = ref(false)
+
+    const visibleFeed = computed(() => {
+      if (!filterPhotosOnly.value) return combinedFeed.value
+      return combinedFeed.value.filter(item =>
+        item.type !== 'article' || (item.image && item.image !== '')
+      )
+    })
+
     const firstArticleIndex = computed(() =>
-      combinedFeed.value.findIndex(item => item.type === 'article')
+      visibleFeed.value.findIndex(item => item.type === 'article')
     )
 
     // Combined feed: mix articles and tweets
@@ -431,7 +523,14 @@ export default {
         })
 
         if (newsResponse.data.success) {
-          articles.value = newsResponse.data.articles
+          if (resetPage) {
+            articles.value = newsResponse.data.articles
+          } else {
+            // Append for infinite swipe — avoid duplicates by URL
+            const existingUrls = new Set(articles.value.map(a => a.url))
+            const newOnes = newsResponse.data.articles.filter(a => !existingUrls.has(a.url))
+            articles.value = [...articles.value, ...newOnes]
+          }
           totalArticles.value = newsResponse.data.totalCount || 0
 
           // Show note if no articles (e.g., rate limit)
@@ -615,6 +714,13 @@ export default {
       handlePageChange,
       activePolicy,
       firstArticleIndex,
+      feedSwipeRef,
+      swipeSentinelRef,
+      swipeIndex,
+      onFeedScroll,
+      scrollToSwipeCard,
+      filterPhotosOnly,
+      visibleFeed,
       articleDetailUrl,
       articleDetailSlug,
       activeDetailArticle,
@@ -1019,26 +1125,183 @@ export default {
 }
 
 /* ============================================
-   FEED GRID - Mobile-First Layout
+   FEED GRID — Mobile: swipe deck / Desktop: grid
    ============================================ */
-.feed-grid {
+
+/* ── Feed filter bar ─────────────────────────────── */
+.feed-filter-bar {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  margin: 20px 0;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
-/* Tablet: 2 columns */
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.18s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.filter-toggle i { font-size: 0.85rem; }
+
+.filter-toggle:active { transform: scale(0.95); }
+
+.filter-toggle.active {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: #60a5fa;
+}
+
+/* ── Swipe wrapper (relative, so arrows can be absolute) ── */
+.feed-wrap {
+  position: relative;
+}
+
+/* ── Swipe arrows — mobile only, fixed to screen edges ── */
+.swipe-arrow {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .swipe-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 50dvh;
+    transform: translateY(-50%);
+    z-index: 200;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(10, 16, 36, 0.78);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    color: #fff;
+    font-size: 1.6rem;
+    cursor: pointer;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.55),
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: opacity 0.2s, background 0.15s, border-color 0.15s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .swipe-arrow--prev { left: 12px; }
+  .swipe-arrow--next { right: 12px; }
+
+  .swipe-arrow:active {
+    transform: translateY(-50%) scale(0.88);
+    background: rgba(59, 130, 246, 0.4);
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+
+  .swipe-arrow.hidden {
+    opacity: 0.18;
+    pointer-events: none;
+  }
+}
+
+/* ── Mobile swipe deck (< 768px) ── */
+.feed-grid {
+  display: flex;
+  flex-direction: row;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Bleed past content-wrapper padding to go edge-to-edge */
+  margin: 8px calc(-1 * max(16px, env(safe-area-inset-left))) 0 calc(-1 * max(16px, env(safe-area-inset-right)));
+  width: calc(100% + max(32px, env(safe-area-inset-left) + env(safe-area-inset-right)));
+  gap: 0;
+}
+
+.feed-grid::-webkit-scrollbar { display: none; }
+
+/* Each card fills the viewport width */
+.feed-grid :deep(.news-card),
+.feed-grid :deep(.tweet-card) {
+  flex-shrink: 0;
+  width: 100vw;
+  scroll-snap-align: start;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+/* Sentinel spacer at the end of the swipe deck */
+.swipe-sentinel {
+  flex-shrink: 0;
+  width: 1px;
+}
+
+/* ── Swipe counter ── */
+.swipe-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 0 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.swipe-sep { color: rgba(255, 255, 255, 0.13); margin: 0 1px; }
+
+.swipe-loading-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3b82f6;
+  margin-left: 6px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Hide pagination on mobile — swipe + auto-load handles it */
+.pagination-desktop { display: none; }
+
+/* ── Tablet: 2-column grid ── */
 @media (min-width: 768px) {
   .feed-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    margin: 20px 0;
+    width: 100%;
   }
+
+  .feed-grid :deep(.news-card),
+  .feed-grid :deep(.tweet-card) {
+    width: auto;
+    border-radius: 6px;
+    border-left: revert;
+    border-right: revert;
+    flex-shrink: revert;
+    scroll-snap-align: none;
+  }
+
+  .swipe-sentinel { display: none; }
+  .swipe-counter { display: none; }
+  .pagination-desktop { display: block; }
 }
 
-/* Desktop: 3-col editorial grid — featured article spans 2 columns */
+/* ── Desktop: 3-col editorial grid ── */
 @media (min-width: 1024px) {
   .feed-grid {
     grid-template-columns: repeat(3, 1fr);

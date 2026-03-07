@@ -232,10 +232,9 @@ async function fetchAllNews() {
     }
   }
 
-  // Fetch from Al Jazeera RSS (EN + AR) — free, no quota
-  console.log('\n📡 Fetching from Al Jazeera RSS...');
-  const ajStored = await fetchFromRSSSources();
-  totalStored += ajStored;
+  // Al Jazeera RSS disabled as article source (ticker still uses /api/rss directly)
+  // const ajStored = await fetchFromRSSSources();
+  // totalStored += ajStored;
 
   // Fetch from RapidAPI Arabic News for top topics
   console.log('\n📡 Fetching from RapidAPI Arabic News...');
